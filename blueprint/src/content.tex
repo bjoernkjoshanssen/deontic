@@ -5,3 +5,46 @@
 % If you want to split the blueprint content into several files then
 % the current file can be a simple sequence of \input. Otherwise It
 % can start with a \section or \chapter for instance.
+\begin{definition}\label{CJ5a}
+	\lean{CJ5a}
+	\leanok
+	Axiom 5(a) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that $\emptyset\notin\ob(X)$ for all $X\in\Pow(U)$.
+\end{definition}
+
+
+
+\begin{definition}\label{CJ5b}
+	\lean{CJ5a}
+	\leanok
+	Axiom 5(b) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+	\[
+	∀ (X Y Z : Set U), Z ∩ X = Y ∩ X → (Z ∈ ob X ↔ Y ∈ ob X)
+	\]
+
+\end{definition}
+ 
+\begin{definition}\label{CJ5d}
+	\lean{CJ5d}
+	\leanok
+	Axiom 5(d) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+	\[
+	  ∀ (X Y Z : Set U), Y ⊆ X → Y ∈ ob X → X ⊆ Z → Z \ X ∪ Y ∈ ob Z
+	\]
+
+\end{definition}
+ 
+ 
+\begin{definition}\label{CJ5bd}
+	\lean{CJ5bd}
+	\leanok
+	Axiom 5(bd) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+	$\forall (X Y Z \in\Pow U), Y \in \ob X \land X \subseteq Z \to Z \setminus X \cup Y \in \ob Z$.
+\end{definition}
+
+
+\begin{theorem}\label{bd5}
+	\lean{bd5}
+	\leanok
+	\uses{CJ5bd, CJ5b, CJ5d}
+	If $\ob$ satisfies 5(b) and 5(d) then it satisfies 5(bd).
+\end{theorem}
