@@ -110,101 +110,48 @@ section Venn_lemmas
         _ ⊆ ∅ := by apply subset_empty.mpr;tauto
     ) h₁
 
-  lemma subset_same {n : ℕ} {B X Y Z : Finset (Fin n)}
+lemma subset_same {n : ℕ} {B X Y Z : Finset (Fin n)}
     (h₀ : Y ∩ X = Z ∩ X) : X ∩ B ⊆ Y ↔ X ∩ B ⊆ Z := by
-        constructor
-        . intro
-          calc X ∩ B ⊆ Y ∩ X := by intro x hx;simp;aesop
-          _ = Z ∩ X := by rw [h₀]
-          _ ⊆ Z := by intro x;simp;tauto
-        . intro
-          calc X ∩ B ⊆ Z ∩ X := by intro x hx;simp;aesop
-          _ = Y ∩ X := by rw [h₀]
-          _ ⊆ Y := by intro x;simp;tauto
+  constructor <;> exact fun h => by
+      apply subset_trans <|subset_inter h inter_subset_left
+      exact h₀ ▸ inter_subset_left
 
-  lemma subtle {n : ℕ} {B X Y Z : Finset (Fin n)}
-  (h₀ : X ∩ B = X ∩ Y)
-  (h₁ : Y ∩ B = Y ∩ Z)
-  : X ∩ Y = X ∩ (Y ∩ Z) :=
-    calc
-      _ = (X ∩ Y) ∩ (X ∩ Y) := by simp only [inter_self]
-      _ = (X ∩ Y) ∩ (X ∩ B) := by rw [← h₀]
-      _ = X ∩ (Y ∩ B)       := by ext;simp;tauto
-      _ = _                 := by rw [h₁]
 
-  lemma subtle₁ {n : ℕ} {B X Y Z : Finset (Fin n)}
-  (h₀ : X ∩ B = X ∩ Y)
-  (h₁ : Y ∩ B = Y ∩ Z)
-  : X ∩ B = X ∩ (Y ∩ Z) := by rw [h₀]; exact subtle h₀ h₁
+lemma subtle {n : ℕ} {B X Y Z : Finset (Fin n)}
+    (h₀ : X ∩ B = X ∩ Y)
+    (h₁ : Y ∩ B = Y ∩ Z) : X ∩ Y = X ∩ (Y ∩ Z) := by
+  calc
+    _ = (X ∩ Y) ∩ (X ∩ Y) := by simp only [inter_self]
+    _ = (X ∩ Y) ∩ (X ∩ B) := by rw [← h₀]
+    _ = X ∩ (Y ∩ B)       := by ext;simp;tauto
+    _ = _                 := by rw [h₁]
 
-  lemma inter₃₀ {n : ℕ} {A B X Y Z : Finset (Fin n)}
-  (h₁₀ : Y ∩ A = ∅)
-  (h₀ : X ∩ A = X ∩ Y)
-  (h₁ : Y ∩ B = Y ∩ Z)
-  : X ∩ (Y ∩ Z) = ∅ := by
-      calc
-      _ = (X ∩ Y) ∩ (Y ∩ Z) := by ext;simp
-      _ = (X ∩ A) ∩ (Y ∩ B) := by rw [← h₀,← h₁]
-      _ = (X ∩ (Y ∩ A) ∩ B) := by ext;simp;tauto
-      _ = ∅ := by rw [h₁₀];simp
+lemma inter₃₀ {n : ℕ} {A B X Y Z : Finset (Fin n)}
+    (h₁₀ : Y ∩ A = ∅)
+    (h₀ : X ∩ A = X ∩ Y)
+    (h₁ : Y ∩ B = Y ∩ Z) : X ∩ (Y ∩ Z) = ∅ := by
+  calc
+  _ = (X ∩ Y) ∩ (Y ∩ Z) := by ext;simp
+  _ = (X ∩ A) ∩ (Y ∩ B) := by rw [← h₀,← h₁]
+  _ = (X ∩ (Y ∩ A) ∩ B) := by ext;simp;tauto
+  _ = ∅ := by rw [h₁₀];simp
 
-  lemma inter₃₁
-  {n : ℕ}
-  {A B : Finset (Fin n)}
-  {X Y Z : Finset (Fin n)}
-  (h : A ⊆ B)
-  (h₆ : X ∩ A = ∅)
-  (h₀ : X ∩ B = X ∩ Y)
-  (h₁ : Y ∩ A = Y ∩ Z)
-  : X ∩ (Y ∩ Z) = ∅ := by
-      calc
-      X ∩ (Y ∩ Z) = X ∩ Y ∩ A := by simp;rw [h₁]
-      _ = X ∩ B ∩ A := by rw [h₀]
-      _ = X ∩ A := by ext;simp;tauto
-      _ = ∅ := by tauto
+lemma inter₃₁ {n : ℕ} {A B X Y Z : Finset (Fin n)}
+    (h₂ : X ∩ A = ∅)
+    (h₀ : X ∩ B = X ∩ Y)
+    (h₁ : Y ∩ A = Y ∩ Z) : X ∩ (Y ∩ Z) = ∅ := by
+  rw [← h₁, ← inter_assoc, ← h₀]
+  rw [inter_assoc,inter_comm,inter_assoc]
+  nth_rewrite 2 [inter_comm]
+  rw [h₂]
+  simp
 
-  lemma no_filter₀ : filter (fun i : Fin 3 ↦ i = 0 ∨ i = 1) univ
-                  ∩ filter (fun i ↦ i = 0 ∨ i = 2) univ ≠ ∅ := by
-    intro h₀
-    have : (0:Fin 3) ∈  filter (fun i ↦ i = 0 ∨ i = 1) univ ∩ filter (fun i ↦ i = 0 ∨ i = 2) univ := by
-      simp
-    rw [h₀] at this
-    simp at this
-
-  lemma no_filter₁ : filter (fun i ↦ i = (0:Fin 3) ∨ i = 2) univ ≠ ∅ := by
-    intro h₀
-    have : (0:Fin 3) ∈  filter (fun i ↦ i = 0 ∨ i = 1) univ ∩ filter (fun i ↦ i = 0 ∨ i = 2) univ := by
-      simp
-    rw [h₀] at this
-    simp at this
-
-  lemma no_filter₂ : filter (fun i ↦ i = (2:Fin 3)) univ ≠ ∅ := by
-    intro h₀
-    have : (2:Fin 3) ∈ filter (fun i ↦ i = 2) univ := by simp
-    rw [h₀] at this
-    simp at this
-
-  lemma no_filter₃ : filter (fun i : Fin 3 ↦ i = 0 ∨ i = 1) univ
-                  ∩ filter (fun i ↦ i = 1 ∨ i = 2) univ ≠ ∅ := by
-    intro h₀
-    have : (1:Fin 3) ∈  filter (fun i ↦ i = 0 ∨ i = 1) univ ∩ filter (fun i ↦ i = 1 ∨ i = 2) univ := by
-      simp
-    rw [h₀] at this
-    simp at this
-
-  lemma no_filter₄ : ¬ filter (fun i : Fin 3 ↦ i = 0 ∨ i = 1) univ
-                    ∩ filter (fun i ↦ i = 0 ∨ i = 2) univ
-                    ⊆ filter (fun i ↦ i = 1 ∨ i = 2) univ := by
-    intro hc
-    have : (0:Fin 3) ∈  filter (fun i ↦ i = 0 ∨ i = 1) univ ∩ filter (fun i ↦ i = 0 ∨ i = 2) univ := by simp
-    have := hc this
-    . simp at this
 
 end Venn_lemmas
 
 def canon {n : ℕ} (A : Finset (Fin n)) :
 Finset (Fin n) → Finset (Finset (Fin n)) :=
-  λ S ↦ ite (S ∩ A = ∅) ∅ ((filter (λ T ↦ S ∩ A ⊆ T)) univ)
+  fun S ↦ ite (S ∩ A = ∅) ∅ ((filter (fun T ↦ S ∩ A ⊆ T)) univ)
 
 /-- The `canon` models, which say that
 what is obligatory is to be in one of the still-possible optimal worlds,
@@ -217,11 +164,11 @@ My 2017 (II) corresponds to:
 -/
 def canon_II {n : ℕ} (A : Finset (Fin n)) :
 Finset (Fin n) → Finset (Finset (Fin n)) :=
-  λ X ↦ ite (X ∩ A = ∅) ∅
-  ((filter (λ Y ↦ X ∩ Y = X ∩ A)) univ)
+  fun X ↦ ite (X ∩ A = ∅) ∅
+  ((filter (fun Y ↦ X ∩ Y = X ∩ A)) univ)
 
 lemma canon_II_symmetry {n : ℕ} (A : Finset (Fin n)) :
-  canon_II A = (λ X ↦ ite (X ∩ A = ∅) ∅ ((filter (λ Y ↦ X ∩ A = X ∩ Y)) univ)) := by
+  canon_II A = (fun X ↦ ite (X ∩ A = ∅) ∅ ((filter (fun Y ↦ X ∩ A = X ∩ Y)) univ)) := by
     unfold canon_II
     ext x y
     split_ifs;tauto;simp;tauto
@@ -249,11 +196,11 @@ theorem canon_II_E5 {n : ℕ} (A : Finset (Fin n)) :  E5 (canon_II A) := by
     . rw [if_neg h₄] at *; simp at *; exact restrict_filter h₀ h₁
 
 theorem not_canon_E5 : ∃ n : ℕ, ∃ A : Finset (Fin n), ¬ E5 (canon A) := by
-  use 2; use filter (λ x ↦ x = 0) univ
+  use 2; use filter (fun x ↦ x = 0) univ
   unfold E5 canon
   push_neg
   use univ
-  use filter (λ x ↦ x = 1) univ
+  use filter (fun x ↦ x = 1) univ
   use univ
   have h₀ (i : Fin 2): ¬ filter (fun x ↦ x = (i:Fin 2)) univ = ∅ := by
     intro hc
@@ -274,10 +221,10 @@ theorem not_canon_E5 : ∃ n : ℕ, ∃ A : Finset (Fin n), ¬ E5 (canon A) := b
 -- Finally let us show that canon_II does not satisfy D5.
 theorem not_canon_II_D5 : ∃ n, ∃ A : Finset (Fin n), ¬ D5 (canon_II A) := by
   use 2
-  use filter (λ i ↦ i = 0) univ
+  use filter (fun i ↦ i = 0) univ
   unfold D5; push_neg
-  use filter (λ i ↦ i = 0) univ
-  use filter (λ i ↦ i = 0) univ
+  use filter (fun i ↦ i = 0) univ
+  use filter (fun i ↦ i = 0) univ
   use univ
   have h : 0 ∈ filter (fun i ↦ i = (0:Fin 2)) univ := by simp
   have h₀: ¬ filter (fun i ↦ i = (0:Fin 2)) univ = ∅ := by
@@ -290,18 +237,18 @@ theorem not_canon_II_D5 : ∃ n, ∃ A : Finset (Fin n), ¬ D5 (canon_II A) := b
 
 
 def canon₂ {n : ℕ} (A B : Finset (Fin n))  : Finset (Fin n) → Finset (Finset (Fin n)) :=
-  λ X ↦ ite (X ∩ B = ∅) ∅ (
+  fun X ↦ ite (X ∩ B = ∅) ∅ (
       ite (X ∩ A = ∅)
-      (filter (λ T ↦ X ∩ B ⊆ T) univ)
-      (filter (λ T ↦ X ∩ A ⊆ T) univ)
+      (filter (fun T ↦ X ∩ B ⊆ T) univ)
+      (filter (fun T ↦ X ∩ A ⊆ T) univ)
   )
 
 
 def canon₂_II {n : ℕ} (A B : Finset (Fin n))  : Finset (Fin n) → Finset (Finset (Fin n)) :=
-  λ X ↦ ite (X ∩ B = ∅) ∅ (
+  fun X ↦ ite (X ∩ B = ∅) ∅ (
       ite (X ∩ A = ∅)
-      (filter (λ Y ↦ X ∩ B = X ∩ Y) univ)
-      (filter (λ Y ↦ X ∩ A = X ∩ Y) univ)
+      (filter (fun Y ↦ X ∩ B = X ∩ Y) univ)
+      (filter (fun Y ↦ X ∩ A = X ∩ Y) univ)
   )
 
 theorem canon₂_II_A5 {n:ℕ} (A B : Finset (Fin n)) : A5 (canon₂_II A B) := by
@@ -346,7 +293,7 @@ theorem canon₂_II_E5 {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
   . simp at *; contrapose h₆; simp; exact emp_filter₃ h₀ h₁₀
   . simp at *; exact restrict_filter h₀ h₁
 
-theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) : G5 (canon₂_II A B) := by
+theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} : G5 (canon₂_II A B) := by
   unfold G5 canon₂_II
   intro X Y Z h₀ h₁ h₂
   simp at *
@@ -354,17 +301,17 @@ theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) : G5 (canon�
   simp at *
   tauto;tauto;tauto
   . simp at *; rw [h₀]; exact subtle h₀ h₁
-  . simp at *; contrapose h₂; simp; exact inter₃₁ h h₆ h₀ h₁
+  . simp at *; contrapose h₂; simp; exact inter₃₁ h₆ h₀ h₁
   . tauto
   . simp at *; contrapose h₂; simp; exact inter₃₀ h₁₀ h₀ h₁
-  . simp at *; exact subtle₁ h₀ h₁
+  . simp at *; exact h₀ ▸ subtle h₀ h₁
 
 
 theorem not_canon₂_II_F5 : ∃ n : ℕ, ∃ A B : Finset (Fin n), A ⊆ B ∧ ¬ F5 (canon₂_II A B) := by
-  use 2; use filter (λ i ↦ i = 0) univ; use univ
+  use 2; use filter (fun i ↦ i = 0) univ; use univ
   use (by trivial)
   unfold F5; push_neg
-  use univ; use filter (λ i ↦ i = 1) univ; use filter (λ i ↦ i = 0) univ
+  use univ; use filter (fun i ↦ i = 1) univ; use filter (fun i ↦ i = 0) univ
   trivial
 
 -- The guess would be that this has the same properties as `canon`.
@@ -441,34 +388,36 @@ theorem canon₂_D5 {n:ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) : D5 (canon₂ 
 -- However, if canon₂_II does satisfy G then we can say G firmly belongs in the II category.
 theorem not_canon₂_G: ∃ n:ℕ, ∃ (A B : Finset (Fin n)), A ⊆ B ∧ ¬ G5 (canon₂ A B) := by
   use 3
-  use filter (λ i ↦ i = 2) univ
-  use filter (λ i ↦ i = 0 ∨ i = 2) univ
+  use filter (fun i ↦ i = 2) univ
+  use filter (fun i ↦ i = 0 ∨ i = 2) univ
   -- simp
   constructor
   . trivial
   . unfold G5 canon₂
     push_neg
-    use filter (λ i ↦ i = 0 ∨ i = 1) univ
+    use filter (fun i ↦ i = 0 ∨ i = 1) univ
     use univ
-    use filter (λ i ↦ i = 1 ∨ i = 2) univ
+    use filter (fun i ↦ i = 1 ∨ i = 2) univ
     simp
     constructor
     split_ifs with h₀ h₁
-    . simp at *; apply no_filter₀;tauto
+    . simp only [not_mem_empty]
+      exact ne_of_beq_false rfl h₀
     . simp at *
     . contrapose h₁; simp; ext x; aesop
 
     constructor
     split_ifs with g₀ g₁
-    . simp at *; apply no_filter₁;tauto
-    . contrapose g₁;apply no_filter₂
+    . simp only [not_mem_empty]
+      exact ne_of_beq_false rfl g₀
+    . exact (ne_of_beq_false rfl g₁).elim
     . simp; trivial
     constructor
-    . apply no_filter₃
+    . exact ne_of_beq_false rfl
 
     split_ifs with h₀ h₁
     . aesop
-    . simp at *; apply no_filter₄
+    . exact of_decide_eq_false rfl
     . contrapose h₁; simp; ext x;simp;aesop
 
 lemma canon₂_F5 {n:ℕ} (A B : Finset (Fin n)) : F5 (canon₂ A B) := by
@@ -525,7 +474,7 @@ theorem CJ_no_DF_canon₂_II {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
     use canon₂_II_B5 _ _
     use canon₂_II_C5 _ _
     use canon₂_II_E5 h
-    use canon₂_II_G5 h
+    use canon₂_II_G5
 
 theorem CJ_no_EG_canon₂ {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
   CJ_noEG_2022 (canon₂ A B) := by
@@ -587,7 +536,7 @@ theorem CJ_noD_canon_II {n : ℕ} {A : Finset (Fin n)} : CJ_noD_2022 (canon_II A
       exact W
     )
     use (by
-      let Q := @canon₂_II_G5 n A A (by trivial)
+      let Q := @canon₂_II_G5 n A A
       unfold canon₂_II at Q
       simp at Q
       tauto
