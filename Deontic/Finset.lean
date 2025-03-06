@@ -74,22 +74,18 @@ theorem ob₂5g : ∀ (b : Fin 5 → Bool),
 -- a,b,c,d => f
 -- a,b,c,e,f,g  =/=> d v f
 theorem do_not_imply_5d_or_5f : ∃ ob : Finset (Fin 2) → Finset (Finset (Fin 2)),
-  A5 ob ∧ B5 ob ∧ C5 ob ∧ ¬ D5 ob ∧ E5 ob ∧ ¬ F5 ob ∧ G5 ob
-:= by
+  A5 ob ∧ B5 ob ∧ C5 ob ∧ ¬ D5 ob ∧ E5 ob ∧ ¬ F5 ob ∧ G5 ob := by
+  unfold A5 B5 C5 D5 E5 F5 G5
   use ob₂ ![true,true,false,false,false]
-  use (by unfold A5; decide); use (by unfold B5; decide)
-  use (by unfold C5; decide); use (by unfold D5; decide)
-  use (by unfold E5; decide); use (by unfold F5; decide)
-  use (by unfold G5; decide)
-
+  repeat use (by decide)
 
 open Classical
 
 def converter {U : Type} [Fintype U]
   (ob : Finset U → Finset (Finset U)) :
            Set U → Set       (Set U) := by
-  intro S
-  exact { T | T.toFinset ∈ ob S.toFinset}
+  intro S T
+  exact T.toFinset ∈ ob S.toFinset
 
 lemma empty_finset {U : Type} [Fintype U] {X : Set U}
   (h : X.toFinset = ∅) : X = ∅ := by
@@ -99,108 +95,66 @@ lemma empty_finset {U : Type} [Fintype U] {X : Set U}
     simp
     tauto
 
-lemma fin_emp {U : Type} [Fintype U] : ∅ = @Set.toFinset U ∅ (Fintype.ofFinite _) := by
-        ext x; simp
+lemma toFinset_empty' {U : Type} [Fintype U] : ∅ = @Set.toFinset U ∅ (Fintype.ofFinite _) := by
+  ext x; simp only [Finset.not_mem_empty, Set.toFinset_empty]
 
-lemma get_5a {U : Type} [Fintype U]
-{ob₀ : Finset U → Finset (Finset U)}
-(hob₀ : A5 ob₀)
-: CJ5a fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
-      unfold A5 at hob₀
-      rw [fin_emp] at hob₀
-      intro X
-      simp
-      let Q := hob₀ X.toFinset
-      rw [fin_emp]
-      tauto
+lemma get_5a {U : Type} [Fintype U] {ob₀ : Finset U → Finset (Finset U)}
+    (hob₀ : A5 ob₀) : CJ5a fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
+  unfold A5 at hob₀
+  rw [toFinset_empty'] at hob₀
+  intro X
+  simp
+  let Q := hob₀ X.toFinset
+  rw [toFinset_empty']
+  tauto
 
 lemma get_5b {U : Type} [Fintype U] [DecidableEq U]
-{ob₀ : Finset U → Finset (Finset U)}
-(hob₀ : B5 ob₀)
-:
-CJ5b fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
-      intro X Y Z h
-      constructor
-      . intro h₀
-        have Q := hob₀ X.toFinset Y.toFinset Z.toFinset (by
-          repeat rw [← Set.toFinset_inter]
-          exact Set.toFinset_inj.mpr h.symm
-        )
-        simp;tauto
-      . intro h₀
-        have Q := hob₀ X.toFinset Y.toFinset Z.toFinset (by
-          repeat rw [← Set.toFinset_inter]
-          exact Set.toFinset_inj.mpr h.symm
-        )
-        tauto
+    {ob₀ : Finset U → Finset (Finset U)}
+    (hob₀ : B5 ob₀) : CJ5b fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
+  intro X Y Z h
+  repeat rw [Set.mem_setOf_eq]
+  symm
+  exact hob₀ X.toFinset Y.toFinset Z.toFinset (by
+    repeat rw [← Set.toFinset_inter]
+    exact Set.toFinset_inj.mpr h.symm
+  )
 
-
-/-- Used in `aux_toFinset`. -/
-lemma inter_toFinset₂ {U : Type} [Fintype U] [DecidableEq U]
-{X Y : Set U}
-{hβ : X ∩ Y ≠ ∅}
-: X.toFinset ∩ Y.toFinset ≠ ∅ := by
-        have hβ' := hβ
-        contrapose hβ'
-        simp only [ne_eq, Decidable.not_not] at hβ'
-        simp only [ne_eq, Decidable.not_not]
-        exact @empty_finset U _ (X ∩ Y) (by
-          rw [← hβ']
-          simp only [Set.toFinset_inter]
-        )
-
-lemma inter_toFinset₃ {U : Type} [Fintype U] [DecidableEq U]
- {X Y Z : Set U} (hβ : X ∩ Y ∩ Z ≠ ∅)
-: X.toFinset ∩ Y.toFinset ∩ Z.toFinset ≠ ∅ := by
-        rw [← Set.toFinset_inter]
-        let Q := @inter_toFinset₂ U _ _ (X ∩ Y) Z hβ
-        simp only [Set.toFinset_inter, Finset.inter_assoc, ne_eq] at Q
-        simp only [Set.toFinset_inter, Finset.inter_assoc, ne_eq]
-        tauto
+lemma inter_inter_toFinset {U : Type} [Fintype U] [DecidableEq U]
+    {X Y Z : Set U} (hβ : X ∩ Y ∩ Z ≠ ∅) : X.toFinset ∩ Y.toFinset ∩ Z.toFinset ≠ ∅ := by
+  repeat rw [← Set.toFinset_inter]
+  exact fun hc => hβ <| Set.toFinset_inj.mp <| hc ▸ Set.toFinset_empty.symm
 
 lemma get_5c {U : Type} [Fintype U] [DecidableEq U]
-  {ob₀ : Finset U → Finset (Finset U)}
-  (hob₀ : C5 ob₀) :
-CJ5c_star_finite fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
-      intro X Y Z hY hZ hβ
-      simp only [Set.mem_setOf_eq, Set.toFinset_inter]
-      exact hob₀ X.toFinset Y.toFinset Z.toFinset hY hZ (inter_toFinset₃ hβ)
+    {ob₀ : Finset U → Finset (Finset U)}
+    (hob₀ : C5 ob₀) : CJ5c_star_finite fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
+  intro _ _ _ hY hZ hβ
+  simp only [Set.mem_setOf_eq, Set.toFinset_inter]
+  apply hob₀ _ _ _ hY hZ <| inter_inter_toFinset hβ
 
 lemma get_not_5d {U : Type} [Fintype U] [DecidableEq U]
-{ob₀ : Finset U → Finset (Finset U)}
-(hob₀ : ¬D5 ob₀)
-: ¬CJ5d fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
-    unfold CJ5d
-    contrapose hob₀
-    simp only [not_forall, Classical.not_imp, exists_and_left, not_exists, not_and,
-      Decidable.not_not]
-    simp only [Set.mem_setOf_eq, Set.toFinset_union, Set.toFinset_diff, not_forall,
-      Classical.not_imp, exists_and_left, not_exists, not_and, Decidable.not_not] at hob₀
-    intro X Y Z h₀ h₁ h₂
-    have W := hob₀ X Y Z
-      (by simp only [Finset.coe_subset]; tauto)
-      (by simp only [Finset.toFinset_coe]; tauto)
-      (by simp only [Finset.coe_subset]; tauto)
-    simp only [Finset.toFinset_coe] at W
-    tauto
+    {ob₀ : Finset U → Finset (Finset U)}
+    (hob₀ : ¬D5 ob₀) : ¬CJ5d fun S ↦ {T | T.toFinset ∈ ob₀ S.toFinset} := by
+  unfold CJ5d
+  contrapose hob₀
+  simp only [Decidable.not_not]
+  simp only [Set.mem_setOf_eq, Set.toFinset_union, Set.toFinset_diff, not_forall,
+    Classical.not_imp, exists_and_left, not_exists, not_and, Decidable.not_not] at hob₀
+  intro X Y Z h₀ h₁ h₂
+  specialize hob₀ X Y Z h₀
+  simp only [Finset.toFinset_coe] at hob₀
+  exact hob₀ h₁ h₂
 
 theorem Set_result_from_computation :
-  ∃ U : Type, ∃ ob : Set U → Set (Set U),
-  CJ5a ob ∧ CJ5b ob ∧ CJ5c_star_finite ob ∧ ¬ CJ5d ob := by
-    use Fin 2
-    obtain ⟨ob₀,hob₀⟩ := do_not_imply_5d_or_5f
-    use converter ob₀
-    use get_5a hob₀.1
-    use get_5b hob₀.2.1
-    use get_5c hob₀.2.2.1
-    use get_not_5d hob₀.2.2.2.1
+    ∃ U : Type, ∃ ob : Set U → Set (Set U),
+    CJ5a ob ∧ CJ5b ob ∧ CJ5c_star_finite ob ∧ ¬ CJ5d ob := by
+  use Fin 2
+  obtain ⟨ob₀,hob₀⟩ := do_not_imply_5d_or_5f
+  use converter ob₀,
+    get_5a hob₀.1, get_5b hob₀.2.1, get_5c hob₀.2.2.1, get_not_5d hob₀.2.2.2.1
 
 
 theorem do_not_imply_5e : ∃ ob : Finset (Fin 2) → Finset (Finset (Fin 2)),
-  A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ ¬ E5 ob ∧ F5 ob ∧ G5 ob
-:= by
+    A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ ¬ E5 ob ∧ F5 ob ∧ G5 ob := by
+  unfold A5 B5 C5 D5 E5 F5 G5
   use ob₂ ![false,false,true,false,false]
-  use (by unfold A5; decide); use (by unfold B5; decide)
-  use (by unfold C5; decide); use (by unfold D5; decide)
-  use (by unfold E5; decide); use (by unfold F5; decide)
-  use (by unfold G5; decide)
+  repeat use (by decide)

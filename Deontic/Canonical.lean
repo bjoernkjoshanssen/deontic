@@ -39,76 +39,61 @@ We prove the following results about which axioms hold in which model.
 open Finset
 
 section Venn_lemmas
-  lemma emp_filter₃ {n : ℕ} {A X Y : Finset (Fin n)}
-  (h₀ : Y ⊆ X) (h₁₀ : X ∩ A = ∅)
-  : Y ∩ A = ∅ := by
-      ext u;simp;intro hu hc;
-      have : u ∈ X ∩ A := by simp;tauto
-      rw [h₁₀] at this
-      simp at this
 
-  lemma restrict_filter₀ {n : ℕ} {B X Y Z : Finset (Fin n)} (h₀ : Y ⊆ X)
-  (h₁ : X ∩ B = X ∩ Z)
-      : Y ∩ B ⊆ Y ∩ Z := by
-      intro a ha; simp at *;constructor
-      . tauto
-      . have : a ∈ X := h₀ ha.1
-        have : a ∈ X ∩ B := by simp;tauto
-        rw [h₁] at this
-        simp at this; tauto
+lemma inter_eq_empty_of_subset {n : ℕ} {A X Y : Finset (Fin n)}
+    (h₀ : Y ⊆ X) (h₁ : X ∩ A = ∅) : Y ∩ A = ∅ := by
+  rw [← subset_empty] at h₁ ⊢
+  exact (inter_subset_inter h₀ (subset_refl _)).trans h₁
 
-  lemma restrict_filter {n : ℕ} {B X Y Z : Finset (Fin n)}
-  (h₀ : Y ⊆ X)
-  (h₁ : X ∩ B = X ∩ Z)
-      : Y ∩ B = Y ∩ Z := by
-      apply subset_antisymm
-      exact restrict_filter₀ h₀ h₁
-      exact restrict_filter₀ h₀ h₁.symm
+lemma inter_subset_restrict {n : ℕ} {B X Y Z : Finset (Fin n)} (h₀ : Y ⊆ X)
+    (h₁ : X ∩ B = X ∩ Z) : Y ∩ B ⊆ Y ∩ Z := by
+  apply subset_inter
+  · exact inter_subset_left
+  · intro a ha
+    apply mem_of_mem_inter_right
+    rw [← h₁]
+    simp only [mem_inter] at ha ⊢
+    constructor
+    · exact h₀ ha.1
+    · exact ha.2
 
-  lemma inter₃ {n : ℕ} {U X Y Z : Finset (Fin n)}
-    (h₀ : U = X ∩ Y) (h₁ : U = X ∩ Z)
-    : U = X ∩ (Y ∩ Z) := by
-      have : U = U ∩ U := (inter_self _).symm
-      rw [this]
-      nth_rewrite 1 [h₀]
-      rw [h₁]
-      ext;simp;tauto
+lemma inter_eq_restrict {n : ℕ} {B X Y Z : Finset (Fin n)}
+    (h₀ : Y ⊆ X) (h₁ : X ∩ B = X ∩ Z) : Y ∩ B = Y ∩ Z := by
+  apply subset_antisymm
+  exact inter_subset_restrict h₀ h₁
+  exact inter_subset_restrict h₀ h₁.symm
 
-  lemma emp_filter₀ {n : ℕ} {B X Y Z : Finset (Fin n)}
-  (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅) (h₁ : X ∩ B = X ∩ Z) : Y ∩ Z = ∅ := by
-      ext a
-      simp
-      intro hay haz
-      have : a ∈ X := h₀ hay
-      have : a ∈ X ∩ Z := by simp;tauto
-      rw [← h₁] at this
-      have : a ∈ B := by simp at this;tauto
-      have : a ∈ Y ∩ B := by simp;tauto
-      rw [h₃] at this
-      simp at this
+lemma eq_inter_inter {n : ℕ} {U X Y Z : Finset (Fin n)}
+    (h₀ : U = X ∩ Y) (h₁ : U = X ∩ Z) : U = X ∩ (Y ∩ Z) := by
+  rw [← inter_self U]
+  nth_rewrite 1 [h₀]
+  rw [h₁]
+  ext;simp;tauto
 
-  lemma emp_filter₂ {n : ℕ} {A : Finset (Fin n)}
+lemma inter_empty_of_restrict {n : ℕ} {B X Y Z : Finset (Fin n)}
+    (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅) (h₁ : X ∩ B = X ∩ Z) : Y ∩ Z = ∅ := by
+  apply subset_empty.mp
+  intro a h
+  simp only [mem_inter] at h
+  exact h₃ ▸ (mem_inter_of_mem h.1
+         <| mem_of_mem_inter_right <| h₁ ▸ mem_inter_of_mem (h₀ h.1) h.2)
+
+
+lemma inter_empty_of_restrict_restrict {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B)
     {X Y Z : Finset (Fin n)}
-    (h₀ : Y ⊆ X) (h₃ : Y ∩ A = ∅) (h₁ : X ∩ A = X ∩ Z)
-    : Y ∩ Z = ∅ := by
-      ext a
-      simp
-      intro hay haz
-      have g₀: a ∈ X := h₀ hay
-      have g₁: a ∈ X ∩ Z := by simp;tauto
-      rw [← h₁] at g₁
-      have g₂: a ∈ Y ∩ A := by simp;simp at g₁;tauto
-      rw [h₃] at g₂
-      simp at g₂
-
-  lemma emp_filter₁ {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B)
-    {X Y Z : Finset (Fin n)}
-    (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅) (h₁ : X ∩ A = X ∩ Z)
-    : Y ∩ Z = ∅ := emp_filter₂ h₀ (by
-      apply subset_empty.mp
-      calc Y ∩ A ⊆ Y ∩ B := by intro;simp;tauto
-        _ ⊆ ∅ := by apply subset_empty.mpr;tauto
-    ) h₁
+    (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅) (h₁ : X ∩ A = X ∩ Z) : Y ∩ Z = ∅ := by
+  apply subset_empty.mp
+  intro a ha
+  simp only [mem_inter] at ha
+  rw [← h₃]
+  simp
+  constructor
+  exact ha.1
+  apply h
+  apply mem_of_mem_inter_right
+  rw [h₁]
+  simp only [mem_inter]
+  tauto
 
 lemma subset_same {n : ℕ} {B X Y Z : Finset (Fin n)}
     (h₀ : Y ∩ X = Z ∩ X) : X ∩ B ⊆ Y ↔ X ∩ B ⊆ Z := by
@@ -117,7 +102,7 @@ lemma subset_same {n : ℕ} {B X Y Z : Finset (Fin n)}
       exact h₀ ▸ inter_subset_left
 
 
-lemma subtle {n : ℕ} {B X Y Z : Finset (Fin n)}
+lemma eq_inter_inter_of_inter {n : ℕ} {B X Y Z : Finset (Fin n)}
     (h₀ : X ∩ B = X ∩ Y)
     (h₁ : Y ∩ B = Y ∩ Z) : X ∩ Y = X ∩ (Y ∩ Z) := by
   calc
@@ -126,7 +111,7 @@ lemma subtle {n : ℕ} {B X Y Z : Finset (Fin n)}
     _ = X ∩ (Y ∩ B)       := by ext;simp;tauto
     _ = _                 := by rw [h₁]
 
-lemma inter₃₀ {n : ℕ} {A B X Y Z : Finset (Fin n)}
+lemma inter_inter_eq_empty {n : ℕ} {A B X Y Z : Finset (Fin n)}
     (h₁₀ : Y ∩ A = ∅)
     (h₀ : X ∩ A = X ∩ Y)
     (h₁ : Y ∩ B = Y ∩ Z) : X ∩ (Y ∩ Z) = ∅ := by
@@ -136,10 +121,10 @@ lemma inter₃₀ {n : ℕ} {A B X Y Z : Finset (Fin n)}
   _ = (X ∩ (Y ∩ A) ∩ B) := by ext;simp;tauto
   _ = ∅ := by rw [h₁₀];simp
 
-lemma inter₃₁ {n : ℕ} {A B X Y Z : Finset (Fin n)}
-    (h₂ : X ∩ A = ∅)
-    (h₀ : X ∩ B = X ∩ Y)
-    (h₁ : Y ∩ A = Y ∩ Z) : X ∩ (Y ∩ Z) = ∅ := by
+lemma inter_inter_eq_empty' {n : ℕ} {A B y z x : Finset (Fin n)}
+    (h₂ : y ∩ A = ∅)
+    (h₀ : y ∩ B = y  ∩ z)
+    (h₁ : z ∩ A = z ∩ x) : y ∩ (z ∩ x) = ∅ := by
   rw [← h₁, ← inter_assoc, ← h₀]
   rw [inter_assoc,inter_comm,inter_assoc]
   nth_rewrite 2 [inter_comm]
@@ -193,7 +178,7 @@ theorem canon_II_E5 {n : ℕ} (A : Finset (Fin n)) :  E5 (canon_II A) := by
       have h₆: Y ∩ Z ⊆ Y ∩ A := by intro x;simp;aesop
       rw [h₄] at h₆
       exact subset_empty.mp h₆
-    . rw [if_neg h₄] at *; simp at *; exact restrict_filter h₀ h₁
+    . rw [if_neg h₄] at *; simp at *; exact inter_eq_restrict h₀ h₁
 
 theorem not_canon_E5 : ∃ n : ℕ, ∃ A : Finset (Fin n), ¬ E5 (canon A) := by
   use 2; use filter (fun x ↦ x = 0) univ
@@ -273,9 +258,9 @@ theorem canon₂_II_C5 {n:ℕ} (A B : Finset (Fin n)) : C5 (canon₂_II A B) := 
   intro X Y Z h₀ h₁ h₂
   simp at *
   split_ifs at * with h₃ h₄
-  . tauto;
-  . simp at *; exact inter₃ h₀ h₁
-  . simp at *; exact inter₃ h₀ h₁
+  . simp only [not_mem_empty] at h₀
+  . simp at *; exact eq_inter_inter h₀ h₁
+  . simp at *; exact eq_inter_inter h₀ h₁
 
 theorem canon₂_II_E5 {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
   E5 (canon₂_II A B) := by
@@ -284,14 +269,14 @@ theorem canon₂_II_E5 {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
   simp at *
   split_ifs at * with h₃ _ _ h₆ _ _ _ h₁₀
   . tauto
-  . simp at *; contrapose h₂; simp; exact emp_filter₀ h₀ h₃ h₁
-  . simp at *; contrapose h₂; simp; exact emp_filter₁ h h₀ h₃ h₁
+  . simp at *; contrapose h₂; simp; exact inter_empty_of_restrict h₀ h₃ h₁
+  . simp at *; contrapose h₂; simp; exact inter_empty_of_restrict_restrict h h₀ h₃ h₁
   . simp at *
-  . simp at *; exact restrict_filter h₀ h₁
-  . simp at *; contrapose h₂; simp; exact emp_filter₂ h₀ h₆ h₁
+  . simp at *; exact inter_eq_restrict h₀ h₁
+  . simp at *; contrapose h₂; simp; exact inter_empty_of_restrict h₀ h₆ h₁
   . tauto
-  . simp at *; contrapose h₆; simp; exact emp_filter₃ h₀ h₁₀
-  . simp at *; exact restrict_filter h₀ h₁
+  . simp at *; contrapose h₆; simp; exact inter_eq_empty_of_subset h₀ h₁₀
+  . simp at *; exact inter_eq_restrict h₀ h₁
 
 theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} : G5 (canon₂_II A B) := by
   unfold G5 canon₂_II
@@ -300,11 +285,11 @@ theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} : G5 (canon₂_II A B) := 
   split_ifs at * with h₃ h₄ h₅ h₆ h₇ h₈ h₉ h₁₀
   simp at *
   tauto;tauto;tauto
-  . simp at *; rw [h₀]; exact subtle h₀ h₁
-  . simp at *; contrapose h₂; simp; exact inter₃₁ h₆ h₀ h₁
+  . simp at *; rw [h₀]; exact eq_inter_inter_of_inter h₀ h₁
+  . simp at *; contrapose h₂; simp; exact inter_inter_eq_empty' h₆ h₀ h₁
   . tauto
-  . simp at *; contrapose h₂; simp; exact inter₃₀ h₁₀ h₀ h₁
-  . simp at *; exact h₀ ▸ subtle h₀ h₁
+  . simp at *; contrapose h₂; simp; exact inter_inter_eq_empty h₁₀ h₀ h₁
+  . simp at *; exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
 
 
 theorem not_canon₂_II_F5 : ∃ n : ℕ, ∃ A B : Finset (Fin n), A ⊆ B ∧ ¬ F5 (canon₂_II A B) := by
