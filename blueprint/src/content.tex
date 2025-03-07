@@ -5,6 +5,11 @@
 % If you want to split the blueprint content into several files then
 % the current file can be a simple sequence of \input. Otherwise It
 % can start with a \section or \chapter for instance.
+This Lean blueprint project \emph{Deontic} formalizes the paper \emph{Natural models of Carmo and Jones axioms for contrary-to-duty obligations}.
+
+Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
+
+
 \begin{definition}\label{CJ5a}
 	\lean{CJ5a}
 	\leanok
@@ -18,7 +23,7 @@
 	\leanok
 	Axiom 5(b) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
-	∀ (X Y Z : Set U), Z ∩ X = Y ∩ X → (Z ∈ ob X ↔ Y ∈ ob X)
+	∀ X\, Y\, Z, Z ∩ X = Y ∩ X → (Z ∈ \ob X ↔ Y ∈ \ob X)
 	\]
 
 \end{definition}
