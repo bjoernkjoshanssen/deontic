@@ -115,11 +115,18 @@ lemma inter_inter_eq_empty {n : ℕ} {A B X Y Z : Finset (Fin n)}
     (h₁₀ : Y ∩ A = ∅)
     (h₀ : X ∩ A = X ∩ Y)
     (h₁ : Y ∩ B = Y ∩ Z) : X ∩ (Y ∩ Z) = ∅ := by
-  calc
-  _ = (X ∩ Y) ∩ (Y ∩ Z) := by ext;simp
-  _ = (X ∩ A) ∩ (Y ∩ B) := by rw [← h₀,← h₁]
-  _ = (X ∩ (Y ∩ A) ∩ B) := by ext;simp;tauto
-  _ = ∅ := by rw [h₁₀];simp
+  apply subset_empty.mp
+  apply subset_trans
+  · show X ∩ (Y ∩ Z) ⊆ (X ∩ Y) ∩ (Y ∩ Z)
+    refine subset_inter ?_ ?_
+    refine inter_subset_inter (fun ⦃a⦄ a ↦ a) inter_subset_left
+    exact inter_subset_right
+  rw [← h₀, ← h₁]
+  apply subset_trans
+  · show  X ∩ A ∩ (Y ∩ B) ⊆ A ∩ Y
+    exact inter_subset_inter inter_subset_right inter_subset_left
+  · rw [inter_comm]
+    exact subset_empty.mpr h₁₀
 
 lemma inter_inter_eq_empty' {n : ℕ} {A B y z x : Finset (Fin n)}
     (h₂ : y ∩ A = ∅)
@@ -171,54 +178,46 @@ theorem canon_II_E5 {n : ℕ} (A : Finset (Fin n)) :  E5 (canon_II A) := by
     simp at *
     by_cases h₄ : Y ∩ A = ∅
     . rw [if_pos h₄] at *
-      contrapose h₂;simp
-      have h₅: Y ∩ Z ⊆ A := calc
-        Y ∩ Z ⊆ X ∩ Z := by intro x;simp;tauto
-        _     ⊆ _     := by rw [h₁];intro x;simp
-      have h₆: Y ∩ Z ⊆ Y ∩ A := by intro x;simp;aesop
-      rw [h₄] at h₆
-      exact subset_empty.mp h₆
+      exfalso
+      apply h₂
+      apply subset_empty.mp
+      refine subset_trans ?_ <| subset_empty.mpr h₄
+      apply subset_trans
+      show Y ∩ Z ⊆ Y ∩ (Y ∩ Z)
+      rw [← inter_assoc]
+      simp
+      exact inter_subset_inter (fun ⦃a⦄ a ↦ a)
+        <| subset_trans (inter_subset_inter h₀ fun ⦃a⦄ a ↦ a)
+          <| h₁ ▸ inter_subset_right
     . rw [if_neg h₄] at *; simp at *; exact inter_eq_restrict h₀ h₁
 
 theorem not_canon_E5 : ∃ n : ℕ, ∃ A : Finset (Fin n), ¬ E5 (canon A) := by
   use 2; use filter (fun x ↦ x = 0) univ
   unfold E5 canon
   push_neg
-  use univ
-  use filter (fun x ↦ x = 1) univ
-  use univ
-  have h₀ (i : Fin 2): ¬ filter (fun x ↦ x = (i:Fin 2)) univ = ∅ := by
-    intro hc
-    have : (i:Fin 2) ∈ (∅:Finset (Fin 2)) := by rw [← hc];simp
-    simp at this
-  have h₂: filter (fun x ↦ x = (1:Fin 2)) univ ∩ filter (fun x ↦ x = 0) univ = ∅  := by
-    ext x;simp;aesop
+  use univ, filter (fun x ↦ x = 1) univ, univ
   constructor
-  . intro x;simp
+  . exact filter_subset (fun x ↦ x = 1) univ
   . constructor
-    . simp; rw [if_neg (h₀ 0)]; simp
+    . simp; rw [if_neg (by apply ne_empty_of_mem (a := 0);trivial)]; simp
     . simp
       constructor
-      . aesop
-      . intro hc; rw [if_pos h₂] at hc; simp at *
+      . apply ne_empty_of_mem (a := 1)
+        trivial
+      . intro hc; rw [if_pos (by rfl)] at hc; simp at *
 
 
 -- Finally let us show that canon_II does not satisfy D5.
 theorem not_canon_II_D5 : ∃ n, ∃ A : Finset (Fin n), ¬ D5 (canon_II A) := by
-  use 2
-  use filter (fun i ↦ i = 0) univ
+  use 2, filter (fun i ↦ i = 0) univ
   unfold D5; push_neg
-  use filter (fun i ↦ i = 0) univ
-  use filter (fun i ↦ i = 0) univ
-  use univ
-  have h : 0 ∈ filter (fun i ↦ i = (0:Fin 2)) univ := by simp
-  have h₀: ¬ filter (fun i ↦ i = (0:Fin 2)) univ = ∅ := by
-    intro hc;rw [hc] at h;
-    simp at h
-  unfold canon_II; simp
+  use filter (fun i ↦ i = 0) univ, filter (fun i ↦ i = 0) univ, univ
   constructor
   . trivial
-  . rw [if_neg h₀]; simp; tauto
+  · unfold canon_II
+    rw [if_neg <| ne_empty_of_mem (by simp;rfl)]
+    simp
+    tauto
 
 
 def canon₂ {n : ℕ} (A B : Finset (Fin n))  : Finset (Fin n) → Finset (Finset (Fin n)) :=
@@ -278,13 +277,13 @@ theorem canon₂_II_E5 {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
   . simp at *; contrapose h₆; simp; exact inter_eq_empty_of_subset h₀ h₁₀
   . simp at *; exact inter_eq_restrict h₀ h₁
 
-theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} : G5 (canon₂_II A B) := by
+theorem canon₂_II_G5 {n:ℕ} (A B : Finset (Fin n)) : G5 (canon₂_II A B) := by
   unfold G5 canon₂_II
   intro X Y Z h₀ h₁ h₂
   simp at *
   split_ifs at * with h₃ h₄ h₅ h₆ h₇ h₈ h₉ h₁₀
   simp at *
-  tauto;tauto;tauto
+  repeat tauto
   . simp at *; rw [h₀]; exact eq_inter_inter_of_inter h₀ h₁
   . simp at *; contrapose h₂; simp; exact inter_inter_eq_empty' h₆ h₀ h₁
   . tauto
@@ -293,98 +292,95 @@ theorem canon₂_II_G5 {n:ℕ} {A B : Finset (Fin n)} : G5 (canon₂_II A B) := 
 
 
 theorem not_canon₂_II_F5 : ∃ n : ℕ, ∃ A B : Finset (Fin n), A ⊆ B ∧ ¬ F5 (canon₂_II A B) := by
-  use 2; use filter (fun i ↦ i = 0) univ; use univ
-  use (by trivial)
-  unfold F5; push_neg
-  use univ; use filter (fun i ↦ i = 1) univ; use filter (fun i ↦ i = 0) univ
+  use 2, filter (fun i ↦ i = 0) univ, univ, by trivial
+  unfold F5
+  push_neg
+  use univ, filter (fun i ↦ i = 1) univ, filter (fun i ↦ i = 0) univ
   trivial
 
 -- The guess would be that this has the same properties as `canon`.
 -- For A5, the property A ⊆ B is not even needed:
 theorem canon₂_A5 {n:ℕ} (A B : Finset (Fin n)) : A5 (canon₂ A B) := by
-  unfold A5
-  unfold canon₂
   intro X
-  split_ifs with h₀ h₁;tauto;simp;contrapose h₀;simp at *;
-  apply subset_empty.mp;simp_all
-  simp;contrapose h₁;simp;apply subset_empty.mp;simp_all
+  unfold canon₂
+  split_ifs with h₀ h₁
+  tauto
+  · simp
+    exact h₀
+  · simp
+    exact h₁
 
 
 theorem canon₂_B5 {n:ℕ} (A B : Finset (Fin n)) : B5 (canon₂ A B) := by
   unfold B5 canon₂
   intro X Y Z h₀
   split_ifs
-  tauto;simp;exact subset_same h₀;simp;exact subset_same h₀
+  tauto
+  repeat simp;exact subset_same h₀
 
 theorem canon₂_C5 {n:ℕ} (A B : Finset (Fin n)) : C5 (canon₂ A B) := by
   intro X Y Z h₀ h₁ h₂
   unfold canon₂ at *
   split_ifs at * with h₁
   . tauto
-  . simp at *;exact subset_inter h₀ h₁
-  . simp at *;exact subset_inter h₀ h₁
+  repeat simp at *;exact subset_inter h₀ h₁
 
 
 theorem canon₂_D5 {n:ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) : D5 (canon₂ A B) := by
   unfold D5 canon₂
   intro X Y Z _ h₁ h₂
   split_ifs at * with h₃ h₄ h₅ h₆ h₇ h₈
-  . tauto
-  . simp at *
-    contrapose h₄
-    simp
-    ext u;simp;intro hu hc;
-    have : u ∈ Z := h₂ hu
-    have : u ∈ Z ∩ B := by simp;tauto
-    rw [h₃] at this;simp at this
-  . simp at *
-    contrapose h₄
-    simp
-    ext u;simp;intro hu hc;
-    have : u ∈ Z := h₂ hu
-    have : u ∈ Z ∩ B := by simp;tauto
-    rw [h₃] at this;simp at this
-  . simp at *
-  . simp at *
-    intro u hu;simp;
-    by_cases H : u ∈ X
-    right;simp at hu;apply h₁;simp;tauto
-    left; simp at hu;tauto
-  . simp at *
-    contrapose h₈
-    simp;ext u;simp;intro hu hc;
-    have : u ∈ Z ∩ A := by simp;tauto
-    rw [h₆] at this
-    simp at this
-  . simp at *
-  . simp at *
-    intro u hu;simp;
-    by_cases H : u ∈ X
-    right;simp at hu;apply h₁;simp;tauto
-    left; simp at hu;tauto
-  . simp at *
-    intro u hu;simp;
-    by_cases H : u ∈ X
-    right;simp at hu;apply h₁;simp;tauto
-    left; simp at hu;tauto
+  . simp at h₁
+  repeat exact (h₄ <| subset_empty.mp
+      <| (inter_subset_inter h₂ fun ⦃a⦄ a ↦ a).trans <| subset_empty.mpr h₃).elim
+  . simp at h₁
+  . simp at h₁ ⊢
+    nth_rewrite 1 [← sdiff_union_inter Z]
+    rw [union_inter_distrib_right]
+    refine union_subset_union ?_ ?_
+    exact inter_subset_left
+    apply subset_trans ?_ h₁
+    refine inter_subset_inter ?_ fun ⦃a⦄ a ↦ a
+    exact inter_subset_right
+  . exfalso
+    apply h₈
+    apply subset_empty.mp
+    apply subset_trans
+    exact inter_subset_inter h₂ fun ⦃a⦄ a ↦ a
+    exact subset_empty.mpr h₆
+  . simp at h₁
+  . simp at h₁ ⊢
+    nth_rewrite 1 [← sdiff_union_inter Z]
+    rw [union_inter_distrib_right]
+    exact union_subset_union inter_subset_left
+      <| subset_trans
+      (inter_subset_inter inter_subset_right fun ⦃a⦄ a ↦ a)
+      (subset_trans (inter_subset_inter (fun ⦃a⦄ a ↦ a) h) h₁)
+  . simp at h₁ ⊢
+    nth_rewrite 1 [← sdiff_union_inter Z]
+    rw [union_inter_distrib_right]
+    refine union_subset_union ?_ ?_
+    exact inter_subset_left
+    apply subset_trans
+    show Z ∩ X ∩ A ⊆ X ∩ A
+    refine inter_subset_inter ?_ fun ⦃a⦄ a ↦ a
+    exact inter_subset_right
+    apply subset_trans ?_ h₁
+    exact fun ⦃a⦄ a ↦ a
 
 
 -- July 7: Surprisingly, canon₂ doesn't satisfy G:
 -- However, if canon₂_II does satisfy G then we can say G firmly belongs in the II category.
 theorem not_canon₂_G: ∃ n:ℕ, ∃ (A B : Finset (Fin n)), A ⊆ B ∧ ¬ G5 (canon₂ A B) := by
-  use 3
-  use filter (fun i ↦ i = 2) univ
-  use filter (fun i ↦ i = 0 ∨ i = 2) univ
-  -- simp
+  use 3, filter (fun i ↦ i = 2) univ, filter (fun i ↦ i = 0 ∨ i = 2) univ
   constructor
   . trivial
-  . unfold G5 canon₂
+  . unfold G5
     push_neg
-    use filter (fun i ↦ i = 0 ∨ i = 1) univ
-    use univ
-    use filter (fun i ↦ i = 1 ∨ i = 2) univ
+    use filter (fun i ↦ i = 0 ∨ i = 1) univ, univ, filter (fun i ↦ i = 1 ∨ i = 2) univ
     simp
     constructor
+    unfold canon₂
     split_ifs with h₀ h₁
     . simp only [not_mem_empty]
       exact ne_of_beq_false rfl h₀
@@ -392,6 +388,7 @@ theorem not_canon₂_G: ∃ n:ℕ, ∃ (A B : Finset (Fin n)), A ⊆ B ∧ ¬ G5
     . contrapose h₁; simp; ext x; aesop
 
     constructor
+    unfold canon₂
     split_ifs with g₀ g₁
     . simp only [not_mem_empty]
       exact ne_of_beq_false rfl g₀
@@ -400,41 +397,51 @@ theorem not_canon₂_G: ∃ n:ℕ, ∃ (A B : Finset (Fin n)), A ⊆ B ∧ ¬ G5
     constructor
     . exact ne_of_beq_false rfl
 
+    unfold canon₂
     split_ifs with h₀ h₁
     . aesop
     . exact of_decide_eq_false rfl
     . contrapose h₁; simp; ext x;simp;aesop
 
+theorem inter_empty_of_inter_union_empty {n : ℕ} {B Y Z : Finset (Fin n)}
+  (h₂ : (Y ∪ Z) ∩ B = ∅) : Y ∩ B = ∅ := by
+    apply subset_empty.mp
+    apply subset_trans
+    show Y ∩ B ⊆ (Y ∪ Z) ∩ B
+    refine inter_subset_inter ?_ fun ⦃a⦄ a ↦ a
+    exact subset_union_left
+    apply subset_empty.mpr
+    exact h₂
+
 lemma canon₂_F5 {n:ℕ} (A B : Finset (Fin n)) : F5 (canon₂ A B) := by
-  unfold F5 canon₂; intro X Y Z h₀ h₁
-  split_ifs at * with
-    h₂ h₃ h₄ h₅ h₆ h₇ h₈ h₉ h₁₀ h₁₁ _ _ _ _ _ h₁₇ h₁₈
-  tauto;tauto;tauto;tauto;tauto;
-  . simp at *;contrapose h₃;simp;rw [union_inter_distrib_right] at h₂
-    exact (union_eq_empty.mp h₂).1
-  . simp at *;contrapose h₃;simp;rw [union_inter_distrib_right] at h₂
-    exact (union_eq_empty.mp h₂).1
-  . simp at *;contrapose h₃;simp;rw [union_inter_distrib_right] at h₂
-    exact (union_eq_empty.mp h₂).1
-  . simp at *;contrapose h₃;simp;rw [union_inter_distrib_right] at h₂
-    exact (union_eq_empty.mp h₂).1
-  simp at *;simp at *;simp at *;simp at *;simp at *;
-  . simp at *; rw [union_inter_distrib_right];apply union_subset;tauto;tauto
-  . simp at *; contrapose h₁₈;simp;rw [union_inter_distrib_right] at h₁₁;
-    exact (union_eq_empty.mp h₁₁).2
-  . simp at *; contrapose h₁₇;simp;rw [union_inter_distrib_right] at h₁₁;
-    exact (union_eq_empty.mp h₁₁).1
-  . simp at *; contrapose h₁₇;simp;rw [union_inter_distrib_right] at h₁₁;
-    exact (union_eq_empty.mp h₁₁).1
-  simp at *;simp at *;simp at *;simp at *;simp at *;
-  . simp at *; rw [union_inter_distrib_right]; apply union_subset
-    rw [‹ Y ∩ A = ∅›]; simp; rw [‹ Z ∩ A = ∅›]; simp
-  . simp at *; rw [union_inter_distrib_right]; apply union_subset
-    rw [‹ Y ∩ A = ∅›]; simp; tauto
-  . simp at *; rw [union_inter_distrib_right]; apply union_subset
-    tauto; rw [‹ Z ∩ A = ∅›]; simp
-  . simp at *; rw [union_inter_distrib_right]; apply union_subset
-    tauto; tauto
+  intro X Y Z h₀ h₁
+  unfold canon₂ at *
+  split_ifs with h₂ h₃
+  · rw [if_pos (inter_empty_of_inter_union_empty h₂)] at h₀
+    exact h₀
+  · split_ifs at * with
+      h₁₀ h₃ h₄ h₅ h₆ h₇ h₈ h₉
+    repeat (simp at h₀ h₁)
+    · simp
+      rw [union_inter_distrib_right]
+      exact union_subset h₀ h₁
+    · rw [union_comm] at h₃
+      exact (h₈ <| inter_empty_of_inter_union_empty h₃).elim
+    repeat exact (h₇ <| inter_empty_of_inter_union_empty h₃).elim
+  · split_ifs at * with _ _ _ _ _ g₅ g₆ g₇
+    repeat tauto
+    · rw [union_inter_distrib_right,g₅,g₆]
+      simp
+    · simp at h₁ ⊢
+      rw [union_inter_distrib_right,g₅,empty_union]
+      exact h₁
+    · simp at h₀
+      rw [union_inter_distrib_right,g₇]
+      simp only [union_empty, mem_filter, mem_univ, true_and]
+      exact h₀
+    · simp at h₀ h₁ ⊢
+      rw [union_inter_distrib_right]
+      exact union_subset h₀ h₁
 
 /-- All the axioms (including the paradoxical B, D, E): -/
 def CJ_all_2022 {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) : Prop :=
@@ -454,108 +461,112 @@ def CJ_noEG_2022 {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) : P
   A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob         ∧ F5 ob
 
 theorem CJ_no_DF_canon₂_II {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
-  CJ_noDF_2022 (canon₂_II A B) := by
-    use canon₂_II_A5 _ _
-    use canon₂_II_B5 _ _
-    use canon₂_II_C5 _ _
-    use canon₂_II_E5 h
-    use canon₂_II_G5
+    CJ_noDF_2022 (canon₂_II A B) := by
+  use canon₂_II_A5 _ _, canon₂_II_B5 _ _, canon₂_II_C5 _ _, canon₂_II_E5 h, canon₂_II_G5 _ _
 
 theorem CJ_no_EG_canon₂ {n : ℕ} {A B : Finset (Fin n)} (h : A ⊆ B) :
-  CJ_noEG_2022 (canon₂ A B) := by
-    use canon₂_A5 _ _
-    use canon₂_B5 _ _
-    use canon₂_C5 _ _
-    use canon₂_D5 h
-    use canon₂_F5 _ _
+    CJ_noEG_2022 (canon₂ A B) := by
+  use canon₂_A5 _ _, canon₂_B5 _ _, canon₂_C5 _ _, canon₂_D5 h, canon₂_F5 _ _
 
-theorem F5_canon_II  {n : ℕ} {A : Finset (Fin n)} : F5 (canon_II A) := by
+theorem F5_canon_II  {n : ℕ} (A : Finset (Fin n)) : F5 (canon_II A) := by
     -- must prove directly since F fails for canon₂_II !
       unfold F5 canon_II
-      intro X Y Z h₀ h₁
-      -- simp at *
+      intro _ _ _ h₀ h₁
       split_ifs at * with h₂ h₃ h₄ h₅
-      tauto;tauto;tauto;simp at *;
-      rw [union_inter_distrib_right] at h₂
-      contrapose h₃;simp;
-      let Q := @union_eq_empty (Fin n) _ (Y ∩ A) (Z ∩ A)
-      tauto
-      tauto;tauto;tauto;simp at *;
-      rw [union_inter_distrib_right,h₀,h₁,union_inter_distrib_right]
+      repeat exact h₀
+      · exact h₁
+      · simp only [mem_filter, mem_univ, true_and, not_mem_empty] at h₀ h₁ ⊢
+        rw [union_inter_distrib_right, union_eq_empty] at h₂
+        exact h₃ h₂.1
+      repeat simp at h₀
+      · simp at h₁
+      · simp at *;
+        rw [union_inter_distrib_right,h₀,h₁,union_inter_distrib_right]
 
 theorem CJ_noD_canon_II {n : ℕ} {A : Finset (Fin n)} : CJ_noD_2022 (canon_II A) := by
-    let R := @canon_II_symmetry n A
-    rw [R]
-
-    let W := @CJ_no_DF_canon₂_II n A A (by trivial)
-    unfold CJ_noDF_2022 canon₂_II at W
-    unfold CJ_noD_2022
-
+    rw [canon_II_symmetry]
     use (by
-
-      let Q := @canon₂_II_A5 n A A
+      have Q := canon₂_II_A5 A A
       unfold canon₂_II at Q
-      simp at Q
-      tauto
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let Q := @canon₂_II_B5 n A A
+      have Q := canon₂_II_B5 A A
       unfold canon₂_II at Q
-      simp at Q
-      tauto
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let Q := @canon₂_II_C5 n A A
+      have Q := canon₂_II_C5 A A
       unfold canon₂_II at Q
-      simp at Q
-      tauto
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let W := @canon_II_E5 n A
+      have W := canon_II_E5 A
       rw [canon_II_symmetry] at W
-      tauto
-    )
-    use (by
-      let W := @F5_canon_II n A
-      rw [@canon_II_symmetry n A] at W
       exact W
     )
     use (by
-      let Q := @canon₂_II_G5 n A A
+      have W := F5_canon_II A
+      rw [canon_II_symmetry] at W
+      exact W
+    )
+    use (by
+      have Q := canon₂_II_G5 A A
       unfold canon₂_II at Q
-      simp at Q
-      tauto
+      simp only [ite_self] at Q
+      exact Q
     )
 
 
+theorem inter_subset_inter_of_restrict {n : ℕ} {A X Y Z : Finset (Fin n)}
+    (h₀ : X ∩ A ⊆ Y) (h₁ : Y ∩ A ⊆ Z) : X ∩ A ⊆ Y ∩ Z :=
+  subset_inter h₀ <| (subset_inter h₀ inter_subset_right).trans h₁
 
 theorem CJ_noE_canon {n : ℕ} {A : Finset (Fin n)} :
   CJ_noE_2022 (canon A) := by
-    unfold canon
     use (by
-      let Q := @canon₂_A5 n A A
-      unfold canon₂ at Q;simp at Q; exact Q
+      have Q := canon₂_A5 A A
+      unfold canon₂ at Q
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let Q := @canon₂_B5 n A A
-      unfold canon₂ at Q;simp at Q; exact Q
+      have Q := canon₂_B5 A A
+      unfold canon₂ at Q
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let Q := @canon₂_C5 n A A
-      unfold canon₂ at Q;simp at Q; exact Q
+      have Q := canon₂_C5 A A
+      unfold canon₂ at Q
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let Q := @canon₂_D5 n A A (by trivial)
-      unfold canon₂ at Q; simp at Q; exact Q
+      have Q := canon₂_D5 (by show A ⊆ A; trivial)
+      unfold canon₂ at Q
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      let Q := @canon₂_F5 n A A
-      unfold canon₂ at Q; simp at Q; exact Q
+      have Q := canon₂_F5 A A
+      unfold canon₂ at Q
+      simp only [ite_self] at Q
+      exact Q
     )
     use (by
-      unfold G5 -- can't use canon₂_G since that doesn't hold!
-      intro X Y Z h₀ h₁ h₂;simp at *;split_ifs at *
-      tauto;tauto;tauto;simp at *;intro x hx;aesop
+      unfold canon G5 -- can't use canon₂_G since that doesn't hold!
+      intro X Y Z h₀ h₁ h₂
+      simp at *
+      split_ifs at *
+      · tauto
+      · tauto
+      · tauto
+      · simp only [mem_filter, mem_univ, true_and, mem_inter] at h₀ h₁ ⊢
+        exact inter_subset_inter_of_restrict h₀ h₁
     )
 
 lemma coincidence {n : ℕ} : canon    (univ : Finset (Fin n))
@@ -566,9 +577,8 @@ lemma coincidence {n : ℕ} : canon    (univ : Finset (Fin n))
 /-- We prove that for any n, there is an n-world model of A5 through G5,
 namely: let ob(X) be all the supersets of X, except that ob(∅)=∅. -/
 theorem CJ_all_canon_univ {n : ℕ} : CJ_all_2022 (canon (univ: Finset (Fin n))) := by
-    unfold CJ_all_2022
-    let R := @canon_II_E5 n univ
-    rw [← coincidence] at R
-    let Q := @CJ_noE_canon n univ
+    have R := coincidence ▸ @canon_II_E5 n univ
+    have Q := @CJ_noE_canon n univ
     unfold CJ_noE_2022 at Q
+    unfold CJ_all_2022
     tauto

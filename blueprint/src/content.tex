@@ -19,7 +19,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 
 \begin{definition}\label{CJ5b}
-	\lean{CJ5a}
+	\lean{CJ5b}
 	\leanok
 	Axiom 5(b) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
@@ -27,6 +27,18 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	\]
 
 \end{definition}
+
+\begin{definition}\label{CJ5cstar}
+	\lean{CJ5c_star}
+	\leanok
+	Axiom 5(c*) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+	\[
+    \forall X, \forall \beta \subseteq \ob X, \beta \ne \emptyset \rightarrow \bigcap \beta \cap X \ne \emptyset
+	\rightarrow \bigcap \beta \in \ob X.	
+	\]
+
+\end{definition}
+ 
  
 \begin{definition}\label{CJ5d}
 	\lean{CJ5d}
@@ -52,4 +64,22 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	\leanok
 	\uses{CJ5bd, CJ5b, CJ5d}
 	If $\ob$ satisfies 5(b) and 5(d) then it satisfies 5(bd).
+\end{theorem}
+
+\begin{definition}\label{CJ5f}
+	\lean{CJ5f}
+	\leanok
+	Axiom 5(f) says
+	\[
+		\forall \beta \subseteq \Pow(U), \beta \ne \emptyset \rightarrow
+		\forall X, \text{ if} \forall Z \in \beta, X \in \ob Z \text{ then } X \in \ob \bigcup \beta.
+	\]
+\end{definition}
+While 5(f) allows for infinite sets, the finite version can be stated more simply.
+
+\begin{theorem}[Lemma II.2.2 of Carmo and Jones]\label{II22}
+	\lean{II_2_2}
+	\leanok
+	\uses{CJ5a, CJ5b, CJ5cstar,CJ5d}
+	If $\ob$ satisfies axioms 5(a,b,c*,d) then $\ob$ satisfies axiom 5(f).
 \end{theorem}
