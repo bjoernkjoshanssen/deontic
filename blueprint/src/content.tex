@@ -23,7 +23,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	\leanok
 	Axiom 5(b) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
-	∀ X\, Y\, Z, Z ∩ X = Y ∩ X → (Z ∈ \ob X ↔ Y ∈ \ob X)
+	∀ X\, Y\, Z, Z ∩ X = Y ∩ X \to (Z ∈ \ob X ↔ Y ∈ \ob X)
 	\]
 
 \end{definition}
@@ -45,7 +45,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	\leanok
 	Axiom 5(d) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
-	  ∀ (X Y Z : Set U), Y ⊆ X → Y ∈ ob X → X ⊆ Z → Z \ X ∪ Y ∈ ob Z
+	  ∀ (X Y Z : Set U), Y ⊆ X \to Y ∈ ob X \to X ⊆ Z \to Z \ X ∪ Y ∈ ob Z
 	\]
 
 \end{definition}
@@ -83,3 +83,73 @@ While 5(f) allows for infinite sets, the finite version can be stated more simpl
 	\uses{CJ5a, CJ5b, CJ5cstar,CJ5d}
 	If $\ob$ satisfies axioms 5(a,b,c*,d) then $\ob$ satisfies axiom 5(f).
 \end{theorem}
+
+\begin{definition}
+	\lean{ob₂}
+	\leanok
+The 32 models $\ob_2(b)$, where $b$ is a Boolean vector of length 5, are defined by $B\in\ob_2(A)$ iff
+the following are true:
+\begin{itemize}
+	\item $A \cap B \ne \emptyset$,
+	\item $(B = \{0\} \to b 0)$,
+	\item $(B = \{1\} \to b 1)$, and
+	\item if $B = \{0,1\}$ then
+		\begin{itemize}
+			\item $(A = \{0\} \to b 3)$,
+			\item $(A = \{1\} \to b 4)$, and
+			\item $(A = \{0,1\} \to b 2)$.
+		\end{itemize}
+\end{itemize}
+\end{definition}
+
+Using this ob₂ we prove that
+\begin{theorem}
+	\lean{do_not_imply_5d_or_5f}
+	\uses{ob₂}
+	\leanok
+There is a model where $5(a)(b)(c)(e)(g)$ all hold but $5(d)$ and $5(f)$
+do not hold.
+\end{theorem}
+
+We also prove
+\begin{theorem}
+\lean{do_not_imply_5e}
+\leanok
+∃ ob, A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ ¬ E5 ob ∧ F5 ob ∧ G5 ob.
+\end{theorem}
+
+\section{Canonical models of Carmo and Jones' systems}
+
+We show that the two approaches sketched in [Kjos-Hanssen 2017] are both consistent with [Carmo Jones 2022]
+\cite{MR4500520}.
+
+Preferably, we let F(X) = X ∩ A for a fixed set A.
+
+However, to incorporate contrary-to-duty obligations we introduce a predicate B,
+where A worlds, A ⊆ B, are the best and B \setminus A worlds the second best.
+
+Thus, if X ∩ A = ∅ but X ∩ B ≠ ∅, we let F(X) = X ∩ B.
+
+
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        Axiom \textbackslash\ Model & \texttt{canon} & \texttt{canon\_II} & \texttt{canon₂} & \texttt{canon₂\_II} \\
+        \midrule
+        A & ✓ & ✓ & ✓ & ✓ \\
+        B & ✓ & ✓ & ✓ & ✓ \\
+        C & ✓ & ✓ & ✓ & ✓ \\
+        D & \textit{thus} ✓ & × & ✓ & \textit{thus} × \\
+        E & × & ✓ & \textit{thus} × & ✓ \\
+        F & ✓ & ✓ & ✓ & ×! \\
+        G & ✓ & ✓ & ×! & ✓ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results about which axioms hold in which model.}
+    \label{tab:example}
+\end{table}
+
+\bibliographystyle{plain}
+\bibliography{deontic}
