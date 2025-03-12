@@ -190,10 +190,9 @@ theorem canon_II_E5 {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
       apply subset_empty.mp
       refine subset_trans ?_ <| subset_empty.mpr h₄
       apply subset_trans
-      show Y ∩ Z ⊆ Y ∩ (Y ∩ Z)
-      rw [← inter_assoc]
-      simp
-      exact inter_subset_inter (fun ⦃a⦄ a ↦ a)
+      · show Y ∩ Z ⊆ Y ∩ (Y ∩ Z)
+        rw [← inter_assoc, inter_self]
+      · exact inter_subset_inter (fun ⦃a⦄ a ↦ a)
         <| subset_trans (inter_subset_inter h₀ fun ⦃a⦄ a ↦ a)
           <| h₁ ▸ inter_subset_right
     . rw [if_neg h₄] at *; simp at *; exact inter_eq_restrict h₀ h₁
@@ -244,62 +243,60 @@ def canon₂_II {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α)  : 
 
 theorem canon₂_II_A5  {α : Type*} [Fintype α] [DecidableEq α]
 (A B : Finset α) : A5 (canon₂_II A B) := by
-  intro X; unfold canon₂_II; split_ifs
-  tauto;simp;tauto;simp;tauto
+  intro X
+  unfold canon₂_II
+  split_ifs
+  any_goals (simp only [mem_filter, mem_univ, inter_empty, true_and]; tauto)
+  tauto
 
 theorem canon₂_II_B5  {α : Type*} [Fintype α] [DecidableEq α]
     (A B : Finset α) : B5 (canon₂_II A B) := by
   unfold B5 canon₂_II
   intro X Y Z h₀
   split_ifs with h₁ h₂
-  . simp
-  . simp
-    nth_rewrite 1 [inter_comm] at h₀; nth_rewrite 2 [inter_comm] at h₀
+  any_goals (
+    simp only [mem_filter, mem_univ, true_and]
+    nth_rewrite 1 [inter_comm] at h₀
+    nth_rewrite 2 [inter_comm] at h₀
     rw [h₀]
-  . simp
-    nth_rewrite 1 [inter_comm] at h₀; nth_rewrite 2 [inter_comm] at h₀
-    rw [h₀]
+  )
+  simp only [not_mem_empty]
 
 
 theorem canon₂_II_C5  {α : Type*} [Fintype α] [DecidableEq α]
     (A B : Finset α) : C5 (canon₂_II A B) := by
   unfold C5 canon₂_II
   intro X Y Z h₀ h₁ h₂
-  simp at *
   split_ifs at * with h₃ h₄
-  . simp only [not_mem_empty] at h₀
-  . simp at *; exact eq_inter_inter h₀ h₁
-  . simp at *; exact eq_inter_inter h₀ h₁
+  any_goals (simp only [not_mem_empty, mem_filter, mem_univ, true_and] at h₀ h₁ ⊢) <;>
+  exact eq_inter_inter h₀ h₁
 
 theorem canon₂_II_E5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset α} (h : A ⊆ B) :
   E5 (canon₂_II A B) := by
   unfold canon₂_II
   intro X Y Z h₀ h₁ h₂
   simp at *
-  split_ifs at * with h₃ _ _ h₆ _ _ _ h₁₀
-  . tauto
-  . simp at *; contrapose h₂; simp; exact inter_empty_of_restrict h₀ h₃ h₁
-  . simp at *; contrapose h₂; simp; exact inter_empty_of_restrict_restrict h h₀ h₃ h₁
-  . simp at *
-  . simp at *; exact inter_eq_restrict h₀ h₁
-  . simp at *; contrapose h₂; simp; exact inter_empty_of_restrict h₀ h₆ h₁
-  . tauto
-  . simp at *; contrapose h₆; simp; exact inter_eq_empty_of_subset h₀ h₁₀
-  . simp at *; exact inter_eq_restrict h₀ h₁
+  split_ifs at * with h₃ _ _ h₄ _ _ _ h₅
+  any_goals (simp only [mem_filter, mem_univ, true_and, not_mem_empty] at h₁ ⊢)
+  . exact h₂ <| inter_empty_of_restrict h₀ h₃ h₁
+  . exact h₂ <| inter_empty_of_restrict_restrict h h₀ h₃ h₁
+  . exact inter_eq_restrict h₀ h₁
+  . exact False.elim <| h₂ <| inter_empty_of_restrict h₀ h₄ h₁
+  . apply False.elim <| h₄ <| inter_eq_empty_of_subset h₀ h₅
+  . exact inter_eq_restrict h₀ h₁
 
 theorem canon₂_II_G5  {α : Type*} [Fintype α] [DecidableEq α]
     (A B : Finset α) : G5 (canon₂_II A B) := by
   unfold G5 canon₂_II
   intro X Y Z h₀ h₁ h₂
-  simp at *
-  split_ifs at * with h₃ h₄ h₅ h₆ h₇ h₈ h₉ h₁₀
-  simp at *
+  split_ifs at * with _ _ _ h₃ _ _ _ h₄
   repeat tauto
-  . simp at *; rw [h₀]; exact eq_inter_inter_of_inter h₀ h₁
-  . simp at *; contrapose h₂; simp; exact inter_inter_eq_empty' h₆ h₀ h₁
-  . tauto
-  . simp at *; contrapose h₂; simp; exact inter_inter_eq_empty h₁₀ h₀ h₁
-  . simp at *; exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
+  all_goals (simp only [inter_assoc, ne_eq, mem_filter, mem_univ, true_and] at *)
+  . exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
+  . apply False.elim <| h₂ <| inter_inter_eq_empty' h₃ h₀ h₁
+  · simp at h₁
+  . apply False.elim <| h₂ <| inter_inter_eq_empty h₄ h₀ h₁
+  . exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
 
 
 theorem not_canon₂_II_F5 : ∃ n : ℕ, ∃ A B : Finset (Fin n), A ⊆ B ∧ ¬ F5 (canon₂_II A B) := by
@@ -315,19 +312,17 @@ theorem canon₂_A5  {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α
   intro X
   unfold canon₂
   split_ifs with h₀ h₁
-  tauto
-  · simp
-    exact h₀
-  · simp
-    exact h₁
+  any_goals (simp only [mem_filter, mem_univ, subset_empty, true_and,not_mem_empty, not_false_eq_true])
+  · exact h₀
+  · exact h₁
 
 
 theorem canon₂_B5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : B5 (canon₂ A B) := by
   unfold B5 canon₂
   intro X Y Z h₀
   split_ifs
-  tauto
-  repeat simp;exact subset_same h₀
+  simp
+  repeat simp only [mem_filter, mem_univ, true_and]; exact subset_same h₀
 
 theorem canon₂_C5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : C5 (canon₂ A B) := by
   intro X Y Z h₀ h₁ h₂
@@ -343,41 +338,28 @@ theorem canon₂_D5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset α}
   split_ifs at * with h₃ h₄ h₅ h₆ h₇ h₈
   . simp at h₁
   repeat exact (h₄ <| subset_empty.mp
-      <| (inter_subset_inter h₂ fun ⦃a⦄ a ↦ a).trans <| subset_empty.mpr h₃).elim
+      <| (inter_subset_inter h₂ (subset_refl _)).trans <| subset_empty.mpr h₃).elim
   . simp at h₁
-  . simp at h₁ ⊢
+  . simp only [mem_filter, mem_univ, true_and] at h₁ ⊢
     nth_rewrite 1 [← sdiff_union_inter Z]
     rw [union_inter_distrib_right]
-    refine union_subset_union ?_ ?_
-    exact inter_subset_left
-    apply subset_trans ?_ h₁
-    refine inter_subset_inter ?_ fun ⦃a⦄ a ↦ a
-    exact inter_subset_right
-  . exfalso
-    apply h₈
-    apply subset_empty.mp
-    apply subset_trans
-    exact inter_subset_inter h₂ fun ⦃a⦄ a ↦ a
-    exact subset_empty.mpr h₆
+    exact union_subset_union inter_subset_left
+      <| (inter_subset_inter inter_subset_right (subset_refl _)).trans h₁
+  . exact False.elim <| h₈ <| subset_empty.mp
+      <| (inter_subset_inter h₂ (subset_refl _)).trans
+      <| subset_empty.mpr h₆
   . simp at h₁
   . simp at h₁ ⊢
     nth_rewrite 1 [← sdiff_union_inter Z]
     rw [union_inter_distrib_right]
     exact union_subset_union inter_subset_left
-      <| subset_trans
-      (inter_subset_inter inter_subset_right fun ⦃a⦄ a ↦ a)
-      (subset_trans (inter_subset_inter (fun ⦃a⦄ a ↦ a) h) h₁)
+      <| (inter_subset_inter inter_subset_right (subset_refl _)).trans
+      ((inter_subset_inter (subset_refl _) h).trans h₁)
   . simp at h₁ ⊢
     nth_rewrite 1 [← sdiff_union_inter Z]
     rw [union_inter_distrib_right]
-    refine union_subset_union ?_ ?_
-    exact inter_subset_left
-    apply subset_trans
-    show Z ∩ X ∩ A ⊆ X ∩ A
-    refine inter_subset_inter ?_ fun ⦃a⦄ a ↦ a
-    exact inter_subset_right
-    apply subset_trans ?_ h₁
-    exact fun ⦃a⦄ a ↦ a
+    exact union_subset_union inter_subset_left
+      <| (inter_subset_inter inter_subset_right (subset_refl _)).trans h₁
 
 
 -- July 7: Surprisingly, canon₂ doesn't satisfy G:
@@ -418,11 +400,9 @@ theorem inter_empty_of_inter_union_empty {α : Type*} [Fintype α] [DecidableEq 
   (h₂ : (Y ∪ Z) ∩ B = ∅) : Y ∩ B = ∅ := by
     apply subset_empty.mp
     apply subset_trans
-    show Y ∩ B ⊆ (Y ∪ Z) ∩ B
-    refine inter_subset_inter ?_ fun ⦃a⦄ a ↦ a
-    exact subset_union_left
-    apply subset_empty.mpr
-    exact h₂
+    · show Y ∩ B ⊆ (Y ∪ Z) ∩ B
+      exact inter_subset_inter subset_union_left (subset_refl B)
+    · apply subset_empty.mpr h₂
 
 lemma canon₂_F5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : F5 (canon₂ A B) := by
   intro X Y Z h₀ h₁
@@ -455,21 +435,21 @@ lemma canon₂_F5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) :
       exact union_subset h₀ h₁
 
 /-- All the axioms (including the paradoxical B, D, E): -/
-def CJ_all_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) : Prop :=
+def CJ_all_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) :=
   A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ E5 ob ∧ F5 ob ∧ G5 ob
 
-def CJ_noE_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) : Prop :=
-  A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob         ∧ F5 ob ∧ G5 ob
+def CJ_noE_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) :=
+  A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ F5 ob ∧ G5 ob
 
 /-- This could also be called CJ_2022. -/
-def CJ_noD_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) : Prop :=
-  A5 ob ∧ B5 ob ∧ C5 ob ∧         E5 ob ∧ F5 ob ∧ G5 ob
+def CJ_noD_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) :=
+  A5 ob ∧ B5 ob ∧ C5 ob ∧ E5 ob ∧ F5 ob ∧ G5 ob
 
-def CJ_noDF_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) : Prop :=
-  A5 ob ∧ B5 ob ∧ C5 ob ∧         E5 ob ∧         G5 ob
+def CJ_noDF_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) :=
+  A5 ob ∧ B5 ob ∧ C5 ob ∧ E5 ob ∧ G5 ob
 
-def CJ_noEG_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) : Prop :=
-  A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob         ∧ F5 ob
+def CJ_noEG_2022 {α : Type*} [Fintype α] [DecidableEq α] (ob : Finset α → Finset (Finset α)) :=
+  A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ F5 ob
 
 theorem CJ_no_DF_canon₂_II {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset α} (h : A ⊆ B) :
     CJ_noDF_2022 (canon₂_II A B) := by
@@ -479,7 +459,7 @@ theorem CJ_no_EG_canon₂ {α : Type*} [Fintype α] [DecidableEq α] {A B : Fins
     CJ_noEG_2022 (canon₂ A B) := by
   use canon₂_A5 _ _, canon₂_B5 _ _, canon₂_C5 _ _, canon₂_D5 h, canon₂_F5 _ _
 
-theorem F5_canon_II  {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) : F5 (canon_II A) := by
+theorem canon_II_F5  {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) : F5 (canon_II A) := by
     -- must prove directly since F fails for canon₂_II !
       unfold F5 canon_II
       intro _ _ _ h₀ h₁
@@ -496,41 +476,16 @@ theorem F5_canon_II  {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) 
 
 theorem CJ_noD_canon_II {α : Type*} [Fintype α] [DecidableEq α] {A : Finset α} : CJ_noD_2022 (canon_II A) := by
     rw [canon_II_symmetry]
-    use (by
-      have Q := canon₂_II_A5 A A
-      unfold canon₂_II at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have Q := canon₂_II_B5 A A
-      unfold canon₂_II at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have Q := canon₂_II_C5 A A
-      unfold canon₂_II at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have W := canon_II_E5 A
-      rw [canon_II_symmetry] at W
-      exact W
-    )
-    use (by
-      have W := F5_canon_II A
-      rw [canon_II_symmetry] at W
-      exact W
-    )
-    use (by
-      have Q := canon₂_II_G5 A A
-      unfold canon₂_II at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-
+    have A₅ := canon₂_II_A5 A A
+    have B₅ := canon₂_II_B5 A A
+    have C₅ := canon₂_II_C5 A A
+    have E₅ := canon_II_E5 A
+    have F₅ := canon_II_F5 A
+    have G₅ := canon₂_II_G5 A A
+    rw [canon_II_symmetry] at E₅ F₅
+    unfold canon₂_II at A₅ B₅ C₅ G₅
+    simp only [ite_self] at A₅ B₅ C₅ G₅
+    use A₅, B₅, C₅, E₅, F₅, G₅
 
 theorem inter_subset_inter_of_restrict {α : Type*} [Fintype α] [DecidableEq α] {A X Y Z : Finset α}
     (h₀ : X ∩ A ⊆ Y) (h₁ : Y ∩ A ⊆ Z) : X ∩ A ⊆ Y ∩ Z :=
@@ -538,47 +493,21 @@ theorem inter_subset_inter_of_restrict {α : Type*} [Fintype α] [DecidableEq α
 
 theorem CJ_noE_canon {α : Type*} [Fintype α] [DecidableEq α] {A : Finset α} :
   CJ_noE_2022 (canon A) := by
-    use (by
-      have Q := canon₂_A5 A A
-      unfold canon₂ at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have Q := canon₂_B5 A A
-      unfold canon₂ at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have Q := canon₂_C5 A A
-      unfold canon₂ at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have Q := canon₂_D5 (by show A ⊆ A; trivial)
-      unfold canon₂ at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      have Q := canon₂_F5 A A
-      unfold canon₂ at Q
-      simp only [ite_self] at Q
-      exact Q
-    )
-    use (by
-      unfold canon G5 -- can't use canon₂_G since that doesn't hold!
-      intro X Y Z h₀ h₁ h₂
-      simp at *
-      split_ifs at *
-      · tauto
-      · tauto
-      · tauto
-      · simp only [mem_filter, mem_univ, true_and, mem_inter] at h₀ h₁ ⊢
-        exact inter_subset_inter_of_restrict h₀ h₁
-    )
+    have A₅ := canon₂_A5 A A
+    have B₅ := canon₂_B5 A A
+    have C₅ := canon₂_C5 A A
+    have D₅ := canon₂_D5 (by show A ⊆ A; trivial)
+    have F₅ := canon₂_F5 A A
+    unfold canon₂ at *
+    simp only [ite_self] at *
+    use A₅, B₅, C₅, D₅, F₅
+    unfold canon G5 -- can't use canon₂_G since that doesn't hold!
+    intro X Y Z h₀ h₁ h₂
+    simp only at *
+    split_ifs at *
+    any_goals (simp only [not_mem_empty] at *)
+    simp only [mem_filter, mem_univ, true_and, mem_inter] at h₀ h₁ ⊢
+    exact inter_subset_inter_of_restrict h₀ h₁
 
 lemma coincidence {α : Type*} [Fintype α] [DecidableEq α] :
     canon (univ : Finset α) = canon_II (univ : Finset α) := by
