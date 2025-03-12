@@ -46,12 +46,12 @@ lemma inter_eq_empty_of_subset {α : Type*} [Fintype α] [DecidableEq α] {A X Y
   exact (inter_subset_inter h₀ (subset_refl _)).trans h₁
 
 lemma inter_subset_restrict {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
-    (h₀ : Y ⊆ X) (h₁ : X ∩ B = X ∩ Z) : Y ∩ B ⊆ Y ∩ Z := by
+    (h₀ : Y ⊆ X) (h₁ : X ∩ B ⊆ X ∩ Z) : Y ∩ B ⊆ Y ∩ Z := by
   apply subset_inter
   · exact inter_subset_left
   · intro a ha
     apply mem_of_mem_inter_right
-    rw [← h₁]
+    apply h₁
     simp only [mem_inter] at ha ⊢
     constructor
     · exact h₀ ha.1
@@ -60,8 +60,8 @@ lemma inter_subset_restrict {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z 
 lemma inter_eq_restrict {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
     (h₀ : Y ⊆ X) (h₁ : X ∩ B = X ∩ Z) : Y ∩ B = Y ∩ Z := by
   apply subset_antisymm
-  exact inter_subset_restrict h₀ h₁
-  exact inter_subset_restrict h₀ h₁.symm
+  exact inter_subset_restrict h₀ (by rw [h₁])
+  exact inter_subset_restrict h₀ (by rw [h₁])
 
 lemma eq_inter_inter {α : Type*} [Fintype α] [DecidableEq α] {U X Y Z : Finset α}
     (h₀ : U = X ∩ Y) (h₁ : U = X ∩ Z) : U = X ∩ (Y ∩ Z) := by
@@ -81,21 +81,20 @@ lemma inter_empty_of_restrict {α : Type*} [Fintype α] [DecidableEq α]
 
 
 lemma inter_empty_of_restrict_restrict {α : Type*} [Fintype α] [DecidableEq α]
-    {A B : Finset α} (h : A ⊆ B)
+    {A B : Finset α} (hAB : A ⊆ B)
     {X Y Z : Finset α}
-    (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅) (h₁ : X ∩ A = X ∩ Z) : Y ∩ Z = ∅ := by
+    (hYX : Y ⊆ X) (h₀ : Y ∩ B = ∅) (h₁ : X ∩ Z ⊆ X ∩ A) : Y ∩ Z = ∅ := by
   apply subset_empty.mp
   intro a ha
-  simp only [mem_inter] at ha
-  rw [← h₃]
-  simp
+  rw [← h₀]
+  simp only [mem_inter] at ha ⊢
   constructor
   exact ha.1
-  apply h
-  apply mem_of_mem_inter_right
-  rw [h₁]
+  apply hAB
+  suffices a ∈ X ∩ A by rw [mem_inter] at this; exact this.2
+  apply h₁
   simp only [mem_inter]
-  tauto
+  exact ⟨hYX ha.1, ha.2⟩
 
 lemma subset_same {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
     (h₀ : Y ∩ X = Z ∩ X) : X ∩ B ⊆ Y ↔ X ∩ B ⊆ Z := by
@@ -104,41 +103,43 @@ lemma subset_same {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset �
       exact h₀ ▸ inter_subset_left
 
 
+lemma eq_inter_inter_of_inter₀ {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
+    (h₀ : X ∩ B = X ∩ Y)
+    (h₁ : Y ∩ B = Y ∩ Z) : X ∩ Y ⊆ Z := by
+  have := @subset_same α _ _ X Y B Z (by rw [inter_comm, h₁,inter_comm])
+  rw [inter_comm]
+  apply this.mp
+  rw [inter_comm, ← h₀]
+  simp
+
 lemma eq_inter_inter_of_inter {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
     (h₀ : X ∩ B = X ∩ Y)
     (h₁ : Y ∩ B = Y ∩ Z) : X ∩ Y = X ∩ (Y ∩ Z) := by
-  calc
-    _ = (X ∩ Y) ∩ (X ∩ Y) := by simp only [inter_self]
-    _ = (X ∩ Y) ∩ (X ∩ B) := by rw [← h₀]
-    _ = X ∩ (Y ∩ B)       := by ext;simp;tauto
-    _ = _                 := by rw [h₁]
+  rw [← inter_assoc]
+  exact Eq.symm <| (@inter_eq_left α _ (X ∩ Y) Z).mpr <| eq_inter_inter_of_inter₀ h₀ h₁
 
-lemma inter_inter_eq_empty {α : Type*} [Fintype α] [DecidableEq α] {A B X Y Z : Finset α}
-    (h₁₀ : Y ∩ A = ∅)
-    (h₀ : X ∩ A = X ∩ Y)
-    (h₁ : Y ∩ B = Y ∩ Z) : X ∩ (Y ∩ Z) = ∅ := by
-  apply subset_empty.mp
-  apply subset_trans
-  · show X ∩ (Y ∩ Z) ⊆ (X ∩ Y) ∩ (Y ∩ Z)
-    refine subset_inter ?_ ?_
-    refine inter_subset_inter (fun ⦃a⦄ a ↦ a) inter_subset_left
-    exact inter_subset_right
-  rw [← h₀, ← h₁]
-  apply subset_trans
-  · show  X ∩ A ∩ (Y ∩ B) ⊆ A ∩ Y
-    exact inter_subset_inter inter_subset_right inter_subset_left
-  · rw [inter_comm]
-    exact subset_empty.mpr h₁₀
+lemma inter_eq_empty₀ {α : Type*} [Fintype α] [DecidableEq α] {A X Y : Finset α}
+    (h₁ : Y ∩ A = ∅) (h₀ : X ∩ A = X ∩ Y) : X ∩ Y = ∅ := by
+  suffices (X ∩ Y) ∩ (X ∩ Y) = ∅  by
+    simp at this
+    exact this
+  nth_rewrite 1 [← h₀]
+  rw [inter_assoc]
+  nth_rewrite 3 [inter_comm]
+  nth_rewrite 2 [← inter_assoc]
+  nth_rewrite 3 [inter_comm]
+  rw [h₁]
+  simp
+
+lemma inter_inter_eq_empty {α : Type*} [Fintype α] [DecidableEq α] {A X Y Z : Finset α}
+    (h₁ : Y ∩ A = ∅) (h₀ : X ∩ A = X ∩ Y) : X ∩ (Y ∩ Z) = ∅ := by
+  rw [← inter_assoc, inter_eq_empty₀ h₁ h₀, empty_inter]
 
 lemma inter_inter_eq_empty' {α : Type*} [Fintype α] [DecidableEq α] {A B y z x : Finset α}
-    (h₂ : y ∩ A = ∅)
+    (h₂ : A ∩ y = ∅)
     (h₀ : y ∩ B = y  ∩ z)
     (h₁ : z ∩ A = z ∩ x) : y ∩ (z ∩ x) = ∅ := by
-  rw [← h₁, ← inter_assoc, ← h₀]
-  rw [inter_assoc,inter_comm,inter_assoc]
-  nth_rewrite 2 [inter_comm]
-  rw [h₂]
-  simp
+  rw [← h₁, ← inter_assoc, ← h₀, inter_assoc, inter_comm, inter_assoc, h₂, inter_empty]
 
 
 end Venn_lemmas
@@ -279,7 +280,7 @@ theorem canon₂_II_E5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset 
   split_ifs at * with h₃ _ _ h₄ _ _ _ h₅
   any_goals (simp only [mem_filter, mem_univ, true_and, not_mem_empty] at h₁ ⊢)
   . exact h₂ <| inter_empty_of_restrict h₀ h₃ h₁
-  . exact h₂ <| inter_empty_of_restrict_restrict h h₀ h₃ h₁
+  . exact h₂ <| inter_empty_of_restrict_restrict h h₀ h₃ (by rw [h₁])
   . exact inter_eq_restrict h₀ h₁
   . exact False.elim <| h₂ <| inter_empty_of_restrict h₀ h₄ h₁
   . apply False.elim <| h₄ <| inter_eq_empty_of_subset h₀ h₅
@@ -293,9 +294,10 @@ theorem canon₂_II_G5  {α : Type*} [Fintype α] [DecidableEq α]
   repeat tauto
   all_goals (simp only [inter_assoc, ne_eq, mem_filter, mem_univ, true_and] at *)
   . exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
-  . apply False.elim <| h₂ <| inter_inter_eq_empty' h₃ h₀ h₁
+  . rw [inter_comm] at h₃
+    apply False.elim <| h₂ <| inter_inter_eq_empty' h₃ h₀ h₁
   · simp at h₁
-  . apply False.elim <| h₂ <| inter_inter_eq_empty h₄ h₀ h₁
+  . apply False.elim <| h₂ <| inter_inter_eq_empty h₄ h₀
   . exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
 
 
