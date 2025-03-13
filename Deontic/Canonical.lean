@@ -3,7 +3,7 @@ import Deontic.Finset
 import Deontic.Venn
 /-!
 
-## Canonical models of Carmo and Jones' systems
+## Graded models of Carmo and Jones' systems
 
 Abstract: We show that the two approaches sketched in [Kjos-Hanssen 2017]
 are both consistent with [Carmo Jones 2022].
