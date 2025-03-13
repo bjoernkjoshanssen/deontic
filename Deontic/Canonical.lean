@@ -1,19 +1,12 @@
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Data.Finset.Basic
 import Deontic.Basic
 import Deontic.Finset
-
+import Deontic.Venn
 /-!
 
 ## Canonical models of Carmo and Jones' systems
 
-Abstract: We show that the two approaches sketched in
-
-* Kjos-Hanssen 2017
-
-are both consistent with
-
-* Carmo Jones 2022.
+Abstract: We show that the two approaches sketched in [Kjos-Hanssen 2017]
+are both consistent with [Carmo Jones 2022].
 
 Preferably, we let `F(X) = X ∩ A` for a fixed set `A`.
 
@@ -23,126 +16,35 @@ where `A` worlds, `A ⊆ B`, are the best and `B \ A` worlds the second best.
 Thus, if `X ∩ A = ∅` but `X ∩ B ≠ ∅`, we let `F(X) = X ∩ B`.
 
 We prove the following results about which axioms hold in which model.
+Since the models without the subscript ₂ are special cases of those
+with it, some results follow: these are indicated with (parentheses).
 
-| Axiom \ Model | `canon` | `canon_II` | `canon₂` | `canon₂_II` |
-| ------------- | ------- | ---------- | -------- | ----------- |
-| A             | ✓       | ✓          | ✓        | ✓           |
-| B             | ✓       | ✓          | ✓        | ✓           |
-| C             | ✓       | ✓          | ✓        | ✓           |
-| D             | thus ✓  | ×          | ✓        | thus ×      |
-| E             | ×       | ✓          | thus ×   | ✓           |
-| F             | ✓       | ✓          | ✓        | ×!          |
-| G             | ✓       | ✓          | ×!       | ✓           |
-
+| Axiom \ Model | `canon`      | `canon_II`      | `canon₂`     | `canon₂_II`      |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| A             | (✓           | (✓)             | ✓            | ✓                |
+|               |              |                 |`canon₂_A5`   |`canon₂_II_A5`    |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| B             | (✓)          | (✓)             | ✓            | ✓                |
+|               |              |                 |`canon₂_B5`   |`canon₂_II_B5`    |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| C             | (✓)          | (✓)             | ✓            | ✓                |
+|               |              |                 |`canon₂_C5`   |`canon₂_II_C5`    |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| D             | (✓)          | ×               | ✓            |(×)               |
+|               |              |`not_canon_II_D5`|`canon₂_D5`   |                  |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| E             | ×            | ✓               |(×)           | ✓                |
+|               |`not_canon_E5`|`canon_II_E5`    |              |`canon₂_II_E5`    |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| F             | (✓)          | ✓               | ✓            | ×!               |
+|               |              |`canon_II_F5`    |`canon₂_F5`   |`not_canon₂_II_F5`|
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
+| G             | ✓            | (✓)             | ×!           | ✓                |
+|               |`canon_G`     |                 |`not_canon₂_G`|`canon₂_II_G5`    |
+| ------------- | ------------ | --------------- | ------------ | ---------------- |
 -/
 
 open Finset
-
-section Venn_lemmas
-
-lemma inter_eq_empty_of_subset {α : Type*} [Fintype α] [DecidableEq α] {A X Y : Finset α}
-    (h₀ : Y ⊆ X) (h₁ : X ∩ A = ∅) : Y ∩ A = ∅ := by
-  rw [← subset_empty] at h₁ ⊢
-  exact (inter_subset_inter h₀ (subset_refl _)).trans h₁
-
-lemma inter_subset_restrict {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
-    (h₀ : Y ⊆ X) (h₁ : X ∩ B ⊆ X ∩ Z) : Y ∩ B ⊆ Y ∩ Z := by
-  apply subset_inter
-  · exact inter_subset_left
-  · intro a ha
-    apply mem_of_mem_inter_right
-    apply h₁
-    simp only [mem_inter] at ha ⊢
-    constructor
-    · exact h₀ ha.1
-    · exact ha.2
-
-lemma inter_eq_restrict {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
-    (h₀ : Y ⊆ X) (h₁ : X ∩ B = X ∩ Z) : Y ∩ B = Y ∩ Z := by
-  apply subset_antisymm
-  exact inter_subset_restrict h₀ (by rw [h₁])
-  exact inter_subset_restrict h₀ (by rw [h₁])
-
-lemma eq_inter_inter {α : Type*} [Fintype α] [DecidableEq α] {U X Y Z : Finset α}
-    (h₀ : U = X ∩ Y) (h₁ : U = X ∩ Z) : U = X ∩ (Y ∩ Z) := by
-  rw [← inter_self U]
-  nth_rewrite 1 [h₀]
-  rw [h₁]
-  ext;simp;tauto
-
-lemma inter_empty_of_restrict {α : Type*} [Fintype α] [DecidableEq α]
-    {B X Y Z : Finset α}
-    (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅) (h₁ : X ∩ B = X ∩ Z) : Y ∩ Z = ∅ := by
-  apply subset_empty.mp
-  intro a h
-  simp only [mem_inter] at h
-  exact h₃ ▸ (mem_inter_of_mem h.1
-         <| mem_of_mem_inter_right <| h₁ ▸ mem_inter_of_mem (h₀ h.1) h.2)
-
-
-lemma inter_empty_of_restrict_restrict {α : Type*} [Fintype α] [DecidableEq α]
-    {A B : Finset α} (hAB : A ⊆ B)
-    {X Y Z : Finset α}
-    (hYX : Y ⊆ X) (h₀ : Y ∩ B = ∅) (h₁ : X ∩ Z ⊆ X ∩ A) : Y ∩ Z = ∅ := by
-  apply subset_empty.mp
-  intro a ha
-  rw [← h₀]
-  simp only [mem_inter] at ha ⊢
-  constructor
-  exact ha.1
-  apply hAB
-  suffices a ∈ X ∩ A by rw [mem_inter] at this; exact this.2
-  apply h₁
-  simp only [mem_inter]
-  exact ⟨hYX ha.1, ha.2⟩
-
-lemma subset_same {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
-    (h₀ : Y ∩ X = Z ∩ X) : X ∩ B ⊆ Y ↔ X ∩ B ⊆ Z := by
-  constructor <;> exact fun h => by
-      apply subset_trans <|subset_inter h inter_subset_left
-      exact h₀ ▸ inter_subset_left
-
-
-lemma eq_inter_inter_of_inter₀ {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
-    (h₀ : X ∩ B = X ∩ Y)
-    (h₁ : Y ∩ B = Y ∩ Z) : X ∩ Y ⊆ Z := by
-  have := @subset_same α _ _ X Y B Z (by rw [inter_comm, h₁,inter_comm])
-  rw [inter_comm]
-  apply this.mp
-  rw [inter_comm, ← h₀]
-  simp
-
-lemma eq_inter_inter_of_inter {α : Type*} [Fintype α] [DecidableEq α] {B X Y Z : Finset α}
-    (h₀ : X ∩ B = X ∩ Y)
-    (h₁ : Y ∩ B = Y ∩ Z) : X ∩ Y = X ∩ (Y ∩ Z) := by
-  rw [← inter_assoc]
-  exact Eq.symm <| (@inter_eq_left α _ (X ∩ Y) Z).mpr <| eq_inter_inter_of_inter₀ h₀ h₁
-
-lemma inter_eq_empty₀ {α : Type*} [Fintype α] [DecidableEq α] {A X Y : Finset α}
-    (h₁ : Y ∩ A = ∅) (h₀ : X ∩ A = X ∩ Y) : X ∩ Y = ∅ := by
-  suffices (X ∩ Y) ∩ (X ∩ Y) = ∅  by
-    simp at this
-    exact this
-  nth_rewrite 1 [← h₀]
-  rw [inter_assoc]
-  nth_rewrite 3 [inter_comm]
-  nth_rewrite 2 [← inter_assoc]
-  nth_rewrite 3 [inter_comm]
-  rw [h₁]
-  simp
-
-lemma inter_inter_eq_empty {α : Type*} [Fintype α] [DecidableEq α] {A X Y Z : Finset α}
-    (h₁ : Y ∩ A = ∅) (h₀ : X ∩ A = X ∩ Y) : X ∩ (Y ∩ Z) = ∅ := by
-  rw [← inter_assoc, inter_eq_empty₀ h₁ h₀, empty_inter]
-
-lemma inter_inter_eq_empty' {α : Type*} [Fintype α] [DecidableEq α] {A B y z x : Finset α}
-    (h₂ : A ∩ y = ∅)
-    (h₀ : y ∩ B = y  ∩ z)
-    (h₁ : z ∩ A = z ∩ x) : y ∩ (z ∩ x) = ∅ := by
-  rw [← h₁, ← inter_assoc, ← h₀, inter_assoc, inter_comm, inter_assoc, h₂, inter_empty]
-
-
-end Venn_lemmas
 
 def canon {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
 Finset α → Finset (Finset α) :=
@@ -175,13 +77,14 @@ lemma canon_II_symmetry {α : Type*} [Fintype α] [DecidableEq α] (A : Finset �
 
 -- `canon_II` says that Y is obligatory if Y ≃ A.
 
-
+/-- canon_II does satisfy axiom 5(e). -/
 theorem canon_II_E5 {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :  E5 (canon_II A) := by
   unfold canon_II
   intro X Y Z h₀ h₁ h₂
   simp at *
   by_cases h₃ : X ∩ A = ∅
-  . rw [if_pos h₃] at *; simp at h₁
+  . rw [h₃] at h₁
+    simp at h₁
   . rw [if_neg h₃] at *
     simp at *
     by_cases h₄ : Y ∩ A = ∅
@@ -198,6 +101,7 @@ theorem canon_II_E5 {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
           <| h₁ ▸ inter_subset_right
     . rw [if_neg h₄] at *; simp at *; exact inter_eq_restrict h₀ h₁
 
+/-- canon does not satisfy axiom 5(e). -/
 theorem not_canon_E5 : ∃ n : ℕ, ∃ A : Finset (Fin n), ¬ E5 (canon A) := by
   use 2; use filter (fun x ↦ x = 0) univ
   unfold E5 canon
@@ -214,7 +118,7 @@ theorem not_canon_E5 : ∃ n : ℕ, ∃ A : Finset (Fin n), ¬ E5 (canon A) := b
       . intro hc; rw [if_pos (by rfl)] at hc; simp at *
 
 
--- Finally let us show that canon_II does not satisfy D5.
+/-- canon_II does not satisfy axiom 5(d). -/
 theorem not_canon_II_D5 : ∃ n, ∃ A : Finset (Fin n), ¬ D5 (canon_II A) := by
   use 2, filter (fun i ↦ i = 0) univ
   unfold D5; push_neg
@@ -242,6 +146,7 @@ def canon₂_II {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α)  : 
       (filter (fun Y ↦ X ∩ A = X ∩ Y) univ)
   )
 
+/-- The canon₂_II models satisfy axiom 5(a). -/
 theorem canon₂_II_A5  {α : Type*} [Fintype α] [DecidableEq α]
 (A B : Finset α) : A5 (canon₂_II A B) := by
   intro X
@@ -250,6 +155,7 @@ theorem canon₂_II_A5  {α : Type*} [Fintype α] [DecidableEq α]
   any_goals (simp only [mem_filter, mem_univ, inter_empty, true_and]; tauto)
   tauto
 
+/-- The canon₂_II models satisfy axiom 5(b). -/
 theorem canon₂_II_B5  {α : Type*} [Fintype α] [DecidableEq α]
     (A B : Finset α) : B5 (canon₂_II A B) := by
   unfold B5 canon₂_II
@@ -264,6 +170,7 @@ theorem canon₂_II_B5  {α : Type*} [Fintype α] [DecidableEq α]
   simp only [not_mem_empty]
 
 
+/-- The canon₂_II models satisfy axiom 5(c). -/
 theorem canon₂_II_C5  {α : Type*} [Fintype α] [DecidableEq α]
     (A B : Finset α) : C5 (canon₂_II A B) := by
   unfold C5 canon₂_II
@@ -272,6 +179,7 @@ theorem canon₂_II_C5  {α : Type*} [Fintype α] [DecidableEq α]
   any_goals (simp only [not_mem_empty, mem_filter, mem_univ, true_and] at h₀ h₁ ⊢) <;>
   exact eq_inter_inter h₀ h₁
 
+/-- The canon₂_II models satisfy axiom 5(e) if `A ⊆ B`. -/
 theorem canon₂_II_E5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset α} (h : A ⊆ B) :
   E5 (canon₂_II A B) := by
   unfold canon₂_II
@@ -286,6 +194,7 @@ theorem canon₂_II_E5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset 
   . apply False.elim <| h₄ <| inter_eq_empty_of_subset h₀ h₅
   . exact inter_eq_restrict h₀ h₁
 
+/-- The canon₂_II models satisfy axiom 5(g). -/
 theorem canon₂_II_G5  {α : Type*} [Fintype α] [DecidableEq α]
     (A B : Finset α) : G5 (canon₂_II A B) := by
   unfold G5 canon₂_II
@@ -300,7 +209,7 @@ theorem canon₂_II_G5  {α : Type*} [Fintype α] [DecidableEq α]
   . apply False.elim <| h₂ <| inter_inter_eq_empty h₄ h₀
   . exact h₀ ▸ eq_inter_inter_of_inter h₀ h₁
 
-
+/-- The canon₂_II models do not satisfy axiom 5(f). -/
 theorem not_canon₂_II_F5 : ∃ n : ℕ, ∃ A B : Finset (Fin n), A ⊆ B ∧ ¬ F5 (canon₂_II A B) := by
   use 2, filter (fun i ↦ i = 0) univ, univ, by trivial
   unfold F5
@@ -308,8 +217,7 @@ theorem not_canon₂_II_F5 : ∃ n : ℕ, ∃ A B : Finset (Fin n), A ⊆ B ∧ 
   use univ, filter (fun i ↦ i = 1) univ, filter (fun i ↦ i = 0) univ
   trivial
 
--- The guess would be that this has the same properties as `canon`.
--- For A5, the property A ⊆ B is not even needed:
+/-- The canon₂ models satisfy axiom 5(a). -/
 theorem canon₂_A5  {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : A5 (canon₂ A B) := by
   intro X
   unfold canon₂
@@ -318,7 +226,7 @@ theorem canon₂_A5  {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α
   · exact h₀
   · exact h₁
 
-
+/-- The canon₂ models satisfy axiom 5(b). -/
 theorem canon₂_B5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : B5 (canon₂ A B) := by
   unfold B5 canon₂
   intro X Y Z h₀
@@ -326,6 +234,7 @@ theorem canon₂_B5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α)
   simp
   repeat simp only [mem_filter, mem_univ, true_and]; exact subset_same h₀
 
+/-- The canon₂ models satisfy axiom 5(c). -/
 theorem canon₂_C5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : C5 (canon₂ A B) := by
   intro X Y Z h₀ h₁ h₂
   unfold canon₂ at *
@@ -333,7 +242,7 @@ theorem canon₂_C5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α)
   . tauto
   repeat simp at *;exact subset_inter h₀ h₁
 
-
+/-- The canon₂ models satisfy axiom 5(d). -/
 theorem canon₂_D5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset α} (h : A ⊆ B) : D5 (canon₂ A B) := by
   unfold D5 canon₂
   intro X Y Z _ h₁ h₂
@@ -364,8 +273,8 @@ theorem canon₂_D5 {α : Type*} [Fintype α] [DecidableEq α] {A B : Finset α}
       <| (inter_subset_inter inter_subset_right (subset_refl _)).trans h₁
 
 
--- July 7: Surprisingly, canon₂ doesn't satisfy G:
--- However, if canon₂_II does satisfy G then we can say G firmly belongs in the II category.
+-- Surprisingly, thee canon₂ models do not satisfy Axiom 5(g).
+-- However, since canon₂_II does satisfy G (see `canon₂_II_G5`) G firmly belongs in the II category.
 theorem not_canon₂_G: ∃ n:ℕ, ∃ (A B : Finset (Fin n)), A ⊆ B ∧ ¬ G5 (canon₂ A B) := by
   use 3, filter (fun i ↦ i = 2) univ, filter (fun i ↦ i = 0 ∨ i = 2) univ
   constructor
@@ -398,14 +307,8 @@ theorem not_canon₂_G: ∃ n:ℕ, ∃ (A B : Finset (Fin n)), A ⊆ B ∧ ¬ G5
     . exact of_decide_eq_false rfl
     . contrapose h₁; simp; ext x;simp;aesop
 
-theorem inter_empty_of_inter_union_empty {α : Type*} [Fintype α] [DecidableEq α] {B Y Z : Finset α}
-  (h₂ : (Y ∪ Z) ∩ B = ∅) : Y ∩ B = ∅ := by
-    apply subset_empty.mp
-    apply subset_trans
-    · show Y ∩ B ⊆ (Y ∪ Z) ∩ B
-      exact inter_subset_inter subset_union_left (subset_refl B)
-    · apply subset_empty.mpr h₂
 
+/-- The canon₂ models satisfy axiom 5(f). -/
 lemma canon₂_F5 {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) : F5 (canon₂ A B) := by
   intro X Y Z h₀ h₁
   unfold canon₂ at *
@@ -478,45 +381,46 @@ theorem canon_II_F5  {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) 
 
 theorem CJ_noD_canon_II {α : Type*} [Fintype α] [DecidableEq α] {A : Finset α} : CJ_noD_2022 (canon_II A) := by
     rw [canon_II_symmetry]
-    have A₅ := canon₂_II_A5 A A
-    have B₅ := canon₂_II_B5 A A
-    have C₅ := canon₂_II_C5 A A
-    have E₅ := canon_II_E5 A
-    have F₅ := canon_II_F5 A
-    have G₅ := canon₂_II_G5 A A
-    rw [canon_II_symmetry] at E₅ F₅
-    unfold canon₂_II at A₅ B₅ C₅ G₅
-    simp only [ite_self] at A₅ B₅ C₅ G₅
-    use A₅, B₅, C₅, E₅, F₅, G₅
+    have := canon₂_II_A5 A A
+    have := canon₂_II_B5 A A
+    have := canon₂_II_C5 A A
+    have := canon_II_E5 A
+    have := canon_II_F5 A
+    have := canon₂_II_G5 A A
+    rw [canon_II_symmetry] at *
+    unfold canon₂_II at *
+    simp only [ite_self] at *
+    repeat use (by tauto)
 
-theorem inter_subset_inter_of_restrict {α : Type*} [Fintype α] [DecidableEq α] {A X Y Z : Finset α}
-    (h₀ : X ∩ A ⊆ Y) (h₁ : Y ∩ A ⊆ Z) : X ∩ A ⊆ Y ∩ Z :=
-  subset_inter h₀ <| (subset_inter h₀ inter_subset_right).trans h₁
+
+theorem canon_G.{u_1} {α : Type u_1} [inst : Fintype α] [inst_1 : DecidableEq α] (A : Finset α) :
+    G5 (canon A) := by
+  unfold canon G5 -- can't use canon₂_G since that doesn't hold!
+  intro X Y Z h₀ h₁ h₂
+  simp only at *
+  split_ifs at *
+  any_goals (simp only [not_mem_empty] at *)
+  simp only [mem_filter, mem_univ, true_and, mem_inter] at h₀ h₁ ⊢
+  exact subset_inter_within h₀ h₁
 
 theorem CJ_noE_canon {α : Type*} [Fintype α] [DecidableEq α] {A : Finset α} :
   CJ_noE_2022 (canon A) := by
-    have A₅ := canon₂_A5 A A
-    have B₅ := canon₂_B5 A A
-    have C₅ := canon₂_C5 A A
-    have D₅ := canon₂_D5 (by show A ⊆ A; trivial)
-    have F₅ := canon₂_F5 A A
+    have := canon₂_A5 A A
+    have := canon₂_B5 A A
+    have := canon₂_C5 A A
+    have := canon₂_D5 (by show A ⊆ A; trivial)
+    have := canon₂_F5 A A
+    have := canon_G A -- can't use canon₂_G since that doesn't hold!
     unfold canon₂ at *
     simp only [ite_self] at *
-    use A₅, B₅, C₅, D₅, F₅
-    unfold canon G5 -- can't use canon₂_G since that doesn't hold!
-    intro X Y Z h₀ h₁ h₂
-    simp only at *
-    split_ifs at *
-    any_goals (simp only [not_mem_empty] at *)
-    simp only [mem_filter, mem_univ, true_and, mem_inter] at h₀ h₁ ⊢
-    exact inter_subset_inter_of_restrict h₀ h₁
+    repeat use (by tauto)
 
 lemma coincidence {α : Type*} [Fintype α] [DecidableEq α] :
     canon (univ : Finset α) = canon_II (univ : Finset α) := by
   unfold canon canon_II;simp
 
 
-/-- We prove that for any n, there is an n-world model of A5 through G5,
+/-- For any n, there is an n-world model of A5 through G5,
 namely: let ob(X) be all the supersets of X, except that ob(∅)=∅. -/
 theorem CJ_all_canon_univ {α : Type*} [Fintype α] [DecidableEq α] : CJ_all_2022 (canon (univ: Finset α)) := by
     have R := (@coincidence α _ _) ▸ @canon_II_E5 α _ _ univ
