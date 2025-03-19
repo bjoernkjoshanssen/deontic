@@ -34,8 +34,8 @@ def C5 {U : Type*} [Fintype U] [DecidableEq U]
   ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob X →
   X ∩ Y ∩ Z ≠ ∅ → Y ∩ Z ∈ ob X
 /-
-5c in 2022 paper is basically the below but for potentially infinite
-families, i.e., CJ5c_star. So we're following 2013 terminology.
+Axiom 5(c) in [CJ 2022] concerns potentially infinite
+families, i.e., CJ5c_star. For simplicity we follow the [CJ 2013] terminology.
 -/
 
 /- 5c_2002:
@@ -93,8 +93,6 @@ theorem ob₂5g : ∀ (b : Fin 5 → Bool),
   G5 (ob₂ b) := by unfold G5 ob₂; decide
 
 
--- a,b,c,d => f
--- a,b,c,e,f,g  =/=> d v f
 theorem do_not_imply_5d_or_5f :
     ∃ ob : Finset (Fin 2) → Finset (Finset (Fin 2)),
     A5 ob ∧ B5 ob ∧ C5 ob ∧ ¬ D5 ob ∧ E5 ob ∧ ¬ F5 ob ∧ G5 ob := by
