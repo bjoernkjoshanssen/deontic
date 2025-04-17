@@ -44,6 +44,12 @@ def CJ5f {U : Type*} (ob : Set U → Set (Set U)) :=
   (∀ Z, Z ∈ β →  X ∈ ob Z)  → (X ∈ ob (⋃₀ β))
 
 
+def CJ5g {U : Type*}
+    (ob : Set U → Set (Set U)) :=
+  ∀ (X Y Z : Set U), Y ∈ ob X → Z ∈ ob Y →
+    X ∩ Y ∩ Z ≠ ∅ → Y ∩ Z ∈ ob X
+
+
 --Lemma II.2.1 --
 theorem bd5 {U : Type*} {ob : Set U → Set (Set U)}
     (b5 : CJ5b ob) (d5 : CJ5d ob) : CJ5bd ob := by
@@ -92,3 +98,12 @@ theorem II_2_2 {U : Type} {ob : Set U → Set (Set U)} (a5 : CJ5a ob)
     (implication_in_ob b5 d5 h3₀)
     (not_empty X h2)
     (inter_not_empty h2 h3 a5 b5)
+
+theorem benchmark {U : Type} {ob : Set U → Set (Set U)}
+    (a5 : CJ5a ob)
+    (b5 : CJ5b ob)
+    (cstar5 : CJ5c_star ob)
+    (d5 : CJ5d ob)
+    (e5: CJ5e ob)
+    : CJ5g ob := by
+  sorry
