@@ -177,3 +177,217 @@ lemma not_empty {U : Type*} {β : Set (Set U)} (X : Set U) (h2 : β ≠ ∅) :
    obtain ⟨Z, hZ⟩ := exists_mem_of_ne_empty h2
    have : (⋃₀β \ Z ∪ X) ∈ {x | ∃ Z ∈ β, ⋃₀ β \ Z ∪ X = x} := by use Z
    exact ne_of_mem_of_not_mem' this (fun a ↦ a)
+
+lemma eq_of_sdiff_empty {n : ℕ} {A B : Finset (Fin n)}
+    (H₀ : Aᶜ ∩ B = ∅) (H₁ : Bᶜ ∩ A = ∅) : B = A := by
+  rw [inter_comm,← sdiff_eq_inter_compl] at H₀ H₁
+  apply subset_antisymm <;>
+  · apply sdiff_eq_empty_iff_subset.mp; tauto
+
+theorem some_like_given'' {n : ℕ} {A : Finset (Fin n)}
+    {P : Finset (Fin n) → Prop} [DecidablePred P] (h : P A):
+    filter (fun Y ↦ P Y) univ ≠ ∅ := by
+  refine nonempty_iff_ne_empty.mp ?_
+  refine filter_nonempty_iff.mpr ?_
+  use A
+  convert h
+  simp
+
+
+theorem some_like_given {n : ℕ} {A : Finset (Fin n)}
+    {P : Finset (Fin n) → Finset (Fin n)} :
+    ∅ ≠ filter (fun Y ↦ P Y = P A) univ := by
+  exact (some_like_given'' (by
+    show P A = P A
+    rfl
+  )).symm
+
+theorem in_neither {n : ℕ} {A B : Finset (Fin n)}
+    (h₂ : Bᶜ ∩ Aᶜ ≠ ∅) : ¬Aᶜ ∩ B = Aᶜ ∩ Bᶜ := by
+  intro hc
+  rw [inter_comm] at h₂
+  have ⟨a,ha⟩ : ∃ a, a ∈ Aᶜ ∩ Bᶜ := by
+    refine Nonempty.exists_mem ?_
+    exact nonempty_iff_ne_empty.mpr h₂
+  have := ha
+  rw [← hc] at this
+  simp at ha this
+  tauto
+
+def my₀ : Finset (Fin 0) → Finset (Finset (Fin 0)) := fun _ => ∅
+def my₁ : Finset (Fin 0) → Finset (Finset (Fin 0)) := fun _ => {∅}
+
+theorem all_are_my (ob : Finset (Fin 0) → Finset (Finset (Fin 0))) :
+    ob = my₀ ∨ ob = my₁ := by
+  unfold my₀ my₁
+  by_cases H : ob ∅ = ∅
+  · left
+    ext A B
+    rw [eq_empty_of_isEmpty A, eq_empty_of_isEmpty B, H]
+  · right
+    ext A B
+    rw [eq_empty_of_isEmpty A, eq_empty_of_isEmpty B]
+    simp
+    contrapose! H
+    ext A
+    simp
+    rw [eq_empty_of_isEmpty A]
+    exact H
+
+
+
+lemma nonemptyFin1 {Q : Finset (Fin 1)} (h : Q ≠ ∅) : Q = {0} := by
+  ext i
+  rw [Fin.fin_one_eq_zero i]
+  simp
+  contrapose! h
+  ext i
+  simp
+  exact (Fin.fin_one_eq_zero i) ▸ h
+open Classical
+def mutually_generic {U : Type*}[Fintype U] (X Y : Finset U) :=
+    X ∩ Y ≠ ∅ ∧
+    X \ Y ≠ ∅ ∧
+    Y \ X ≠ ∅ ∧
+    (X ∪ Y)ᶜ ≠ ∅
+
+def weakly_mutually_generic {U : Type*} [Fintype U] (X Y : Finset U) :=
+    X ≠ ∅ ∧
+    Y \ X ≠ ∅
+
+lemma implies_weakly {U : Type*} [Fintype U] {A B : Finset U}
+  (h₁ : mutually_generic A B) :
+  weakly_mutually_generic A B := by
+  unfold mutually_generic weakly_mutually_generic at *
+  aesop
+
+lemma gen₀₀  {U : Type*} [Fintype U] {A B : Finset U}
+  (h₁ : weakly_mutually_generic A B) : Aᶜ ∩ (A ∪ B) ≠ ∅ := by
+  have := h₁.2
+  contrapose! this
+  rw [← this]
+  ext;simp;tauto
+
+theorem gen₁₁ {U : Type*} [Fintype U] {A B : Finset U}
+    (hg : weakly_mutually_generic A B) : (A ∪ Bᶜ) ∩ A ≠ ∅ := by
+  have := hg.1
+  simp
+  contrapose! this
+  rw [this]
+
+theorem differenceCap  {U : Type*} [Fintype U] (A B : Finset U) :
+  B ∩ Aᶜ = (A ∪ B) ∩ Aᶜ:= by ext;simp;tauto
+
+
+lemma union_diff_singleton {n : ℕ}
+    (X Y : Finset (Fin n)) {a : Fin n} (ha : a ∈ X) :
+    (X ∪ Y) \ {a} = (X ∪ Y) \ X ∪ X \ {a} := by
+  apply subset_antisymm
+  · intro i hi
+    simp at hi ⊢
+    tauto
+  · intro i hi
+    simp at hi ⊢
+    cases hi with
+    | inl h =>
+      simp_all
+      constructor
+      tauto
+      intro hc
+      subst hc
+      tauto
+    | inr h =>
+      tauto
+
+theorem pair_venn {n : ℕ}
+    (X Y : Finset (Fin n)) (a : Fin n) (ha : a ∈ X)
+    (b : Fin n) (hb : b ∈ Y) :
+    {a, b} = (X ∪ Y) \ ((X ∪ Y) \ {a} ∩ ((X ∪ Y) \ {b})) := by
+  ext i;simp
+  constructor
+  · intro hi
+    cases hi with
+    | inl h =>
+      subst h
+      constructor
+      exact .inl ha
+      tauto
+    | inr h =>
+      subst h
+      constructor
+      exact .inr hb
+      tauto
+  · intro hi
+    simp at hi
+    tauto
+
+theorem union_sdiff_singleton {n : ℕ}
+  {X Y : Finset (Fin n)} {a : Fin n} (ha : a ∈ X) (haY : Y \ {a} ≠ ∅) :
+  (X ∪ Y) \ {a} = (X ∪ Y) \ X ∪ X \ {a} := by
+    ext i;simp
+    constructor
+    · tauto
+    · intro hi
+      constructor
+      · tauto
+      · cases hi with
+        | inl h =>
+          intro hc
+          subst hc
+          exact h.2 ha
+        | inr h => exact h.2
+
+lemma two_in_sdiff {n : ℕ} (X Y : Finset (Fin n))
+    (a i : Fin n) (ha : a ∈ X \ Y) (hi₀ : i ∈ X) (hi₁ : ¬i = a) (H₀ : i ∉ Y) :
+    ¬ #(X \ (X ∩ Y)) ≤ 1 := by
+  simp
+  have : #{a,i} ≤ #(X \ Y) := by
+    apply card_le_card
+    intro j;simp at ha ⊢;intro hj
+    cases hj with
+    | inl h => subst h; exact ha
+    | inr h => subst h; tauto
+  have : #{a,i} = 2 := card_pair fun hc ↦ hi₁ hc.symm
+  omega
+
+/-- A simple Venn diagram lemma. -/
+lemma all_or_almost {n : ℕ} {a : Fin n} {X Y : Finset (Fin n)}
+    (h₁: X \ {a} ⊆ X ∩ Y) : X ∩ Y = X ∨ X ∩ Y = X \ {a} := by
+  by_cases H : a ∈ Y
+  · left
+    ext i;simp
+    intro hi
+    suffices i ∈ X ∩ Y by simp at this;tauto
+    by_cases H₀ : a = i
+    · subst H₀
+      simp;tauto
+    · apply h₁
+      simp
+      constructor
+      tauto
+      intro hc
+      symm at hc
+      subst hc
+      simp at H₀
+  · right
+    apply subset_antisymm
+    intro i hi;simp at hi ⊢;
+    constructor;tauto;intro hc;subst hc;tauto
+    exact h₁
+
+lemma venn_singleton {n : ℕ} (a : Fin n) (Y : Finset (Fin n)) :
+  a ∈ Y ↔ ¬{a} ∩ Y = ∅ := by
+    constructor
+    · intro h hc
+      have : a ∈ {a} ∩ Y := by simp;tauto
+      rw [hc] at this
+      simp at this
+    · intro h
+      by_contra G
+      apply h
+      apply subset_empty.mp
+      intro i hi
+      simp at hi
+      have := hi.1
+      subst this
+      tauto

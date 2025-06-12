@@ -26,6 +26,10 @@ def A5 {U : Type*} [Fintype U] (ob : Finset U → Finset (Finset U)) :=
 
 def B5 {U : Type*} [Fintype U] [DecidableEq U]
     (ob : Finset U → Finset (Finset U)) :=
+  ∀ (X Y Z : Finset U), (Y ∩ X = Z ∩ X) → (Y ∈ ob X → Z ∈ ob X)
+
+def B5original {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) :=
   ∀ (X Y Z : Finset U), (Y ∩ X = Z ∩ X) → (Y ∈ ob X ↔ Z ∈ ob X)
 
 -- 5c_2013:
@@ -33,6 +37,13 @@ def C5 {U : Type*} [Fintype U] [DecidableEq U]
     (ob : Finset U → Finset (Finset U)) :=
   ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob X →
   X ∩ Y ∩ Z ≠ ∅ → Y ∩ Z ∈ ob X
+
+/-- An axiom going back to the 1990s. -/
+def C5Strong {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) :=
+  ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob X → Y ∩ Z ∈ ob X
+
+
 /-
 Axiom 5(c) in [CJ 2022] concerns potentially infinite
 families, i.e., CJ5c_star. For simplicity we follow the [CJ 2013] terminology.
@@ -43,19 +54,27 @@ def CJ5c (ob : Set U → Set (Set U)) :=
 ∀ (X Y Z : Set U), Y ∈ ob X → (Z ∈ ob X → Y ∩ Z ∈ ob X)
 -/
 
+open Finset
 /--
 5c*_2013 = 5c_2022
 def CJ5c_star (ob : Set U → Set (Set U)) :=
 ∀ (X : Set U) (β : Set (Set U)),
   (h1 : β ⊆ ob X) → (h2 : β ≠ ∅) → ⋂₀β ∩ X ≠ ∅ → ⋂₀β ∈ ob X
 -/
-
 def D5 {U : Type*} [Fintype U] [DecidableEq U]
     (ob : Finset U → Finset (Finset U)) :=
   ∀ (X Y Z : Finset U), Y ⊆ X → Y ∈ ob X → X ⊆ Z → (Z \ X) ∪ Y ∈ ob Z
+
+def BD5 {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) :=
+  ∀ (X Y Z : Finset U), Y ∈ ob X → X ⊆ Z → (Z \ X) ∪ Y ∈ ob Z
+
 def E5 {U : Type*} [Fintype U] [DecidableEq U]
     (ob : Finset U → Finset (Finset U)) :=
   ∀ (X Y Z : Finset U), Y ⊆ X → Z ∈ ob X → Y ∩ Z ≠ ∅ → Z ∈ ob Y
+def E5weak {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) :=
+  ∀ (Y Z : Finset U), Z ∈ ob univ → Y ∩ Z ≠ ∅ → Z ∈ ob Y
 def F5 {U : Type*} [Fintype U] [DecidableEq U]
     (ob : Finset U → Finset (Finset U)) :=
   ∀ (X Y Z : Finset U), X ∈ ob Y → X ∈ ob Z → X ∈ ob (Y ∪ Z)
@@ -63,6 +82,29 @@ def G5 {U : Type*} [Fintype U] [DecidableEq U]
     (ob : Finset U → Finset (Finset U)) :=
   ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob Y →
     X ∩ Y ∩ Z ≠ ∅ → Y ∩ Z ∈ ob X
+
+/-- Weak conditional deontic explosion, implicit in [KH17]. -/
+def CXweak {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) :=
+  ∀ (A B : Finset U), A ∈ ob univ → B \ A ≠ ∅ → B ∈ ob Aᶜ
+
+/-- Full conditional deontic explosion, implicit in [KH17].
+Many variations of this statement could be considered.
+-/
+def CX {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) :=
+  ∀ (A B C : Finset U), A ∈ ob C → B ∩ Aᶜ ∩ C ≠ ∅ → B ∈ ob (Aᶜ ∩ C)
+
+theorem CXimpliesWeak {U : Type*} [Fintype U] [DecidableEq U]
+    (ob : Finset U → Finset (Finset U)) (h : CX ob) : CXweak ob := by
+  intro A B h₀ h₁
+  have := h A B univ h₀ (by
+    contrapose! h₁
+    rw [← h₁]
+    ext;simp
+  )
+  convert this using 1
+  simp
 
 /-- All the ob's satisfying 5(a) and 5(b) in a two-world domain. -/
 def ob₂ (b : Fin 5 → Bool) (B : Finset (Fin 2)) :
@@ -92,11 +134,47 @@ theorem ob₂5f : ∀ (b : Fin 5 → Bool), ((b 0 || b 1) → b 2) →
 theorem ob₂5g : ∀ (b : Fin 5 → Bool),
   G5 (ob₂ b) := by unfold G5 ob₂; decide
 
+def mycode : Fin 32 → (Fin 5 → Bool) :=
+  ![
+    ![false,false,false,false,false], -- 0
+    ![false,false,false,false,true ], -- 1
+    ![false,false,false,true, false], -- 2
+    ![false,false,false,true, true ], -- 3
+    ![false,false,true, false,false], -- 4
+    ![false,false,true, false,true ], -- 5
+    ![false,false,true, true, false], -- 6
+    ![false,false,true,true,true], -- 7
+    ![false,true, false,false,false], -- 0
+    ![false,true, false,false,true ], -- 1
+    ![false,true, false,true, false], -- 2
+    ![false,true, false,true, true ], -- 3
+    ![false,true, true, false,false], -- 4
+    ![false,true, true, false,true ], -- 5
+    ![false,true, true, true, false], -- 6
+    ![false,true, true,true,true], -- 7
+    ![true, false,false,false,false], -- 0
+    ![true, false,false,false,true ], -- 1
+    ![true, false,false,true, false], -- 2
+    ![true, false,false,true, true ], -- 3
+    ![true, false,true, false,false], -- 4
+    ![true, false,true, false,true ], -- 5
+    ![true, false,true, true, false], -- 6
+    ![true, false,true,true,true], -- 7
+    ![true, true, false,false,false], -- 0
+    ![true, true, false,false,true ], -- 1
+    ![true, true, false,true, false], -- 2
+    ![true, true, false,true, true ], -- 3
+    ![true, true, true, false,false], -- 4
+    ![true, true, true, false,true ], -- 5
+    ![true, true, true, true, false], -- 6
+    ![true, true, true,true,true] -- 7
+  ]
+
 
 theorem do_not_imply_5d_or_5f :
     ∃ ob : Finset (Fin 2) → Finset (Finset (Fin 2)),
-    A5 ob ∧ B5 ob ∧ C5 ob ∧ ¬ D5 ob ∧ E5 ob ∧ ¬ F5 ob ∧ G5 ob := by
-  unfold A5 B5 C5 D5 E5 F5 G5
+    A5 ob ∧ B5original ob ∧ C5 ob ∧ ¬ D5 ob ∧ E5 ob ∧ ¬ F5 ob ∧ G5 ob := by
+  unfold A5 B5original C5 D5 E5 F5 G5
   use ob₂ ![true,true,false,false,false]
   repeat use (by decide)
 
@@ -132,7 +210,7 @@ lemma get_5a {U : Type} [Fintype U]
   tauto
 
 lemma get_5b {U : Type} [Fintype U] [DecidableEq U]
-    {ob₀ : Finset U → Finset (Finset U)} (hob₀ : B5 ob₀) :
+    {ob₀ : Finset U → Finset (Finset U)} (hob₀ : B5original ob₀) :
     CJ5b fun S => {T | T.toFinset ∈ ob₀ S.toFinset} := by
   intro X Y Z h
   repeat rw [mem_setOf_eq]
