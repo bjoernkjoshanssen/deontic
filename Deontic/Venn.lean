@@ -1,5 +1,26 @@
 import Mathlib.RingTheory.Int.Basic
 import Mathlib.Data.Finset.Basic
+import Batteries.Tactic.Init
+-- import Mathlib.Tactic.Push
+import Mathlib.Tactic.Tauto
+
+
+-- open Lean Lean.Parser Parser.Tactic Elab Command Elab.Tactic Meta
+
+
+syntax "compare"  : tactic
+macro_rules
+  | `(tactic|compare) =>
+  `(tactic|
+    first
+      | congr; ext; simp; tauto;
+      | ext; simp; tauto;
+      | intros; simp; tauto
+      | ext; simp
+      | simp; tauto
+      | simp
+      | tauto
+    )
 
 /-!
 
@@ -41,7 +62,7 @@ lemma eq_inter_inter {α : Type*} [Fintype α] [DecidableEq α]
   rw [← inter_self U]
   nth_rewrite 1 [h₀]
   rw [h₁]
-  ext;simp;tauto
+  compare
 
 lemma inter_empty_of_restrict {α : Type*} [Fintype α] [DecidableEq α]
     {B X Y Z : Finset α} (h₀ : Y ⊆ X) (h₃ : Y ∩ B = ∅)
@@ -266,7 +287,7 @@ lemma gen₀₀  {U : Type*} [Fintype U] {A B : Finset U}
   have := h₁.2
   contrapose! this
   rw [← this]
-  ext;simp;tauto
+  compare
 
 theorem gen₁₁ {U : Type*} [Fintype U] {A B : Finset U}
     (hg : weakly_mutually_generic A B) : (A ∪ Bᶜ) ∩ A ≠ ∅ := by
@@ -276,7 +297,7 @@ theorem gen₁₁ {U : Type*} [Fintype U] {A B : Finset U}
   rw [this]
 
 theorem differenceCap  {U : Type*} [Fintype U] (A B : Finset U) :
-  B ∩ Aᶜ = (A ∪ B) ∩ Aᶜ:= by ext;simp;tauto
+  B ∩ Aᶜ = (A ∪ B) ∩ Aᶜ:= by compare
 
 
 lemma union_diff_singleton {n : ℕ}
@@ -363,12 +384,7 @@ lemma all_or_almost {n : ℕ} {a : Fin n} {X Y : Finset (Fin n)}
       simp;tauto
     · apply h₁
       simp
-      constructor
       tauto
-      intro hc
-      symm at hc
-      subst hc
-      simp at H₀
   · right
     apply subset_antisymm
     intro i hi;simp at hi ⊢;
