@@ -291,23 +291,9 @@ theorem almost_stayAlive {n : ℕ}
     have : n = #(Finset.univ : Finset (Fin n)) := by simp
     simp_rw [this]
     apply Finset.card_le_card;simp
-
   obtain ⟨A,hA⟩ := h
-  use A
-  constructor
-  tauto
-  intro X hX
-  unfold E5 at e5
-  have hn : A ≠ ∅ := by
-    intro hc
-    subst hc
-    exact a5 _ hA.1
-  exact e5 univ X A (by simp) hA.1 (by
-    have : A = A ∩ X := by
-      have := (@inter_eq_left (Fin n) _ A X).mpr hX
-      tauto
-    rw [inter_comm, ← this]
-    tauto)
+  exact ⟨A, hA.2, fun X hX => e5 _ _ _ (subset_univ _) hA.1 $
+    (inter_eq_right.mpr hX).symm ▸ fun hc => a5 _ $ hc ▸ hA.1⟩
 
 
 theorem trivial_ob_of_nontrivial {n : ℕ}
