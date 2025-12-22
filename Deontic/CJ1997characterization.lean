@@ -169,12 +169,12 @@ lemma ob_of_small_good
     · intro h
       cases h with
       | inl h =>
+        subst h
         tauto
       | inr h =>
         by_cases H : a₂ ∈ A
         simp_all
         simp_all
-        tauto
     · tauto
 
 lemma ob_of_small_good_pair
@@ -201,12 +201,12 @@ theorem no_small_good_of_ob {n : ℕ}
   have hl := ob_of_small_good_pair ha₂ h d5
   let Z₁ := A ∪ {a₁}
   let Z₂ := A ∪ {a₂}
-  have h₁ : Z₁ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₁ (by simp;intro i;simp;tauto) hl.1 (by
+  have h₁ : Z₁ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₁ (by simp) hl.1 (by
     intro H
     have : a₁ ∈ {a₁, a₂} ∩ Z₁ := by simp [Z₁]
     rw [H] at this
     simp at this)
-  have h₂ : Z₂ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₂ (by simp;intro i;simp;tauto) hl.2 (by
+  have h₂ : Z₂ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₂ (by simp) hl.2 (by
     intro H
     have : a₂ ∈ {a₁, a₂} ∩ Z₂ := by simp [Z₂]
     rw [H] at this
@@ -222,15 +222,10 @@ theorem no_small_good_of_ob {n : ℕ}
   have h₄ : {a₂} ∈ ob {a₁, a₂} := by
     convert c5 {a₁, a₂} Z₂ {a₁, a₂} h₂ hcorr using 1
     ext b;simp [Z₂]
-    constructor
-    intro h₀
-    rw [h₀]
-    simp
-    intro h₀
-    simp at h₀
-    cases and_or_right.mpr h₀ with
-    | inl h => simp_all
-    | inr h => tauto
+    intro h₁ h₀
+    cases h₀ with
+    | inl h => subst h;tauto
+    | inr h => subst h;tauto
   have : ∅ ∈ ob {a₁, a₂} := by
     convert c5 {a₁, a₂} {a₁} {a₂} h₃ h₄ using 1
     ext b
@@ -283,10 +278,19 @@ theorem almost_stayAlive {n : ℕ}
       simp at h₁
       exfalso
       exact h₁ $ hB.2.1 $ hD₁ hi
-    rw [card_sdiff hB.2.1] at hB
-    rw [card_union_of_disjoint this, card_sdiff (subset_univ C),
-      card_univ, Fintype.card_fin, ← Nat.sub_add_comm (card_finset_fin_le C)]
-    omega
+    rw [card_sdiff] at hB
+    rw [card_union_of_disjoint this, card_sdiff,
+      card_univ, Fintype.card_fin, ← Nat.sub_add_comm]
+    simp
+    suffices #B ≤ #C - 2 by omega
+    suffices 2 ≤ #C - #B by omega
+    have : B ∩ C = B := by compare
+    rw [this] at hB
+    tauto
+    simp
+    have : n = #(Finset.univ : Finset (Fin n)) := by simp
+    simp_rw [this]
+    apply Finset.card_le_card;simp
 
   obtain ⟨A,hA⟩ := h
   use A
@@ -385,8 +389,7 @@ theorem getUniv {n : ℕ}
           exact a5 _ this)
   exact agree_on_inclusion b5 d5 e5
     this (by
-      contrapose! hh;subst hh;intro hc;simp at hc;revert hc;simp
-      exact fun a ↦ a5 ∅ h)
+      contrapose! hh;subst hh;intro hc;simp at hc)
 
 
 lemma ob_forbidden {n : ℕ}
@@ -525,7 +528,7 @@ lemma no_small_good_CJ97 {n : ℕ}
       exact (@card_eq_succ (Fin (n+2)) (A ∪ {a₁}) #A _).mpr (by
         use a₁, A
         simp
-        constructor <;> compare)
+        tauto)
     simp at this
     omega
   by_contra hc
@@ -807,10 +810,16 @@ theorem getStayAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fi
             exact h₀
           · exact getUniv a5 b5 d5 e5 X ({a} ∪ Xᶜ) a (by
               contrapose! H₁
-              simp at H₁
-              cases H₁ with
-              | inl h => exact h
-              | inr h => exact False.elim <| (mem_compl.mp <| h ▸ mem_singleton.mpr rfl) H₀)
+              simp at H₁ ⊢
+              ext y
+              simp
+              by_cases H : y = a
+              · subst H
+                tauto
+              have : y ∉ ({a} : Finset (Fin (n+2))) := by simp;exact H
+              rw [← H₁] at this
+              simp at this
+              tauto)
               (by
                 rw [inter_union_distrib_left]
                 simp
@@ -820,7 +829,7 @@ theorem getStayAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fi
         rw [h']
         by_cases H₀ : a ∈ X
         · exact agree_on_exclusion b5 d5 e5 H₁.1 imp (h' ▸ h.1)
-        · have : X = X \ {a} := sdiff_singleton_eq_erase a X ▸ (Finset.erase_eq_of_not_mem H₀).symm
+        · have : X = X \ {a} := sdiff_singleton_eq_erase a X ▸ (Finset.erase_eq_of_notMem H₀).symm
           rw [← this]
           exact ht H₀
 
@@ -1052,10 +1061,8 @@ example {n : ℕ} (a : Fin n) :
   ∃ X : Finset (Fin n), ¬ alive n X ⊆ canon {a}ᶜ X := by
   use {a}
   simp [alive, canon]
-  intro hc
-  rw [Finset.ext_iff] at hc
-  specialize hc {a}
-  simp at hc
+  use {a}
+  simp
 
 
 /-

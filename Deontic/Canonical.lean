@@ -608,7 +608,7 @@ theorem canon₂_II_C5  {α : Type*} [Fintype α] [DecidableEq α]
   intro X Y Z h₀ h₁ h₂
   split_ifs at * with h₃ h₄
   any_goals (simp only [
-    not_mem_empty, mem_filter, mem_univ, true_and] at h₀ h₁ ⊢)
+    notMem_empty, mem_filter, mem_univ, true_and] at h₀ h₁ ⊢)
     <;> exact eq_inter_inter h₀ h₁
 
 def canon₂'' {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) :
@@ -823,7 +823,7 @@ theorem many_not_canon₂_E5_P {n : ℕ} {A B : Finset (Fin n)}
       simp
       constructor
       · simp at h₇
-        tauto
+        exact nonempty_iff_ne_empty.mpr h₇
       rw [h₈]
       simp
       exact hP
@@ -855,7 +855,7 @@ theorem canon₂_II_E5 {α : Type*} [Fintype α] [DecidableEq α]
   simp at *
   split_ifs at * with h₃ _ _ h₄ _ _ _ h₅
   any_goals (
-    simp only [mem_filter, mem_univ, true_and, not_mem_empty] at h₁ ⊢)
+    simp only [mem_filter, mem_univ, true_and, notMem_empty] at h₁ ⊢)
   . exact h₂ <| inter_empty_of_restrict h₀ h₃ h₁
   . exact h₂ <| inter_empty_of_restrict₂ h h₀ h₃ (by rw [h₁])
   . exact inter_eq_restrict h₀ h₁
@@ -893,7 +893,7 @@ theorem canon₂_A5  {α : Type*} [Fintype α] [DecidableEq α]
   unfold canon₂
   split_ifs with h₀ h₁
   any_goals (simp only [mem_filter, mem_univ, subset_empty,
-    true_and,not_mem_empty, not_false_eq_true])
+    true_and,notMem_empty, not_false_eq_true])
   · exact h₀
   · exact h₁
 
@@ -1011,10 +1011,6 @@ theorem theorem10_1996_related : ∃ (ob : Finset (Fin 3) → Finset (Finset (Fi
   apply many_not_canon_E5
   simp
   simp
-  intro hc
-  have : (1 : Fin 3) ∈ univ := by simp
-  rw [← hc] at this
-  simp at this
 
 
   /- what does it say about A,B that such X₀,Y₀,Z₀ exist?
@@ -1136,7 +1132,7 @@ theorem many_not_canon₂_G {n : ℕ} {A B : Finset (Fin (n + 3))}
     constructor
     unfold canon₂
     split_ifs with h₀
-    . simp only [not_mem_empty]
+    . simp only [notMem_empty]
       exact h₁ h₀
     . simp
       exact h₂'
@@ -1146,7 +1142,7 @@ theorem many_not_canon₂_G {n : ℕ} {A B : Finset (Fin (n + 3))}
     . exfalso; exact h₃ g₀
     . simp;exact h₅
     . constructor
-      · exact h₆
+      · exact nonempty_iff_ne_empty.mpr h₆
       · unfold canon₂
         rw [if_neg h₁]
         rw [h₀]
@@ -1172,7 +1168,7 @@ theorem infinitely_many_not_canon₂_G {n : ℕ}:
     constructor
     unfold canon₂
     split_ifs with h₀
-    . simp only [not_mem_empty]
+    . simp only [notMem_empty]
       exact ne_of_beq_false rfl h₀
     . simp at *
 
@@ -1205,7 +1201,7 @@ theorem not_canon₂_G:
     constructor
     unfold canon₂
     split_ifs with h₀ h₁
-    . simp only [not_mem_empty]
+    . simp only [notMem_empty]
       exact ne_of_beq_false rfl h₀
     . simp at *
     . contrapose h₁; simp
@@ -1401,7 +1397,7 @@ theorem canon_II_F5  {α : Type*} [Fintype α] [DecidableEq α]
 --     repeat exact h₀
 --     · exact h₁
 --     · simp only [mem_filter, mem_univ,
---         true_and, not_mem_empty] at h₀ h₁ ⊢
+--         true_and, notMem_empty] at h₀ h₁ ⊢
 --       rw [union_inter_distrib_right, union_eq_empty] at h₂
 --       exact h₃ h₂.1
 --     repeat simp at h₀
@@ -1430,8 +1426,8 @@ theorem canon_G {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
   intro X Y Z h₀ h₁ h₂
   simp only at *
   split_ifs at *
-  any_goals (simp only [not_mem_empty] at *)
-  simp only [mem_filter, mem_univ, true_and, mem_inter] at h₀ h₁ ⊢
+  any_goals (simp only [notMem_empty] at *)
+  simp only [mem_filter, mem_univ, true_and] at h₀ h₁ ⊢
   exact subset_inter_within h₀ h₁
 
 theorem CJ_noE_canon {α : Type*} [Fintype α] [DecidableEq α]
@@ -1676,15 +1672,15 @@ theorem similar_to_canon₂_II_often_fails_F5 {n : ℕ} {a₀ a₁ : Fin n} {A B
     -- hc₁₂ does not hold for canon₂ or observation_5_2' so we have no common explanation
     : ¬ F5 ob := by
   have h₄ := ne_empty_of_mem <| mem_inter_of_mem (mem_singleton.mpr rfl) h₂
-  have h₅ := singleton_inter_of_not_mem h₃
+  have h₅ := singleton_inter_of_notMem h₃
   have h₆ := ne_empty_of_mem <| mem_inter_of_mem (mem_singleton.mpr rfl) h₀
   have h₇ := ne_empty_of_mem <| mem_inter_of_mem (mem_singleton.mpr rfl) h₁
   have g₀ : a₀ ∈ ({a₀} ∪ {a₁}) ∩ B := by simp;aesop
   have g₁ : a₀ ∈ ({a₀} ∪ {a₁}) ∩ A := by simp;aesop
   have g₂ : a₁ ∈ ({a₀, a₁} : Finset (Fin n)) := by aesop
   have g₃ : {a₀} ∩ ({a₁} : Finset (Fin n)) = ∅ := by aesop
-  have g₄ : ¬ ({a₀} ∪ {a₁}) ∩ B = ∅ := fun hc => not_mem_empty _ (hc ▸ g₀)
-  have g₅ : ¬ ({a₀} ∪ {a₁}) ∩ A = ∅ := fun hc => not_mem_empty _ (hc ▸ g₁)
+  have g₄ : ¬ ({a₀} ∪ {a₁}) ∩ B = ∅ := fun hc => notMem_empty _ (hc ▸ g₀)
+  have g₅ : ¬ ({a₀} ∪ {a₁}) ∩ A = ∅ := fun hc => notMem_empty _ (hc ▸ g₁)
   unfold F5
   push_neg
   use {a₀,a₁}, {a₀}, {a₁}
@@ -1694,10 +1690,11 @@ theorem similar_to_canon₂_II_often_fails_F5 {n : ℕ} {a₀ a₁ : Fin n} {A B
     rw [if_neg h₆] at *
     simp at *
     rw [g₃] at *
-    simp_all only [singleton_inter_of_mem, singleton_ne_empty, not_false_eq_true, singleton_inter_of_not_mem,
+    simp_all only [singleton_inter_of_mem, singleton_ne_empty,
+      not_false_eq_true, singleton_inter_of_notMem,
       ↓reduceIte]
     apply hc₀
-    simp_all only [singleton_inter_of_mem, singleton_ne_empty, ↓reduceIte, mem_filter, mem_univ, mem_singleton,
+    simp_all only [mem_filter, mem_univ, mem_singleton,
       inter_insert_of_mem, true_and]
     ext a : 1
     simp_all only [mem_singleton, mem_insert, mem_inter, iff_self_or, implies_true]
@@ -1933,11 +1930,8 @@ theorem obNonB5Facts :
     subst H
     simp
     intro hc
-    have : 0 ∈ ({0} : Finset (Fin 2)) := by aesop
-    rw [← hc] at this
-    simp at this
-    rw [if_neg H]
-    simp
+    rw [if_neg H] at hc
+    simp at hc
   have : D5 obNonB5 := by
     intro X Y Z h₀ h₁ h₂
     have : X = {1} := by
@@ -2081,7 +2075,7 @@ theorem canon₂_II_not_CX {n : ℕ} {A B : Finset (Fin n)}
   rw [if_neg hB, if_neg hA]
   simp
   constructor
-  · exact h₂
+  · exact nonempty_iff_ne_empty.mpr h₂
   · have : Aᶜ ∩ A = ∅ := by ext;simp
     rw [this]
     simp
@@ -2126,7 +2120,7 @@ theorem injective_canon₂_II {n : ℕ} {A B : Finset (Fin n)}
       have : Bᶜ ∩ B = ∅ := by ext;simp
       rw [this] at hf
       simp at hf
-      rw [if_neg H₁] at hf
+      specialize hf H₁
       exfalso
       apply some_like_given hf
   · rw [if_neg H₀] at hf
@@ -2134,10 +2128,8 @@ theorem injective_canon₂_II {n : ℕ} {A B : Finset (Fin n)}
     rw [this] at hf
     simp at hf
     exfalso
-    have : fun Y ↦ Aᶜ ∩ Y = Aᶜ ∩ B
-         = fun Y ↦ Aᶜ ∩ B = Aᶜ ∩ Y := by aesop
-    simp_rw [← this] at hf
-    apply some_like_given hf.symm
+    have := @hf B
+    simp at this
 
 /-- This is the closest canon₂_II analogue of observation_5_2. -/
 def modified_obs52 := canon₂_II (α := Fin 4) {0,1} {0,1,3}

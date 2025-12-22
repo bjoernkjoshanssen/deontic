@@ -169,7 +169,7 @@ theorem Observation_5_1_2 {U : Type} {ob : Set U → Set (Set U)}
         | inl h => symm at h;subst h;tauto
         | inr h => rw [h];simp at h₆;tauto
         ) (by
-          exact Ne.symm (ne_insert_of_not_mem {X \ Y ∪ Z} id))
+          exact Ne.symm (ne_insert_of_notMem {X \ Y ∪ Z} id))
           (by
           revert h₂
           simp
@@ -207,17 +207,13 @@ def observation_5_2 (X : Set (Fin 4)) : Set (Set (Fin 4)) :=
 lemma ob52_a : CJ5a observation_5_2 := fun X h => by
   unfold observation_5_2 at h
   by_cases H : X ∩ {0,1} = ∅
-  rw [H] at h
-  simp at h
-  revert h
-  simp
-  apply ne_of_not_superset
-  exact fun a ↦ a rfl
-  rw [if_neg H] at h
-  simp at h
-  apply H
-  rw [inter_comm] at h
-  exact h
+  · rw [H] at h
+    simp at h
+  · rw [if_neg H] at h
+    apply H
+    simp at h
+    rw [← h]
+    ext;simp;tauto
 
 lemma ob52_b : CJ5b observation_5_2 := fun X Y₀ Y₁ h₀ => by
   unfold observation_5_2
@@ -320,13 +316,10 @@ lemma ob52_e' : ¬ CJ5e observation_5_2 := by
     simp at this
   next h_1 =>
     simp_all only [Fin.isValue, mem_setOf_eq]
-    specialize h (by
+    exact h (by
       intro j hj
       simp at hj⊢
       fin_cases j <;> tauto)
-    have : 2 ∈ ({2,0} : Set (Fin 4)) ∩ {2} := by simp
-    rw [h] at this
-    simp at this
 
 lemma q_in : {0,1} ∈ observation_5_2 univ:= by
   unfold observation_5_2

@@ -196,7 +196,7 @@ lemma empty_finset {U : Type} [Fintype U] {X : Set U}
 
 lemma toFinset_empty' {U : Type} [Fintype U] :
     ∅ = @toFinset U ∅ (Fintype.ofFinite _) := by
-  ext x; simp only [Finset.not_mem_empty, toFinset_empty]
+  ext x; simp only [Finset.notMem_empty, toFinset_empty]
 
 lemma get_5a {U : Type} [Fintype U]
     {ob₀ : Finset U → Finset (Finset U)} (hob₀ : A5 ob₀) :
@@ -238,10 +238,7 @@ lemma get_not_5d {U : Type} [Fintype U] [DecidableEq U]
     ¬ CJ5d fun S => {T | T.toFinset ∈ ob₀ S.toFinset} := by
   unfold CJ5d
   contrapose hob₀
-  simp only [Decidable.not_not]
-  simp only [mem_setOf_eq, toFinset_union, toFinset_diff,
-    not_forall, Classical.not_imp, exists_and_left, not_exists, not_and,
-    Decidable.not_not] at hob₀
+  simp only [mem_setOf_eq, toFinset_union, toFinset_diff] at hob₀
   intro X Y Z h₀ h₁ h₂
   specialize hob₀ X Y Z h₀
   simp only [Finset.toFinset_coe] at hob₀
