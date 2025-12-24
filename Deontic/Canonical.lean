@@ -61,7 +61,7 @@ open Finset
 
 def canon {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
 Finset α → Finset (Finset α) :=
-  fun S ↦ ite (S ∩ A = ∅) ∅ ((filter (fun T ↦ S ∩ A ⊆ T)) univ)
+  fun S ↦ ite (S ∩ A = ∅) ∅ (filter (fun T ↦ S ∩ A ⊆ T) univ)
 
 /-- The `canon` models, which say that
 what is obligatory is to be in one of the still-possible optimal worlds,
@@ -74,12 +74,12 @@ We make a [CJ 2022] style `canon_II` by letting `ob X = {Y | Y ∩ X = A ∩ X}`
 def canon_II {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
 Finset α → Finset (Finset α) :=
   fun X ↦ ite (X ∩ A = ∅) ∅
-  ((filter (fun Y ↦ X ∩ Y = X ∩ A)) univ)
+  (filter (fun Y ↦ X ∩ Y = X ∩ A) univ)
 
 def canon_II'' {α : Type*} [Fintype α] [DecidableEq α] (A : Finset α) :
 Finset α → Finset (Finset α) :=
   fun X ↦ ite (X ∩ A = ∅) (univ \ {∅})
-  ((filter (fun Y ↦ X ∩ Y = X ∩ A)) univ)
+  (filter (fun Y ↦ X ∩ Y = X ∩ A) univ)
 
 
 lemma canon_II_symm {α : Type*} [Fintype α] [DecidableEq α]
@@ -2122,7 +2122,11 @@ theorem injective_canon₂_II {n : ℕ} {A B : Finset (Fin n)}
       simp at hf
       specialize hf H₁
       exfalso
-      apply some_like_given hf
+
+      apply notMem_empty A
+      rw [hf]
+      simp
+      -- apply some_like_given hf
   · rw [if_neg H₀] at hf
     have : Aᶜ ∩ A = ∅ := by ext;simp
     rw [this] at hf
@@ -2137,11 +2141,9 @@ lemma not_CX_modified_obs52 : ¬ CX modified_obs52 := by
   apply canon₂_II_not_CX
   · simp
   · simp
-  · intro hc
-    have : 2 ∈ (∅ : Finset (Fin 4)) := by
+  · exact fun hc => notMem_empty (2 : Fin 4) $ by
       rw [← hc]
       simp
-    simp at this
 
 /-- A weaker form of canon₂_II_not_CX. -/
 theorem canon₂_II_not_CX_of_mutually_generic
