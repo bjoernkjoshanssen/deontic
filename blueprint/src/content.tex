@@ -1,3 +1,73 @@
+\newcommand{\fivecweak}{
+	If $Y\in\ob(X)$
+	and $Z\in\ob(X)$
+	and $X\cap Y\cap Z\ne\emptyset$,
+	then $Y\cap Z\in\ob(X)$.
+}
+\newcommand{\fiveeweak}{
+	If $Y\subseteq X$
+	and $Z\in\ob(X)$
+	and $Y\cap Z\ne\emptyset$,
+	and $\overline Z\not\in\ob(Y)$,
+	then $Z\in\ob(Y)$.
+}
+
+\newcommand{\fivef}{
+	If $X\in\ob(Y)$ and $X\in\ob(Z)$ then $X\in\ob(Y\cup Z)$.
+}
+\newcommand{\fiveg}{
+	If $Y\in\ob(X)$ and $Z\in\ob(Y)$ and $X\cap Y\cap Z\ne\emptyset$, then $Y\cap Z\in\ob(X)$. (A form of transitivity for obligations.)
+}
+
+
+\newcommand{\fivee}{
+	If $Y\subseteq X$ and $Z\in\ob(X)$ and $Y\cap Z\ne\emptyset$, then $Z\in\ob(Y)$.
+}
+\newcommand{\fived}{
+	If $Y\subseteq X$ and $Y\in\ob(X)$ and $X\subseteq Z$, then $(Z\setminus X)\cup Y\in\ob(Z)$.
+}
+\newcommand{\fivec}{
+	If $Y\in\ob(X)$ and $Z\in\ob(X)$ then $Y\cap Z\in\ob(X)$.
+}
+\newcommand{\fiveb}{
+	If $Y\cap X=Z\cap X$ then $Y\in\ob(X)$ iff $Z\in\ob(X)$.
+}
+\newcommand{\fivea}{
+	$\emptyset\not\in\ob(X)$.
+}
+Carmo and Jones in 2022 \cite{MR4500520} proposed certains axioms 5(a)--(g) for a relation $\ob$ that holds between sets of possible worlds $X$ and $Y$ if $X$ is obligatory in the context $Y$. It was the latest iteration in a sequence of systems \cite{CJ96,CJ02,MR3063042}.
+
+We will exhibit a paradox therein.
+Our paradox will be a weak form of conditional deontic explosion: given that something is somewhat desirable (passing a course with a grade of C, say) and given that the most desirable outcome (the grade of A) is unavailable, the somewhat desirable outcome becomes obligatory.
+
+We then show that despite this paradox, the the systems of Carmo and Jones have interesting mathematical content. For the strongest system we provide a full classification of its models; for weaker versions we characterize the least models (under inclusion) satisfying the axioms and basic contrary-to-duty assumptions.
+
+\section{The paradox}
+	Let $W$ be a finite set of possible worlds of a given model, and let $\mathscr P$ denote the power set operation.
+
+ %    \textsc{Carmo and Jones}\footnote{
+	% 	Conditions 5(a)--(d) and 5(e) are first introduced on pages 331 and 341, respectively, of~\cite{CJ96}, where ob is called pi.
+	% 	5(a)--(d) are also given in~\cite{CJ02}, page 291, with 5(e) on page 319.
+	% 	The conditions 5(a)(b)(d)(e) and a condition (c$^*$) are given in~\cite{CJ13}, page 590.
+	% } gave several
+    
+   Combining the systems from several papers, the full list of Carmo and Jones'
+    conditions
+	on a function $ob : \mathscr P(W) \to \mathscr P(\mathscr P(W))$ is as follows. 
+	\begin{itemize}
+		 \item[5(a)] Axiom 5(a): \fivea (Obligations cannot be impossible to fulfil.)
+		\item[5(b)] Axiom 5(b): \fiveb
+		(Whether $Z$ is obligatory in context $X$ depends only on $Z$ through $Z\cap X$.)
+         \item[5(c)] Axiom 5(c$^-$) (2002, page 319; finite version of 5(c$^*$), 2013, which is called 5(c) in 2022): \fivecweak (Closure under intersection.)
+         \item[5(c)] Axiom 5(c) (1997 and 2002, page 287): \fivec (Closure under intersection, even for disjoint sets.)
+		 \item[5(d)] Axiom 5(d): \fived (If $Y$ is obligatory in context $X$ then a form of the material conditional ``$X \to Y$'' holds in a wider context.)
+		\item[5(e)] Axiom 5(e): \fivee
+        (If $Z$ is obligatory in the context $X$ then it remains obligatory in any subcontext in which it is still possible.)
+	\item[5(f)] Axiom 5(f): \fivef
+    (If $X$ is obligatory in both of the contexts $Y$ and $Z$, then it is obligatory in their union.)
+	\item[5(g)] Axiom 5(g): \fiveg
+    \end{itemize}
+
 % In this file you should put the actual content of the blueprint.
 % It will be used both by the web and the print version.
 % It should *not* include the \begin{document}
@@ -5,13 +75,12 @@
 % If you want to split the blueprint content into several files then
 % the current file can be a simple sequence of \input. Otherwise It
 % can start with a \section or \chapter for instance.
-This Lean blueprint project \emph{Deontic} formalizes the paper \emph{Natural models of Carmo and Jones axioms for contrary-to-duty obligations}.
 
 Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 
 \begin{definition}\label{CJ5a}
-	\lean{CJ5a}
+	\lean{A5}
 	\leanok
 	Axiom 5(a) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that $\emptyset\notin\ob(X)$ for all $X\in\Pow(U)$.
 \end{definition}
@@ -19,7 +88,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 
 \begin{definition}\label{CJ5b}
-	\lean{CJ5b}
+	\lean{B5}
 	\leanok
 	Axiom 5(b) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
@@ -31,24 +100,32 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 \begin{definition}\label{CJ5cstar}
 	\lean{CJ5c_star}
 	\leanok
-	Axiom 5(c*) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+	The weak, but potentially infinite, version of Axiom 5(c) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
     \forall X, \forall \beta \subseteq \ob X, \beta \ne \emptyset \rightarrow \bigcap \beta \cap X \ne \emptyset
 	\rightarrow \bigcap \beta \in \ob X.	
 	\]
 
 \end{definition}
+
+\begin{definition}\label{CJ5cstar}
+	\lean{C5Strong}
+	\leanok
+	The strong version of Axiom 5(c) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+	\fivec
+\end{definition}
  
  
 \begin{definition}\label{CJ5d}
-	\lean{CJ5d}
+	\lean{D5}
 	\leanok
 	Axiom 5(d) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
-	  ∀ (X Y Z : Set U), Y ⊆ X \to Y ∈ ob X \to X ⊆ Z \to Z \ X ∪ Y ∈ ob Z
+	  ∀ (X, Y, Z\subseteq U), Y ⊆ X \to Y ∈ ob X \to X ⊆ Z \to Z \ X ∪ Y ∈ ob Z
 	\]
 
 \end{definition}
+
  
  
 \begin{definition}\label{CJ5bd}
@@ -57,6 +134,14 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	Axiom 5(bd) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	$\forall (X Y Z \in\Pow U), Y \in \ob X \land X \subseteq Z \to Z \setminus X \cup Y \in \ob Z$.
 \end{definition}
+
+\begin{definition}\label{E5}
+	\lean{E5}
+	\leanok
+	Axiom 5(e) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+\fivee
+\end{definition}
+
 
 
 \begin{theorem}\label{bd5}

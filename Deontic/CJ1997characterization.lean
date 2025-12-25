@@ -8,25 +8,26 @@ import Deontic.Canonical
 
 # The system of Carmo and Jones 1997
 
-`ob_of_small_good`
---> `ob_of_small_good_pair`
---> `no_small_good_of_ob`
---> `no_small_good_CJ97₀` --> `no_small_good_CJ97` --> `le_one_CJ97` --> `unique_bad_world`
-                                                                                        |
-                                                                                        v
-                                                                                  `all_or_almost'`
 `alive_properties` (used @ end)
 `stayAlive_properties` (used @ end)
+Theorems that use all of [abcde5] are indicated in [brackets].
 
-
-
-            `all_or_almost'`    `getUniv` <--- `agree_on_exclusion`               `almost_stayAlive`
-                             \       |             /         |                          |
-                              \ >    v            /          |                          v
-`trivial_ob_of_nontrivial` --> `getStayAlive` <- /           |                   ``le_one_of_large_of_ob``
-                                      |                      |                          |
+`ob_of_small_good` [d5]
+--> `no_small_good_of_ob` [acde5]
+--> [`no_small_good_CJ97₀`] --> [`no_small_good_CJ97`]
+                                        |
+                                        v
+            [`unique_bad_world`] <- [`le_one_CJ97`]
+                    |
+                    v
+            [`all_or_almost'`] `obSelf` [abde5] <--- `obSelf_sdiff`     `almost_stayAlive`
+                             \       |             /         |[bde5]                    |[ade]
+                              \/     v            /          |                          v
+`trivial_ob_of_nontrivial` -->[`getStayAlive`]<- /           |                   `le_one_of_large_of_ob`
+      [bde]                           |                      |                          |[ade]
                                       v                      v                          v
-              `univ_ob_univ` --->  [`models_ofCJ_1997`]  <- `getAlive` <--- `le_one_CJ97`
+              `univ_ob_univ` --->  [`models_ofCJ_1997`]  <- [`getAlive`] <--- [`le_one_CJ97`]
+                  [ade5]
 -/
 
 open Finset
@@ -187,25 +188,9 @@ lemma ob_of_small_good
     constructor
     · intro h
       cases h with
-      | inl h =>
-        subst h
-        tauto
-      | inr h =>
-        by_cases H : a₂ ∈ A
-        simp_all
-        simp_all
+      | inl h => subst h; tauto
+      | inr h => tauto
     · tauto
-
-lemma ob_of_small_good_pair
-  {n : ℕ} {ob : Finset (Fin n) → Finset (Finset (Fin n))} {A : Finset (Fin n)}
-  {a₁ a₂ : Fin n} (ha₁₂ : a₁ ≠ a₂)
-    (h : ∀ X, A ⊆ X → A ∈ ob X) (d5 : D5 ob) :
-    A ∪ {a₁} ∈ ob (A ∪ {a₁, a₂}) ∧
-    A ∪ {a₂} ∈ ob (A ∪ {a₁, a₂}) := ⟨by
-      convert ob_of_small_good d5 ha₁₂.symm h using 2
-      rw [pair_comm],
-      ob_of_small_good d5 ha₁₂ h
-      ⟩
 
 end lemma9_1996
 
@@ -217,34 +202,31 @@ theorem no_small_good_of_ob {n : ℕ}
     (a5 : A5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob) :
     ¬ (∀ X, A ⊆ X → A ∈ ob X) := by
   intro h
-  have hl := ob_of_small_good_pair ha₂ h d5
   let Z₁ := A ∪ {a₁}
   let Z₂ := A ∪ {a₂}
-  have h₁ : Z₁ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₁ (by simp) hl.1 (by
-    intro H
-    have : a₁ ∈ {a₁, a₂} ∩ Z₁ := by simp [Z₁]
-    rw [H] at this
-    simp at this)
-  have h₂ : Z₂ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₂ (by simp) hl.2 (by
-    intro H
-    have : a₂ ∈ {a₁, a₂} ∩ Z₂ := by simp [Z₂]
-    rw [H] at this
-    simp at this)
-
-  have h₃ : {a₁} ∈ ob {a₁, a₂} := by
-    convert c5 {a₁, a₂} Z₁ {a₁, a₂} h₁ hcorr using 1
+  have h₁ : Z₁ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₁ (by simp)
+    (pair_comm a₁ a₂ ▸ ob_of_small_good d5 ha₂.symm h) $ ne_empty_of_mem <| by
+    show a₁ ∈ _; simp [Z₁]
+  have h₂ : Z₂ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₂ (by simp)
+    (ob_of_small_good d5 ha₂ h) $ ne_empty_of_mem <| by
+    show a₂ ∈ _; simp [Z₂]
+  have : {a₁} = Z₁ ∩ {a₁, a₂} := by
     ext b
     simp [Z₁]
     intro h₀ h₁
     rw [h₁] at h₀
     tauto
-  have h₄ : {a₂} ∈ ob {a₁, a₂} := by
-    convert c5 {a₁, a₂} Z₂ {a₁, a₂} h₂ hcorr using 1
+  have h₃ : {a₁} ∈ ob {a₁, a₂} := this ▸ c5 {a₁, a₂} Z₁ {a₁, a₂} h₁ hcorr
+  have : {a₂} = Z₂ ∩ {a₁, a₂} := by
     ext b;simp [Z₂]
     intro h₁ h₀
     cases h₀ with
     | inl h => subst h;tauto
     | inr h => subst h;tauto
+  have h₄ : {a₂} ∈ ob {a₁, a₂} := by
+    have hh := c5 {a₁, a₂} Z₂ {a₁, a₂} h₂ hcorr
+    rw [← this] at hh
+    exact hh
   have : ∅ ∈ ob {a₁, a₂} := by
     convert c5 {a₁, a₂} {a₁} {a₂} h₃ h₄ using 1
     ext b
@@ -274,122 +256,115 @@ lemma no_small_good_CJ97₀
     tauto
   exact no_small_good_of_ob ha'.1 ha'.2.1 ha'.2.2 this a5 c5 d5 e5 h
 
-
-
-theorem almost_stayAlive {n : ℕ}
-    {ob : Finset (Fin n) → Finset (Finset (Fin n))}
-    (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    (hBC : ∃ B C, Finset.card (C \ B) ≥ 2 ∧ B ⊆ C ∧ B ∈ ob C)
-    :
-    ¬ ∀ A, Finset.card A ≤ n-2 → ∃ X, A ⊆ X ∧ A ∉ ob X := by
-  push_neg
-  obtain ⟨B,C,hB⟩ : ∃ B C, Finset.card (C \ B) ≥ 2 ∧ B ⊆ C ∧ B ∈ ob C := hBC
-  have := @d5 C B univ
-  have h : ∃ A ∈ ob univ, #A ≤ n-2 := by
-    use univ \ C ∪ B
-    constructor
-    · apply this <;> compare
+lemma sdiff_two {n : ℕ}
+    {B C : Finset (Fin n)} (hBC₀ : #(C \ B) ≥ 2) (hBC₁ : B ⊆ C) :
+    #(univ \ C ∪ B) ≤ n - 2 := by
     have : Disjoint (univ \ C) B := fun D hD₀ hD₁ i hi => False.elim $ by
       have h₁ := hD₀ hi
       rw [mem_sdiff] at h₁
-      exact h₁.2 $ hB.2.1 $ hD₁ hi
-    rw [card_sdiff] at hB
+      exact h₁.2 $ hBC₁ $ hD₁ hi
+    rw [card_sdiff] at hBC₀
     rw [card_union_of_disjoint this, card_sdiff,
       card_univ, Fintype.card_fin, ← Nat.sub_add_comm]
     · simp
       suffices #B ≤ #C - 2 by omega
       suffices 2 ≤ #C - #B by omega
       have : B ∩ C = B := by compare
-      rw [this] at hB
-      exact hB.1
+      rw [this] at hBC₀
+      exact hBC₀
     have : n = #(Finset.univ : Finset (Fin n)) := by simp
     simp_rw [this]
     apply Finset.card_le_card;simp
-  obtain ⟨A,hA⟩ := h
-  exact ⟨A, hA.2, fun X hX => e5 _ _ _ (subset_univ _) hA.1 $
-    (inter_eq_right.mpr hX).symm ▸ fun hc => a5 _ $ hc ▸ hA.1⟩
 
+theorem almost_stayAlive {n : ℕ}
+    {ob : Finset (Fin n) → Finset (Finset (Fin n))}
+    (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob) {B C : Finset (Fin n)}
+    (hBC₀:  Finset.card (C \ B) ≥ 2)
+    (hBC₁ : B ⊆ C)
+    (hBC₂ : B ∈ ob C) :
+     ∃ A, #A ≤ n - 2 ∧ ∀ (X : Finset (Fin n)), A ⊆ X → A ∈ ob X := by
+  use univ \ C ∪ B
+  constructor
+  · exact sdiff_two hBC₀ hBC₁
+  · have h₁ : (univ \ C ∪ B) ∈ ob univ := @d5 C B univ hBC₁ hBC₂ (subset_univ C)
+    exact fun X hX => e5 _ _ _ (subset_univ _) h₁ $
+    (inter_eq_right.mpr hX).symm ▸ fun hc => a5 _ $ hc ▸ h₁
 
+/-- A context `Y` is obligatory given itself, provided
+that `∃ a ∉ Y, ∃ X, a ∈ X ∧ X \ {a} ∈ ob X`.
+-/
 theorem trivial_ob_of_nontrivial {n : ℕ}
     {ob : Finset (Fin n) → Finset (Finset (Fin n))}
     (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob) {X Y : Finset (Fin n)}
     {a : Fin n} (ha : a ∈ X) (hX : X \ {a} ∈ ob X) (haY : a ∉ Y)
     (hY : Y ≠ ∅) : Y ∈ ob Y := by
-  have h₀ := d5 X (X \ {a}) (X ∪ Y) (by simp) hX (by simp)
-  have h₁ := e5 (X ∪ Y) Y ((X ∪ Y) \ X ∪ X \ {a}) (by simp) h₀
-    (by
-      have ⟨y,hy⟩ : ∃ y, y ∈ Y := Nonempty.exists_mem $ nonempty_iff_ne_empty.mpr hY
-      have : y ∈ Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) := by
-        simp
-        by_cases H : y ∈ X
-        · simp_all
-          intro hc
-          subst hc
-          exact haY hy
-        · tauto
-      exact ne_empty_of_mem this
-    )
-  convert b5 Y ((X ∪ Y) \ X ∪ X \ {a}) (((X ∪ Y) \ X ∪ X \ {a}) ∩ Y) (by simp) h₁ using 2
-  ext i;simp
-  intro hi
-  by_cases H : i ∈ X
-  · right
+  have : Y ⊆ Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) := by
+    intro y hy
+    simp
     constructor
-    tauto
-    intro hc
-    subst hc
-    tauto
-  · tauto
+    exact hy
+    by_cases H : y ∈ X
+    · right
+      simp_all
+      intro hc
+      subst hc
+      exact haY hy
+    · tauto
+  have g₀ : Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) ≠ ∅ := by
+    contrapose! hY
+    apply subset_empty.mp
+    apply subset_trans this
+    rw [hY]
+  have g₁ : Y = ((X ∪ Y) \ X ∪ X \ {a}) ∩ Y := by
+    ext i;simp
+    intro hi
+    by_cases H : i ∈ X
+    · exact .inr ⟨H, fun hc => haY $ hc ▸ hi⟩
+    · exact .inl ⟨.inr hi, H⟩
+  have h₀ := d5 _ _ (X ∪ Y) sdiff_subset hX subset_union_left
+  have h₁ := e5 _ _ _ subset_union_right h₀ g₀
+  have h₂ := b5 _ _ (((X ∪ Y) \ X ∪ X \ {a}) ∩ Y)
+    (by simp) h₁
+  convert h₂
 
 
-theorem agree_on_exclusion {n : ℕ}
+theorem obSelf_sdiff {n : ℕ}
     {ob : Finset (Fin n) → Finset (Finset (Fin n))}
     (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob) {X Y : Finset (Fin n)}
     {a : Fin n} (ha : a ∈ X) (h : X \ {a} ∈ ob X) (haY : Y \ {a} ≠ ∅) :
     Y \ {a} ∈ ob Y := by
   have : (X ∪ Y) \ {a} ∈ ob (X ∪ Y) := by
-    convert d5 X (X \ {a}) (X ∪ Y) (by simp) h (by simp) using 1
-    apply union_sdiff_singleton <;> tauto
+    convert d5 _ _ (X ∪ Y) (by simp) h (by simp) using 1
+    exact union_sdiff_singleton ha haY
   have : (X ∪ Y) \ {a} ∈ ob Y := e5 (X ∪ Y) Y ((X ∪ Y) \ {a}) (by simp) this (by
       contrapose! haY
       rw [← haY]
       compare)
-  exact b5 Y ((X ∪ Y) \ {a}) (Y \ {a}) (by compare) this
+  exact b5 _ _ _ (by compare) this
 
-theorem agree_on_inclusion {n : ℕ}
+theorem obSelf_transfer {n : ℕ}
     {ob : Finset (Fin n) → Finset (Finset (Fin n))}
     (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob) {X Y : Finset (Fin n)}
     (hX : X ∈ ob X) (hY : Y ≠ ∅) : Y ∈ ob Y := by
   have : X ∪ Y ∈ ob (X ∪ Y) := by
     convert d5 (Z := X ∪ Y) X X (by simp) hX (by simp) using 1
     compare
-  have := e5 (X ∪ Y) Y (X ∪ Y) (by simp) this (by compare)
-  exact b5 Y (X ∪ Y) Y (by simp) this
+  exact b5 _ _ _ (by simp) $ e5 _ Y _ subset_union_right this (by compare)
 
-theorem getUniv {n : ℕ}
+theorem obSelf {n : ℕ}
     {ob : Finset (Fin n) → Finset (Finset (Fin n))}
     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
     (X Y : Finset (Fin n)) (a : Fin n)
     (hY : Y \ {a} ≠ ∅) (hh : X ∩ Y = {a})
     (h : X \ {a} ∈ ob X) : X ∈ ob X := by
   have ha : a ∈ X ∩ Y := by rw [hh];simp
-  have : Y \ {a} ∈ ob Y := by
-    simp at ha
-    exact agree_on_exclusion b5 d5 e5 ha.1 h hY
-  have : Y \ {a} ∈ ob (Y \ {a}) := e5 (Y) (Y \ {a}) (Y \ {a}) (by simp) this
-      (by
-        simp
-        constructor
-        · contrapose! hY
-          subst hY
-          simp
-        · intro hc
-          subst hc
-          simp at this
-          exact a5 _ this)
-  exact agree_on_inclusion b5 d5 e5
-    this (by
-      contrapose! hh;subst hh;intro hc;simp at hc)
+  simp at ha
+  have h₀ : Y \ {a} ∈ ob Y := obSelf_sdiff b5 d5 e5 ha.1 h hY
+  have : Y \ {a} ∈ ob (Y \ {a}) := e5 _ _ _ sdiff_subset h₀
+      ((inter_self (Y \ {a})).symm ▸ fun hc => a5 Y $ hc ▸ h₀)
+  exact obSelf_transfer b5 d5 e5
+    this
+    $ ne_empty_of_mem ha.1
 
 
 lemma ob_forbidden {n : ℕ}
@@ -444,7 +419,7 @@ lemma ob_forbidden_self {n : ℕ}
 lemma univ_ob_univ {n : ℕ}
     {ob : Finset (Fin (n+1)) → Finset (Finset (Fin (n+1)))}
     (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob) (a : Fin (n+1))
-    (ha : univ \ {a} ∈ ob univ) :  univ ∈ ob univ := by
+    (ha : univ \ {a} ∈ ob univ) : univ ∈ ob univ := by
   have : univ \ {a} ∈ ob (univ \ {a}) :=
     e5 univ  (univ \ {a}) (univ \ {a}) (by simp) ha (by
       simp
@@ -464,7 +439,7 @@ but requires `Fin (n+1)`. -/
 theorem le_one_of_large_of_ob {n : ℕ}
     {ob : Finset (Fin (n+1)) → Finset (Finset (Fin (n+1)))}
     (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    (large_of_ob:  ∀ A, (∀ X, A ⊆ X → A ∈ ob X) → #A ≥ n) :
+    (large_of_ob: ∀ A, (∀ X, A ⊆ X → A ∈ ob X) → #A ≥ n) :
                    ∀ B C, B ⊆ C → B ∈ ob C → #(C \ B) ≤ 1 := by
   intro B C hBC ho
   have hn (m : ℕ) (hm : n = m + 1) : ∀ A, Finset.card A ≤ m → ∃ X, A ⊆ X ∧ A ∉ ob X := by
@@ -475,7 +450,9 @@ theorem le_one_of_large_of_ob {n : ℕ}
     omega
   have h_a (m : ℕ) : n = m + 1 → ¬ (∃ B C, #(C \ B) ≥ 2 ∧ B ⊆ C ∧ B ∈ ob C) := by
     intro hm hc
-    apply almost_stayAlive a5 d5 e5 hc
+    obtain ⟨B,C,hBC⟩ := hc
+    have := almost_stayAlive a5 d5 e5 hBC.1 hBC.2.1 hBC.2.2
+    revert this
     simp_rw [hm]
     simp
     apply hn
@@ -541,7 +518,7 @@ theorem le_one_CJ97 {n : ℕ}
     {B C : Finset (Fin (n+2))}
     (h₀ : B ⊆ C) (h₁ : B ∈ ob C) : #(C \ B) ≤ 1 := by
   have hn := no_small_good_CJ97 a5 b5 c5 d5 e5
-  have large_of_ob:  ∀ A, (∀ X, A ⊆ X → A ∈ ob X) → #A ≥ n+1 := by
+  have large_of_ob: ∀ A, (∀ X, A ⊆ X → A ∈ ob X) → #A ≥ n+1 := by
     intro A
     contrapose!
     specialize hn A
@@ -580,14 +557,17 @@ theorem unique_bad_world {n : ℕ}
   | inr h => simp at h
 
 
+lemma diff_diff {n : ℕ}
+    {X Y : Finset (Fin (n + 2))} : X ∩ Y = Y \ (Y \ X) := by
+  compare
+
 lemma getAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fin (n + 2)))}
     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob)
     (H₀ : ∃ Y X, X ∈ ob Y)
     (H₁ : ∀ (a : Fin (n + 2)) (Y X : Finset (Fin (n + 2))), a ∈ X ∩ Y → X \ {a} ∉ ob Y) :
     ob = alive (n + 2) := by
   ext X Y
-  unfold alive
-  simp
+  simp [alive]
   constructor
   · intro h
     constructor
@@ -598,65 +578,39 @@ lemma getAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fin (n +
     · by_contra H
       have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
       have h₀ : X ∩ Y = X \ {a} := by
-        ext i
-        constructor
-        · intro hi
+        apply subset_antisymm
+        · intro i hi
+          simp at ha hi ⊢
+          exact ⟨hi.1, fun hc => ha.2 $ hc ▸ hi.2⟩
+        · intro i hi
           simp at hi ⊢
           constructor
-          · tauto
-          · intro hc
-            subst hc
-            simp at ha
-            tauto
-        · intro hi
-          simp at hi ⊢
-          constructor
-          · tauto
+          · exact hi.1
           · by_contra H₀
-            have : X ∩ Y ∈ ob X := b5 X Y (X ∩ Y) (by compare) h
-            have := le_one_CJ97 (B := X ∩ Y) (C := X) a5 b5 c5 d5 e5 (by simp) this
-            apply two_in_sdiff <;> tauto
+            exact two_in_sdiff _ _ _ _ ha hi.1 hi.2 H₀ $
+                le_one_CJ97 a5 b5 c5 d5 e5 inter_subset_left $
+                    b5 X Y (X ∩ Y) (by compare) h
       have h₁ : X ∩ Y ∈ ob X := b5 X Y (X ∩ Y) (by compare) h
       specialize H₁ a X X
       rw [h₀] at h₁
       simp at ha H₁
       tauto
-  intro h
+  intro h₂
   obtain ⟨Y',X',h'⟩ := H₀
   have h₀ : Y' ∈ ob Y' := by
     have := le_one_CJ97 a5 b5 c5 d5 e5 (by simp)
       (b5 Y' X' (X' ∩ Y') (by simp) h')
-    have :  #(Y' \ X') ≤ 1 := by
+    have : #(Y' \ X') ≤ 1 := by
       convert this using 2
       simp
-    have :  #(Y' \ X') = 1 ∨ #(Y' \ X') = 0 :=  Or.symm ((fun {n} ↦ Nat.le_one_iff_eq_zero_or_eq_one.mp) this)
+    have : #(Y' \ X') = 1 ∨ #(Y' \ X') = 0 := Or.symm ((fun {n} ↦ Nat.le_one_iff_eq_zero_or_eq_one.mp) this)
     cases this with
     | inl h =>
       have ⟨a,ha⟩: ∃ a, Y' \ X' = {a} := card_eq_one.mp h
       specialize H₁ a
       have h : X' ∩ Y' = Y' \ {a} := by
-        ext i
-        simp
-        constructor
-        · intro hi
-          constructor
-          tauto
-          intro hc
-          subst hc
-          have : i ∈ Y' \ X' := by
-            rw [ha]
-            simp
-          simp at this
-          tauto
-        · intro hi
-          constructor
-          · have := hi.2
-            contrapose! this
-            have : i ∈ Y' \ X' := by simp;tauto
-            rw [ha] at this
-            simp at this
-            tauto
-          · tauto
+        rw [← ha]
+        rw [diff_diff]
       have : X' ∩ Y' ∈ ob Y' := by
         exact b5 Y' X' (X' ∩ Y') (by simp) h'
       rw [h] at this
@@ -667,17 +621,12 @@ lemma getAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fin (n +
         tauto)
       tauto
     | inr h =>
-      have : Y' \ X' = ∅ := card_eq_zero.mp h
-      have : Y' ⊆ X' := sdiff_eq_empty_iff_subset.mp this
-      have : X' ∩ Y' = Y' := inter_eq_right.mpr this
+      have : X' ∩ Y' = Y' :=
+        inter_eq_right.mpr $ sdiff_eq_empty_iff_subset.mp $ card_eq_zero.mp h
       nth_rewrite 2 [← this]
       exact b5 Y' X' (X' ∩ Y') (by simp) h'
-  have h₁ : X ∈ ob X := agree_on_inclusion b5 d5 e5 h₀ h.1
-  have h₂ : X = X ∩ Y := by
-    have := inter_eq_right.mpr h.2
-    rw [← this]
-    compare
-  nth_rewrite 2 [h₂] at h₁
+  have h₁ : X ∈ ob X := obSelf_transfer b5 d5 e5 h₀ h₂.1
+  nth_rewrite 2 [← inter_eq_left.mpr h₂.2] at h₁
   exact b5 X (X ∩ Y) Y (by simp) h₁
 
 
@@ -689,7 +638,7 @@ theorem unique_bad_world' {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finse
   have h₀ : X ∩ Y = X \ {b} := by
     rw [← hb]
     compare
-  have h₁ : X \ {a} ∈ ob X := agree_on_exclusion b5 d5 e5 haX' imp haX
+  have h₁ : X \ {a} ∈ ob X := obSelf_sdiff b5 d5 e5 haX' imp haX
   have h₂ : (X \ {a}) ∩ (X \ {b}) ∈ ob X := c5 _ _ _ h₁ (h₀ ▸ h')
   have h₃ : #(X \ ((X \ {a}) ∩ (X \ {b}))) ≤ 1 := le_one_CJ97 a5 b5 c5 d5 e5
     (by rw [h₅];simp) h₂
@@ -752,7 +701,7 @@ theorem getStayAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fi
       exact a5 _ H₁.2)
   rw [funext_iff]
   intro X
-  have hag := @agree_on_exclusion (n+2) ob b5 d5 e5
+  have hag := @obSelf_sdiff (n+2) ob b5 d5 e5
     (X' ∩ Y') X a H₁.1 (e5 Y' (X' ∩ Y') ( (X' ∩ Y') \ {a})
       (by simp) H₁.2 (by
         intro hc
@@ -782,7 +731,7 @@ theorem getStayAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fi
         · rw [H₂]
           simp
         · have h₀ : X \ {a} ∈ ob (X \ {a}) := e5 (X) (X \ {a}) (X \ {a}) (by simp)
-            (agree_on_exclusion b5 d5 e5 H₁.1 imp H₂) (by simp_all)
+            (obSelf_sdiff b5 d5 e5 H₁.1 imp H₂) (by simp_all)
           have q₀ : X ∩ Y = X
                 ∨ X ∩ Y = X \ {a} := by
             apply all_or_almost' <;> tauto
@@ -808,18 +757,23 @@ theorem getStayAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fi
           · subst H₁
             apply adHoc a
             exact h₀
-          · exact getUniv a5 b5 d5 e5 X ({a} ∪ Xᶜ) a (by
+          · exact obSelf a5 b5 d5 e5 X ({a} ∪ Xᶜ) a (by
+              rw [union_sdiff_left]
+
+
               contrapose! H₁
               simp at H₁ ⊢
-              ext y
-              simp
-              by_cases H : y = a
-              · subst H
-                tauto
-              have : y ∉ ({a} : Finset (Fin (n+2))) := by simp;exact H
-              rw [← H₁] at this
-              simp at this
-              tauto)
+              cases H₁ with
+              | inl h => exact h
+              | inr h =>
+                  ext y
+                  simp
+                  by_cases H : y = a
+                  · subst H
+                    tauto
+                  · rw [eq_compl_comm.mp h.symm]
+                    simp
+                    exact H)
               (by
                 rw [inter_union_distrib_left]
                 simp
@@ -828,7 +782,7 @@ theorem getStayAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fi
       | inr h' =>
         rw [h']
         by_cases H₀ : a ∈ X
-        · exact agree_on_exclusion b5 d5 e5 H₁.1 imp (h' ▸ h.1)
+        · exact obSelf_sdiff b5 d5 e5 H₁.1 imp (h' ▸ h.1)
         · have : X = X \ {a} := sdiff_singleton_eq_erase a X ▸ (Finset.erase_eq_of_notMem H₀).symm
           rw [← this]
           exact ht H₀
@@ -1372,7 +1326,6 @@ theorem models_ofCJ_1997_equiv {n : ℕ}
         rw [h,A5,B5,C5Strong,D5,E5]
         simp [noObligations]
 
-open Classical
 
 lemma stayAlive_injective (m : ℕ) (a b : Fin (m+2))
   (h : stayAlive a = stayAlive b) : a = b := by
@@ -1426,6 +1379,7 @@ lemma stayAlive_eq_alive (a : Fin 1) : stayAlive a = alive 1 := by
       tauto
       apply h.2
       tauto
+open Classical
 
 theorem models_ofCJ_1997_count₀ :
     Finset.card
@@ -1545,7 +1499,7 @@ lemma isomorphic_stayAlive {n : ℕ} (a b : Fin n) :
   · intro h
     simp [stayAlive] at h ⊢
     constructor
-    · have ⟨z,hz⟩ : ∃ z, z ∈ (((({z | swap a b z ∈ X}) :  (Finset (Fin n))) ∩ (({z | swap a b z ∈ Y}) : Finset (Fin n))) :  (Finset (Fin n))) := by
+    · have ⟨z,hz⟩ : ∃ z, z ∈ (((({z | swap a b z ∈ X}) : (Finset (Fin n))) ∩ (({z | swap a b z ∈ Y}) : Finset (Fin n))) : (Finset (Fin n))) := by
         refine nonempty_def.mp ?_
         refine nonempty_iff_ne_empty.mpr ?_
         exact h.1
@@ -1632,12 +1586,12 @@ theorem models_ofCJ_1997_count₂ {m : ℕ} :
   | inr h =>
     cases h with
     | inl h =>
-      subst h
       use m + 2
+      subst h
       simp
     | inr h =>
-      subst h
       use m + 3
+      subst h
       simp
   intro a ha
   by_cases H : a = m + 3
@@ -1695,7 +1649,8 @@ theorem models_ofCJ_1997_count₂ {m : ℕ} :
           simp at this
           exact this
 
-/-- A "never-three" theorem, a complete characterization of the number of models:
+/-- A "never-three" theorem, a complete characterization of the number of models
+on the set `[n]`.
 
 n #
 0 1

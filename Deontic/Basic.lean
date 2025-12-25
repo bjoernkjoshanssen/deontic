@@ -350,8 +350,9 @@ lemma ob52_g : CJ5g observation_5_2 := by
     simp at h₁
     apply subset_antisymm
     apply subset_trans
-    show Y ∩ Z ∩ X ⊆ Z ∩ Y
-    intro;simp;tauto
+    show _ ⊆ Z ∩ Y
+    nth_rw 2 [inter_comm]
+    exact inter_subset_left
     exact Eq.subset h₁
     intro i hi
     simp at hi
@@ -426,17 +427,9 @@ lemma ob52_g : CJ5g observation_5_2 := by
       · simp at hi ⊢
       · simp at hi ⊢
     · rw [if_neg H₁] at h₁
-      simp at h₁
-      intro i hi
-      apply h₁
-      simp at hi ⊢
-      constructor
-      tauto
-      apply h₀
+      apply subset_trans _ h₁
+      apply subset_inter _ h₀
       simp
-      constructor
-      tauto
-      tauto
 
 lemma ob52_f : CJ5f observation_5_2 := by
   unfold CJ5f

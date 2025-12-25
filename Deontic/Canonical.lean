@@ -194,46 +194,6 @@ def canon₂' {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α)
       (filter (fun T ↦ X ∩ A ⊆ T) univ)
   )
 
-
-
--- lemma lemma9_1996_ind {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n)))
---     (a : Fin n)
---     (h : ∀ X, a ∈ X → {a} ∈ ob X) -- h says O(A | ⊤) when A={0}
---     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) :
---     ∀ X, a ∈ X → ob X = {Y | a ∈ Y}.toFinset := by
---   induction n with
---   | zero =>
---     have := a.2
---     simp at this
---   | succ n hn =>
---     intro X haX
---     ext S
---     simp
---     constructor
---     · intro hBX
---       have : {a} ∈ ob X := by
---         apply h
---         tauto
---       have h₀ : S ∩ {a} ∈ ob X := by
---         apply c5 _ _ _ hBX this
---       have : ∅ ∉ ob X := a5 _
---       by_contra H
---       have : S ∩ {a} = ∅ := by
---         ext i
---         simp
---         intro hiB hc
---         subst hc
---         tauto
---       rw [this] at h₀
---       tauto
---     · intro haS
---       let S₀ := S ∩ Finset.filter (fun k => k.1 < n) univ
---       let ob₀ : Finset (Fin n) → Finset (Finset (Fin n)) := fun A =>
---         {C | {k : Fin (n+1) | ∃ hk : k.1 < n, ⟨k.1,hk⟩ ∈ C}.toFinset ∈
---           ob {k : Fin (n+1) | ∃ hk : k.1 < n, ⟨k.1,hk⟩ ∈ A}}
---       have := hn ob₀ (Fin.last n)
---       sorry
-
 theorem canon₂_C5Strong {n : ℕ} (A B : Finset <| Fin n) : C5Strong <| canon₂ A B := by
   unfold canon₂
   intro X Y Z h₀ h₁
@@ -262,172 +222,6 @@ theorem canon₂_C5Strong {n : ℕ} (A B : Finset <| Fin n) : C5Strong <| canon�
     apply h₁
     tauto
 
-
-
-lemma hasOne {X : Finset (Fin 2)} (h : 0 ∈ X) :
-    X = {0} ∨ X = {0,1} := by
-      by_cases H : 1 ∈ X
-      right
-      ext j
-      simp
-      fin_cases j
-      simp
-      tauto
-      simp
-      tauto
-      left
-      ext j
-      simp
-      fin_cases j
-      simp
-      tauto
-      simp
-      tauto
-
-lemma hasOne₃general {X : Finset (Fin 3)} {a₀ a₁ a₂ : Fin 3}
-    (ha : univ = {a₀,a₁,a₂})
-    (h : a₀ ∈ X) :
-    X = {a₀} ∨ X = {a₀,a₁} ∨ X = {a₀,a₂} ∨ X = {a₀,a₁,a₂}:= by
-      have three (j : Fin 3) : j = a₀ ∨ j = a₁ ∨ j = a₂ := by
-        have : j ∈ univ := by simp
-        rw [ha] at this
-        simp at this
-        tauto
-
-      by_cases H₁ : a₁ ∈ X
-      by_cases H₂ : a₂ ∈ X
-      right
-      right
-      right
-      ext j
-      simp
-      have hun : X = univ := by
-        ext b
-        rw [ha]
-        simp
-        constructor
-        intro hb
-        have : b ∈ univ := by simp
-        rw [ha] at this
-        simp at this
-        tauto
-        intro hb
-        cases hb with
-        | inl h => subst h;tauto
-        | inr h => cases h with
-          | inl h => subst h;tauto
-          | inr h => subst h;tauto
-      fin_cases j <;> (simp; rw [hun,ha]; simp)
-
-
-      right
-      left
-      ext j
-      simp
-      constructor
-      intro hj
-      cases three j with
-      | inl h => tauto
-      | inr h => cases h with
-        |inl h => subst h;right;rfl
-        |inr h => subst h;tauto
-      intro h
-      cases h with
-      | inl h => subst h;tauto
-      | inr h => subst h;tauto
-      by_cases H₂ : a₂ ∈ X
-      right
-      right
-      left
-      ext j
-      simp
-
-      cases three j with
-      | inl h => subst h;tauto
-      | inr h => cases h with
-        |inl h =>
-          subst h;simp_all;constructor;contrapose! H₁;subst H₁;tauto
-          contrapose! H₁;subst H₁;tauto
-        |inr h => subst h;tauto
-
-      left
-      ext j
-      simp
-      cases three j with
-      | inl h => subst h;tauto
-      | inr h => cases h with
-        |inl h =>
-          subst h;simp_all;contrapose! H₁;subst H₁;tauto
-        |inr h => subst h;simp_all;contrapose! H₁;subst H₁;tauto
-
-
-lemma hasOne₃ {X : Finset (Fin 3)} (h : 0 ∈ X) :
-    X = {0} ∨ X = {0,1} ∨ X = {0,2} ∨ X = {0,1,2}:= by
-      by_cases H₁ : 1 ∈ X
-      by_cases H₂ : 2 ∈ X
-      right
-      right
-      right
-      ext j
-      simp
-      fin_cases j
-      simp
-      tauto
-      simp
-      tauto
-      simp
-      tauto
-      right
-      left
-      ext j
-      simp
-      fin_cases j
-      simp
-      tauto
-      simp
-      tauto
-      simp
-      tauto
-      by_cases H₂ : 2 ∈ X
-      right
-      right
-      left
-      ext j
-      simp
-      fin_cases j
-      simp
-      tauto
-      simp
-      tauto
-      simp
-      tauto
-      left
-      ext j
-      simp
-      fin_cases j
-      simp
-      tauto
-      simp
-      tauto
-      simp
-      tauto
-
-
-  -- let ABC be given with X=A∪B, Y=A, Z=A∪B∪C,
-  -- then
-  -- This version of D5 is easier to work with here:
-  -- have d5'' : ∀ A B C, A ∈ ob (A ∪ B) →
-  --     C \ (A ∪ B) ∪ A ∈ ob (A ∪ B ∪ C) := by
-  --   intro A B C h₀
-  --   let X := A ∪ B
-  --   let Y := A
-  --   let Z := A ∪ B ∪ C
-  --   have := d5 X Y Z (by unfold X Y;simp) h₀
-  --     (by unfold X Z;simp;intro i;simp;tauto)
-  --   unfold X Y Z at this
-  --   convert this using 1
-  --   ext;simp;tauto
-
 theorem fixD5 {n : ℕ} {ob : Finset (Fin n) → Finset (Finset (Fin n))}
   (d5 : D5 ob) (A B C : Finset (Fin n)) :
   A ∩ B ∩ C ∈ ob (A ∩ B) → A \ (A ∩ B) ∪ A ∩ B ∩ C ∈ ob A := by
@@ -448,9 +242,6 @@ lemma canon_eq_canon₂ {n : ℕ} {A : Finset (Fin n)} :
     unfold canon canon₂
     simp
 
-
-
-
 lemma canon₂_eq_canon₂' {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) :
   canon₂ A B = canon₂' A B ∅ := rfl
 
@@ -462,6 +253,13 @@ def canon₂_II {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) :
       (filter (fun Y ↦ X ∩ A = X ∩ Y) univ)
   )
 
+lemma inter_two {n : ℕ} {B X Y Z : Finset (Fin n)}
+  (h₀ : X ∩ B = X ∩ Y) (h₁ : X ∩ B = X ∩ Z) : X ∩ B = X ∩ (Y ∩ Z) := by
+      rw [← inter_self (X ∩ B)]
+      nth_rewrite 1 [h₀]
+      rw [h₁, ← inter_assoc, inter_eq_left.mpr inter_subset_left]
+      simp
+
 theorem canon₂_II_C5Strong {n : ℕ} (A B : Finset <| Fin n) : C5Strong <| canon₂_II A B := by
   unfold canon₂_II
   intro X Y Z h₀ h₁
@@ -471,24 +269,12 @@ theorem canon₂_II_C5Strong {n : ℕ} (A B : Finset <| Fin n) : C5Strong <| can
     simp at *
   · rw [if_neg H] at h₀ h₁ ⊢
     by_cases H₀ : X ∩ A = ∅
-    rw [H₀] at h₀ h₁ ⊢
-    simp at *
-    have : X ∩ B = (X ∩ B) ∩ (X ∩ B) := by simp
-    rw [this]
-    nth_rewrite 1 [h₀]
-    rw [h₁]
-    ext
-    simp
-    tauto
-    rw [if_neg H₀] at h₀ h₁ ⊢
-    simp at *
-    have : X ∩ A = (X ∩ A) ∩ (X ∩ A) := by simp
-    rw [this]
-    nth_rewrite 1 [h₀]
-    rw [h₁]
-    ext
-    simp
-    tauto
+    all_goals
+      try rw [if_pos H₀] at *
+      try rw [if_neg H₀] at *
+      simp at *
+      apply inter_two h₀ h₁
+
 
 theorem canon₂_II_subset_canon₂
     {α : Type*} [Fintype α] [DecidableEq α] (A B X : Finset α) :
@@ -496,7 +282,7 @@ theorem canon₂_II_subset_canon₂
   unfold canon₂_II canon₂
   intro Y
   split_ifs
-  tauto
+  · tauto
   · simp
     intro h
     rw [h]
@@ -556,18 +342,13 @@ theorem subset_canon₂_A5 {α : Type*} [Fintype α] [DecidableEq α]
     · rw [H₁] at h₀
       simp at h₀
       intro hc
-      have := h₀
-      have : ∅ ∈ filter (fun T ↦ X ∩ B ⊆ T) univ := by
-        have := this hc
-        exact this
+      apply H₀
+      have := h₀ hc
       simp at this
-      exact H₀ this
+      exact this
     · repeat rw [if_neg H₁] at h₀
       intro hc
-      have := h₀
-      have : ∅ ∈ filter (fun T ↦ X ∩ A ⊆ T) univ := by
-        have := this hc
-        exact this
+      have : ∅ ∈ filter (fun T ↦ X ∩ A ⊆ T) univ := h₀ hc
       simp at this
       exact H₁ this
 
@@ -611,185 +392,6 @@ theorem canon₂_II_C5  {α : Type*} [Fintype α] [DecidableEq α]
     notMem_empty, mem_filter, mem_univ, true_and] at h₀ h₁ ⊢)
     <;> exact eq_inter_inter h₀ h₁
 
-def canon₂'' {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) :
-    Finset α → Finset (Finset α) :=
-  fun X ↦ ite (X ∩ B = ∅) (univ \ {∅}) (
-      ite (X ∩ A = ∅)
-      (filter (fun T ↦ X ∩ B ⊆ T) univ)
-      (filter (fun T ↦ X ∩ A ⊆ T) univ)
-  )
-
-def canon₂''' {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α) :
-    Finset α → Finset (Finset α) :=
-  fun X ↦ ite (X ∩ B = ∅) ({T | T ≠ ∅ ∧ X ⊆ T}.toFinset) (
-      ite (X ∩ A = ∅)
-      ({T | X ∩ B ⊆ T}.toFinset)
-      ({T | X ∩ A ⊆ T}.toFinset)
-  )
-
--- theorem test' {n : ℕ} {A : Finset (Fin n)} :
---     E5 (canon₂''' A A) := by
---   intro X Y Z h₀ h₁ h₂
---   unfold canon₂''' at *
---   by_cases H₀ : X ∩ A = ∅
---   · rw [H₀] at h₁
---     simp at h₁
---     have h₃ : Y ∩ A = ∅ := by
---       apply subset_empty.mp
---       apply subset_trans
---       show Y ∩ A ⊆ X ∩ A
---       exact inter_subset_inter h₀ fun ⦃a⦄ a ↦ a
---       rw [H₀]
---     rw [h₃]
---     simp
---     tauto
---   · repeat rw [if_neg H₀] at h₁
---     by_cases h₃ : Y ∩ A = ∅
---     · rw [h₃]
---       simp at h₁ ⊢
---       -- FAILS!
---       contrapose! h₂
---       rw [h₂]
---       simp
---     · rw [if_neg h₃]
---       by_cases H₁ : Y ∩ A = ∅
---       · rw [H₁]
---         simp
---       · rw [if_neg H₁]
---         simp
---         simp at h₁
---         apply subset_trans
---         show Y ∩ A ⊆ X ∩ A
---         apply inter_subset_inter (by tauto) (by simp)
---         tauto
-
-
-
--- theorem test' {n : ℕ} {A B : Finset (Fin n)} (hAB : A ⊆ B):
---     E5 (canon₂'' A B) := by
---   intro X Y Z h₀ h₁ h₂
---   unfold canon₂'' at *
---   by_cases H₀ : X ∩ A = ∅
---   · rw [H₀] at h₁
---     simp at h₁
---     have h₃ : Y ∩ A = ∅ := by
---       apply subset_empty.mp
---       apply subset_trans
---       show Y ∩ A ⊆ X ∩ A
---       exact inter_subset_inter h₀ fun ⦃a⦄ a ↦ a
---       rw [H₀]
---     rw [h₃]
---     simp
---     by_cases H₁ : Y ∩ B = ∅
---     rw [H₁]
---     simp
---     contrapose! h₂
---     rw [h₂]
---     simp
---     rw [if_neg H₁]
---     simp
---     by_cases H₂ : X ∩ B = ∅
---     · rw [H₂] at h₁
---       simp at h₁
---       exfalso
---       apply H₁
---       apply subset_empty.mp
---       apply subset_trans
---       show Y ∩ B ⊆ X ∩ B
---       exact inter_subset_inter h₀ fun ⦃a⦄ a ↦ a
---       rw [H₂]
---     · rw [if_neg H₂] at h₁
---       simp at h₁
---       apply subset_trans
---       show Y ∩ B ⊆ X ∩ B
---       exact inter_subset_inter h₀ fun ⦃a⦄ a ↦ a
---       exact h₁
---   · rw [if_neg H₀] at h₁
---     by_cases h₃ : Y ∩ A = ∅
---     · rw [h₃]
---       simp
---       have : X ∩ B ≠ ∅ := by
---         contrapose! H₀
---         apply subset_empty.mp
---         apply subset_trans
---         show X ∩ A ⊆ X ∩ B
---         exact inter_subset_inter (fun ⦃a⦄ a ↦ a) hAB
---         rw [H₀]
---       rw [if_neg this] at h₁
---       simp at h₁
---       by_cases H₁ : Y ∩ B = ∅
---       rw [H₁]
---       simp
---       contrapose! h₂
---       rw [h₂]
---       simp
-
---       rw [if_neg H₁]
---       simp
---       -- FAILS!
---       contrapose! h₂
-
---       rw [h₂]
---       simp
---     · rw [if_neg h₃]
---       by_cases H₁ : Y ∩ A = ∅
---       · rw [H₁]
---         simp
---       · rw [if_neg H₁]
---         simp
---         simp at h₁
---         apply subset_trans
---         show Y ∩ A ⊆ X ∩ A
---         apply inter_subset_inter (by tauto) (by simp)
---         tauto
-
-
-recall not_canon_E5
-/-- Whereas `canon` failed E5, we now see that just changing what
-is required when no good options are available fixes that!
-But it's only for A=B so not that important.
-And in fact, this means that we have deontic explosion for `canon''`
-and so it is perhaps mild evidence that making nothing obligatory when there are no
-good options, as in `canon`, is best after all.
-
-HOWEVER the canon₂ and canon₂_II models satisfy the original strong axiom
-from my 1996 term paper, which means that my argument from there may be a
-devastasting strike against them!?
- -/
-theorem test {n : ℕ} {A : Finset (Fin n)} :
-    E5 (canon₂'' A A) := by
-  intro X Y Z h₀ h₁ h₂
-  unfold canon₂'' at *
-  by_cases H₀ : X ∩ A = ∅
-  · rw [H₀] at h₁
-    simp at h₁
-    have h₃ : Y ∩ A = ∅ := by
-      apply subset_empty.mp
-      apply subset_trans
-      show Y ∩ A ⊆ X ∩ A
-      exact inter_subset_inter h₀ fun ⦃a⦄ a ↦ a
-      rw [H₀]
-    rw [h₃]
-    simp
-    tauto
-  · rw [if_neg H₀] at h₁
-    by_cases h₃ : Y ∩ A = ∅
-    · rw [h₃]
-      simp
-      contrapose! h₂
-      rw [h₂]
-      simp
-    · rw [if_neg h₃]
-      by_cases H₁ : Y ∩ A = ∅
-      · rw [H₁]
-        simp
-      · rw [if_neg H₁]
-        simp
-        simp at h₁
-        apply subset_trans
-        show Y ∩ A ⊆ X ∩ A
-        apply inter_subset_inter (by tauto) (by simp)
-        tauto
 
 
 /-- Mild conditions on `B` work here, that generalize A=B. (June 2, 2025) -/
@@ -1011,28 +613,6 @@ theorem theorem10_1996_related : ∃ (ob : Finset (Fin 3) → Finset (Finset (Fi
   apply many_not_canon_E5
   simp
   simp
-
-
-  /- what does it say about A,B that such X₀,Y₀,Z₀ exist?
-  certainly B not subset of A. But then very broadly,
-  If we take X,Y,Z generic w.r.t. A,B then let
-  X₀ = X \ A
-  Y₀ = univ
-  Z₀ = Z ∪ A.
-
-  If we take Y=univ:
-  (h₆ : ¬X₀ ∩ Z₀ = ∅)
-  (h₀ : X₀ ∩ A = ∅)
-  (h₃ : B ≠ ∅)
-
-  (h₈ : ¬X₀ ∩ B ⊆ Z₀)
-
-  (h₅ : A ⊆ Z₀)
-  (h₄ : A ≠ ∅)
-
-
-
-  -/
 
 /-- Based on the fact that A = {2}, B={1,2},
   X₀={0,1}, Y₀=univ, Z₀={0,2}
@@ -1388,23 +968,6 @@ theorem canon_II_F5  {α : Type*} [Fintype α] [DecidableEq α]
   convert this using 1
   exact canon_II_is_canon₂_II A
 
--- theorem canon_II_F5  {α : Type*} [Fintype α] [DecidableEq α]
---     (A : Finset α) : F5 (canon_II A) := by
---   -- must prove directly since F fails for canon₂_II !
---     unfold F5 canon_II
---     intro _ _ _ h₀ h₁
---     split_ifs at * with h₂ h₃ h₄ h₅
---     repeat exact h₀
---     · exact h₁
---     · simp only [mem_filter, mem_univ,
---         true_and, notMem_empty] at h₀ h₁ ⊢
---       rw [union_inter_distrib_right, union_eq_empty] at h₂
---       exact h₃ h₂.1
---     repeat simp at h₀
---     · simp at h₁
---     · simp at *;
---       rw [union_inter_distrib_right,h₀,h₁,union_inter_distrib_right]
-
 theorem CJ_noD_canon_II {α : Type*} [Fintype α] [DecidableEq α]
     {A : Finset α} : CJ_noD_2022 (canon_II A) := by
   rw [canon_II_symm]
@@ -1758,7 +1321,6 @@ theorem canon₂_II_often_fails_F5 {n : ℕ} (A B : Finset (Fin n))
 
 
 section KjosHanssen2017
-open Classical
 
 /--THEOREM 1.2
 The main result of [Kjos-Hanssen 2017].

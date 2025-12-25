@@ -134,43 +134,6 @@ theorem ob₂5f : ∀ (b : Fin 5 → Bool), ((b 0 || b 1) → b 2) →
 theorem ob₂5g : ∀ (b : Fin 5 → Bool),
   G5 (ob₂ b) := by unfold G5 ob₂; decide
 
-def mycode : Fin 32 → (Fin 5 → Bool) :=
-  ![
-    ![false,false,false,false,false], -- 0
-    ![false,false,false,false,true ], -- 1
-    ![false,false,false,true, false], -- 2
-    ![false,false,false,true, true ], -- 3
-    ![false,false,true, false,false], -- 4
-    ![false,false,true, false,true ], -- 5
-    ![false,false,true, true, false], -- 6
-    ![false,false,true,true,true], -- 7
-    ![false,true, false,false,false], -- 0
-    ![false,true, false,false,true ], -- 1
-    ![false,true, false,true, false], -- 2
-    ![false,true, false,true, true ], -- 3
-    ![false,true, true, false,false], -- 4
-    ![false,true, true, false,true ], -- 5
-    ![false,true, true, true, false], -- 6
-    ![false,true, true,true,true], -- 7
-    ![true, false,false,false,false], -- 0
-    ![true, false,false,false,true ], -- 1
-    ![true, false,false,true, false], -- 2
-    ![true, false,false,true, true ], -- 3
-    ![true, false,true, false,false], -- 4
-    ![true, false,true, false,true ], -- 5
-    ![true, false,true, true, false], -- 6
-    ![true, false,true,true,true], -- 7
-    ![true, true, false,false,false], -- 0
-    ![true, true, false,false,true ], -- 1
-    ![true, true, false,true, false], -- 2
-    ![true, true, false,true, true ], -- 3
-    ![true, true, true, false,false], -- 4
-    ![true, true, true, false,true ], -- 5
-    ![true, true, true, true, false], -- 6
-    ![true, true, true,true,true] -- 7
-  ]
-
-
 theorem do_not_imply_5d_or_5f :
     ∃ ob : Finset (Fin 2) → Finset (Finset (Fin 2)),
     A5 ob ∧ B5original ob ∧ C5 ob ∧ ¬ D5 ob ∧ E5 ob ∧ ¬ F5 ob ∧ G5 ob := by
