@@ -12,21 +12,21 @@ import Deontic.Canonical
 `stayAlive_properties` (used @ end)
 Theorems that use all of [abcde5] are indicated in [brackets].
 
-`ob_of_small_good` [d5]
---> `no_small_good_of_ob` [acde5]
---> [`no_small_good_CJ97₀`] --> [`no_small_good_CJ97`]
+`prefer_either_of_good` [d5]
+--> `not_good_of_disjoint_selfob_pair` [acde5]
+--> [`not_good_of_small₂_specific`] --> [`not_good_of_small₂`]
                                         |
                                         v
-            [`unique_bad_world`] <- [`le_one_CJ97`]
+            [`unique_bad_world`] <- [`drop_at_most_one_CJ97`]
                     |
                     v
-            [`all_or_almost'`] `obSelf` [abde5] <--- `obSelf_sdiff`     `almost_stayAlive`
+            [`all_or_almost'`] `obSelf` [abde5] <--- `obSelf_sdiff`     `drop_at_most_one_of_no_good_small₂`
                              \       |             /         |[bde5]                    |[ade]
                               \/     v            /          |                          v
-`trivial_ob_of_nontrivial` -->[`getStayAlive`]<- /           |                   `le_one_of_large_of_ob`
+`trivial_ob_of_nontrivial` -->[`getStayAlive`]<- /           |                  `drop_at_most_one_of_no_small₂_good`
       [bde]                           |                      |                          |[ade]
                                       v                      v                          v
-              `univ_ob_univ` --->  [`models_ofCJ_1997`]  <- [`getAlive`] <--- [`le_one_CJ97`]
+              `univ_ob_univ` --->  [`models_ofCJ_1997`]  <- [`getAlive`] <--- [`drop_at_most_one_CJ97`]
                   [ade5]
 -/
 
@@ -176,10 +176,23 @@ theorem stayAlive_properties {n : ℕ} (e : Fin n) :
 section lemma9_1996
 
 
-lemma ob_of_small_good
+
+/-- A context `A` is *good* if `A` is obligatory in any larger context.
+ -/
+def good {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (A : Finset (Fin n)) :=
+    ∀ X, A ⊆ X → A ∈ ob X
+
+def small₂ {n : ℕ} (A : Finset (Fin n)) :=
+    2 ≤ #Aᶜ
+
+/--
+If we add two worlds to a good set, then each one is preferable to
+the other.
+-/
+lemma prefer_either_of_good
   {n : ℕ} {ob : Finset (Fin n) → Finset (Finset (Fin n))} {A : Finset (Fin n)} (d5 : D5 ob)
   {a₁ a₂ : Fin n} (ha₁₂ : a₁ ≠ a₂)
-    (h : ∀ X, A ⊆ X → A ∈ ob X) :
+    (h : good ob A) :
     A ∪ {a₂} ∈ ob (A ∪ {a₁, a₂}) := by
     convert fixD5 d5 (A ∪ {a₁, a₂}) (A ∪ {a₁}) A (by
       convert h (A ∪ {a₁}) (by simp) using 1 <;> compare
@@ -194,21 +207,23 @@ lemma ob_of_small_good
 
 end lemma9_1996
 
-
-theorem no_small_good_of_ob {n : ℕ}
+/-- If `A` is missing a self-obligatory pair
+then `A` is not good.
+ -/
+theorem not_good_of_disjoint_selfob_pair {n : ℕ}
     {ob : Finset (Fin n) → Finset (Finset (Fin n))} {A : Finset (Fin n)}
     {a₁ a₂ : Fin n} (ha₀ : a₁ ∉ A) (ha₁ : a₂ ∉ A) (ha₂ : a₁ ≠ a₂)
     (hcorr : {a₁, a₂} ∈ ob {a₁, a₂})
     (a5 : A5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob) :
-    ¬ (∀ X, A ⊆ X → A ∈ ob X) := by
+    ¬ good ob A := by
   intro h
   let Z₁ := A ∪ {a₁}
   let Z₂ := A ∪ {a₂}
   have h₁ : Z₁ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₁ (by simp)
-    (pair_comm a₁ a₂ ▸ ob_of_small_good d5 ha₂.symm h) $ ne_empty_of_mem <| by
+    (pair_comm a₁ a₂ ▸ prefer_either_of_good d5 ha₂.symm h) $ ne_empty_of_mem <| by
     show a₁ ∈ _; simp [Z₁]
   have h₂ : Z₂ ∈ ob {a₁, a₂} := e5 (A ∪ {a₁, a₂}) {a₁, a₂} Z₂ (by simp)
-    (ob_of_small_good d5 ha₂ h) $ ne_empty_of_mem <| by
+    (prefer_either_of_good d5 ha₂ h) $ ne_empty_of_mem <| by
     show a₂ ∈ _; simp [Z₂]
   have : {a₁} = Z₁ ∩ {a₁, a₂} := by
     ext b
@@ -234,11 +249,13 @@ theorem no_small_good_of_ob {n : ℕ}
     exact fun h => h ▸ ha₂
   exact a5 _ this
 
-lemma no_small_good_CJ97₀
+/-- If `A` is small₂ (missing a pair of worlds)
+then `A` is not good. -/
+lemma not_good_of_small₂_specific
     {n : ℕ} {ob : Finset (Fin n) → Finset (Finset (Fin n))}
     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob)
     {A : Finset <| Fin n} {a₁ a₂ : Fin n} (ha' : a₁ ∉ A ∧ a₂ ∉ A ∧ a₁ ≠ a₂) :
-    ¬ ∀ X, A ⊆ X → A ∈ ob X := by
+    ¬ good ob A := by
   intro h
   have cx : CX ob := by
     convert conditional_explosion a5 (by convert b5) (by convert d5) (by convert e5)
@@ -254,7 +271,7 @@ lemma no_small_good_CJ97₀
     | inl h => subst h;tauto
     | inr h => rw [h];tauto
     tauto
-  exact no_small_good_of_ob ha'.1 ha'.2.1 ha'.2.2 this a5 c5 d5 e5 h
+  exact not_good_of_disjoint_selfob_pair ha'.1 ha'.2.1 ha'.2.2 this a5 c5 d5 e5 h
 
 lemma sdiff_two {n : ℕ}
     {B C : Finset (Fin n)} (hBC₀ : #(C \ B) ≥ 2) (hBC₁ : B ⊆ C) :
@@ -276,13 +293,22 @@ lemma sdiff_two {n : ℕ}
     simp_rw [this]
     apply Finset.card_le_card;simp
 
-theorem almost_stayAlive {n : ℕ}
+def drop_at_most_one  {n : ℕ}
+    (ob : Finset (Fin n) → Finset (Finset (Fin n))) :=
+    ∀ B C, B ⊆ C → B ∈ ob C → #(C \ B) ≤ 1
+
+/-- If `drop_at_most_one` fails then
+a `good small₂` set exists.
+I.e. `no_good_small₂` implies `drop_at_most_one`.
+`drop_at_most_one_of_no_good_small₂`
+ -/
+theorem drop_at_most_one_of_no_good_small₂ {n : ℕ}
     {ob : Finset (Fin n) → Finset (Finset (Fin n))}
     (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob) {B C : Finset (Fin n)}
     (hBC₀:  Finset.card (C \ B) ≥ 2)
     (hBC₁ : B ⊆ C)
     (hBC₂ : B ∈ ob C) :
-     ∃ A, #A ≤ n - 2 ∧ ∀ (X : Finset (Fin n)), A ⊆ X → A ∈ ob X := by
+     ∃ A, #A ≤ n - 2 ∧ good ob A := by
   use univ \ C ∪ B
   constructor
   · exact sdiff_two hBC₀ hBC₁
@@ -434,24 +460,31 @@ lemma univ_ob_univ {n : ℕ}
   convert this using 2
   simp
 
-/-- This cannot be formulated in terms of `Fin n`
-but requires `Fin (n+1)`. -/
-theorem le_one_of_large_of_ob {n : ℕ}
+/--
+Given that no small₂ set is good (which is not automatic here since
+we don't assume B5 and C5),
+an obligatory set cannot be more than 1 world away from its larger context.
+
+(This cannot be formulated in terms of `Fin n`
+but requires `Fin (n+1)`.) -/
+theorem drop_at_most_one_of_no_small₂_good {n : ℕ}
     {ob : Finset (Fin (n+1)) → Finset (Finset (Fin (n+1)))}
     (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    (large_of_ob: ∀ A, (∀ X, A ⊆ X → A ∈ ob X) → #A ≥ n) :
-                   ∀ B C, B ⊆ C → B ∈ ob C → #(C \ B) ≤ 1 := by
+    (large_of_ob: ∀ A, good ob A → #A ≥ n) :
+                   drop_at_most_one ob := by
   intro B C hBC ho
-  have hn (m : ℕ) (hm : n = m + 1) : ∀ A, Finset.card A ≤ m → ∃ X, A ⊆ X ∧ A ∉ ob X := by
+  unfold good at large_of_ob
+  have hn (m : ℕ) (hm : n = m + 1) : ∀ A, #A ≤ m → ¬ good ob A := by
     intro A hA
     by_contra H
-    push_neg at H
+    unfold good at H
     specialize large_of_ob A H
     omega
+  unfold good at hn
   have h_a (m : ℕ) : n = m + 1 → ¬ (∃ B C, #(C \ B) ≥ 2 ∧ B ⊆ C ∧ B ∈ ob C) := by
     intro hm hc
     obtain ⟨B,C,hBC⟩ := hc
-    have := almost_stayAlive a5 d5 e5 hBC.1 hBC.2.1 hBC.2.2
+    have := drop_at_most_one_of_no_good_small₂ a5 d5 e5 hBC.1 hBC.2.1 hBC.2.2
     revert this
     simp_rw [hm]
     simp
@@ -477,11 +510,23 @@ theorem le_one_of_large_of_ob {n : ℕ}
   apply le_trans this
   simp
 
-
-lemma no_small_good_CJ97 {n : ℕ}
+/-- If `A` is small₂ then `A` is not good. -/
+lemma not_good_of_small₂ {n : ℕ}
     {ob : Finset (Fin (n+2)) → Finset (Finset (Fin (n+2)))}
-    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob) :
-    ∀ A, Finset.card A ≤ n → ∃ X, A ⊆ X ∧ A ∉ ob X := fun A hA => by
+    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob)
+    (A : Finset (Fin (n + 2))) (hs : small₂ A) :
+    ¬ good ob A := by
+  have hA : #A ≤ n := by
+    unfold small₂ at hs
+    have : #Aᶜ = #(univ \ A) := by congr
+    rw [this] at hs
+    have : #(univ \ A) = #((univ : Finset (Fin (n+2)))) - #A := by
+        refine card_sdiff_of_subset ?_
+        simp
+    rw [this] at hs
+    have : #((univ : Finset (Fin (n+2)))) = n+2 := card_fin (n + 2)
+    rw [this] at hs
+    omega
   have ⟨a₁,a₂,ha'⟩: ∃ a₁ a₂, a₁ ∉ A ∧ a₂ ∉ A ∧ a₁ ≠ a₂ := by
     by_contra H
     push_neg at H
@@ -508,23 +553,45 @@ lemma no_small_good_CJ97 {n : ℕ}
         tauto)
     simp at this
     omega
-  by_contra hc
-  push_neg at hc
-  exact no_small_good_CJ97₀ a5 b5 c5 d5 e5 ha' hc
+  exact not_good_of_small₂_specific a5 b5 c5 d5 e5 ha'
 
-theorem le_one_CJ97 {n : ℕ}
+
+
+theorem drop_at_most_one_CJ97_FUTURE {n : ℕ}
+    {ob : Finset (Fin (n+2)) → Finset (Finset (Fin (n+2)))}
+    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob) :
+    drop_at_most_one ob := by
+  unfold drop_at_most_one
+  by_contra H
+  push_neg at H
+  obtain ⟨B,C,h₀,h₁,h₂⟩ := H
+
+  have large_of_ob: ∀ A, good ob A → #A ≥ n+1 := by
+    have hn := not_good_of_small₂ a5 b5 c5 d5 e5
+    intro A hA
+    contrapose! hA
+    exact hn _ $ Nat.lt_add_one_iff.mp (by
+            have : #Aᶜ = #(univ \ A) := by congr
+            rw [this]
+            have : #(univ \ A) = #((univ : Finset (Fin (n+2)))) - #A := by
+                refine card_sdiff_of_subset ?_
+                simp
+            rw [this]
+            have : #((univ : Finset (Fin (n+2)))) = n+2 := card_fin (n + 2)
+            rw [this]
+            omega
+    )
+  have := drop_at_most_one_of_no_small₂_good a5 d5 e5 large_of_ob _ _ h₀ h₁
+  omega
+
+/-- Allow `B` and `C` to be implicit in `drop_at_most_one_CJ97`. -/
+def drop_at_most_one_CJ97_apply {n : ℕ}
     {ob : Finset (Fin (n+2)) → Finset (Finset (Fin (n+2)))}
     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob)
     {B C : Finset (Fin (n+2))}
-    (h₀ : B ⊆ C) (h₁ : B ∈ ob C) : #(C \ B) ≤ 1 := by
-  have hn := no_small_good_CJ97 a5 b5 c5 d5 e5
-  have large_of_ob: ∀ A, (∀ X, A ⊆ X → A ∈ ob X) → #A ≥ n+1 := by
-    intro A
-    contrapose!
-    specialize hn A
-    convert hn using 1
-    exact Nat.lt_add_one_iff
-  exact le_one_of_large_of_ob a5 d5 e5 large_of_ob _ _ h₀ h₁
+     :=
+  drop_at_most_one_CJ97_FUTURE a5 b5 c5 d5 e5 B C
+
 
 
 theorem unique_bad_world {n : ℕ}
@@ -544,7 +611,7 @@ theorem unique_bad_world {n : ℕ}
     · nth_rewrite 1 [union_comm]
       rfl
   have : #({a,b}) ≤ 1 := by
-    convert le_one_CJ97 a5 b5 c5 d5 e5 (by intro;simp;tauto) $ c5 _ _ _ h₁ h₃ using 2
+    convert drop_at_most_one_CJ97_apply a5 b5 c5 d5 e5 (by intro;simp;tauto) $ c5 _ _ _ h₁ h₃ using 2
     apply pair_venn <;> tauto
   cases Nat.eq_or_lt_of_le this with
   | inl h =>
@@ -588,7 +655,7 @@ lemma getAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fin (n +
           · exact hi.1
           · by_contra H₀
             exact two_in_sdiff _ _ _ _ ha hi.1 hi.2 H₀ $
-                le_one_CJ97 a5 b5 c5 d5 e5 inter_subset_left $
+                drop_at_most_one_CJ97_apply a5 b5 c5 d5 e5 inter_subset_left $
                     b5 X Y (X ∩ Y) (by compare) h
       have h₁ : X ∩ Y ∈ ob X := b5 X Y (X ∩ Y) (by compare) h
       specialize H₁ a X X
@@ -598,7 +665,7 @@ lemma getAlive {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (Fin (n +
   intro h₂
   obtain ⟨Y',X',h'⟩ := H₀
   have h₀ : Y' ∈ ob Y' := by
-    have := le_one_CJ97 a5 b5 c5 d5 e5 (by simp)
+    have := drop_at_most_one_CJ97_apply a5 b5 c5 d5 e5 (by simp)
       (b5 Y' X' (X' ∩ Y') (by simp) h')
     have : #(Y' \ X') ≤ 1 := by
       convert this using 2
@@ -640,7 +707,7 @@ theorem unique_bad_world' {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finse
     compare
   have h₁ : X \ {a} ∈ ob X := obSelf_sdiff b5 d5 e5 haX' imp haX
   have h₂ : (X \ {a}) ∩ (X \ {b}) ∈ ob X := c5 _ _ _ h₁ (h₀ ▸ h')
-  have h₃ : #(X \ ((X \ {a}) ∩ (X \ {b}))) ≤ 1 := le_one_CJ97 a5 b5 c5 d5 e5
+  have h₃ : #(X \ ((X \ {a}) ∩ (X \ {b}))) ≤ 1 := drop_at_most_one_CJ97_apply a5 b5 c5 d5 e5
     (by rw [h₅];simp) h₂
   by_cases Q : a ∈ X
   · have h₄ : {a,b} ⊆ X \ ((X \ {a}) ∩ (X \ {b})) := by
@@ -662,7 +729,7 @@ theorem all_or_almost' {n : ℕ} {ob : Finset (Fin (n + 2)) → Finset (Finset (
     (haX' : a ∈ X') (haX : X \ {a} ≠ ∅)
     (imp : X' \ {a} ∈ ob X') (h' : X ∩ Y ∈ ob X) :
     X ∩ Y = X ∨ X ∩ Y = X \ {a} := by
-  cases Nat.eq_or_lt_of_le (le_one_CJ97 a5 b5 c5 d5 e5 (by simp) h') with
+  cases Nat.eq_or_lt_of_le (drop_at_most_one_CJ97_apply a5 b5 c5 d5 e5 (by simp) h') with
   | inl h =>
     have ⟨b,hb⟩ : ∃ b, X \ (X ∩ Y) = {b} := card_eq_one.mp h
     have h₀ : (X \ {a}) ∩ (X \ {b}) = X \ {a,b} := by compare
