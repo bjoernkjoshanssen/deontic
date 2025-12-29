@@ -625,8 +625,7 @@ lemma obSelfSingleton_of_bad (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
 
 def obSelf (A : Finset (Fin k)) := A ∈ ob A
 
-/-- Recast as something.obSelf ? -/
-theorem obSelf_obSelfSdiff
+theorem obSelf_of_obSelfSdiff
     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
     {X : Finset (Fin k)} {a : Fin k}
     (haX : a ∈ X)
@@ -1101,7 +1100,7 @@ lemma obSelf_of_bad_mem {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k
         constructor
         exact H₁.1
         exact g₁) X (sdiff_ne_empty_of_ne_empty_of_mem G H₀)
-  exact obSelf_obSelfSdiff a5 b5 d5 e5 (h := h₀) (haX := H₀)
+  exact obSelf_of_obSelfSdiff a5 b5 d5 e5 (h := h₀) (haX := H₀)
 
 
 
