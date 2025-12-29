@@ -79,7 +79,7 @@ We then show that despite this paradox, the the systems of Carmo and Jones have 
 Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 
-\begin{definition}\label{CJ5a}
+\begin{definition}\label{5(a)}
 	\lean{A5}
 	\leanok
 	Axiom 5(a) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that $\emptyset\notin\ob(X)$ for all $X\in\Pow(U)$.
@@ -87,7 +87,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 
 
-\begin{definition}\label{CJ5b}
+\begin{definition}\label{5(b)}
 	\lean{B5}
 	\leanok
 	Axiom 5(b) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
@@ -97,8 +97,8 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 \end{definition}
 
-\begin{definition}\label{CJ5cstar}
-	\lean{CJ5c_star}
+\begin{definition}\label{5(c) weak}
+	\lean{C5}
 	\leanok
 	The weak, but potentially infinite, version of Axiom 5(c) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 	\[
@@ -108,7 +108,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 \end{definition}
 
-\begin{definition}\label{CJ5cstar}
+\begin{definition}\label{5(c) strong}
 	\lean{C5Strong}
 	\leanok
 	The strong version of Axiom 5(c) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
@@ -116,7 +116,7 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 \end{definition}
  
  
-\begin{definition}\label{CJ5d}
+\begin{definition}\label{5(d)}
 	\lean{D5}
 	\leanok
 	Axiom 5(d) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
@@ -126,82 +126,310 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 \end{definition}
 
- 
- 
-\begin{definition}\label{CJ5bd}
-	\lean{CJ5bd}
-	\leanok
-	Axiom 5(bd) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
-	$\forall (X Y Z \in\Pow U), Y \in \ob X \land X \subseteq Z \to Z \setminus X \cup Y \in \ob Z$.
-\end{definition}
+\begin{lemma}\label{insert_single_ob_pair}
+	\lean{insert_single_ob_pair}
+ 	\leanok
+	\uses{5(d)}
+	If $A\in\ob(X)$ whenever $A\subseteq X$ and $a_1\ne a_2$ then $A\cup\{a_1\}\in\ob(A\cup\{a_1,a_2\})$.
+\end{lemma}
 
-\begin{definition}\label{E5}
+% \begin{definition}\label{5(bd)}
+% 	\lean{CJ5bd}
+% 	\leanok
+% 	Axiom 5(bd) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
+% 	$\forall (X Y Z \in\Pow U), Y \in \ob X \land X \subseteq Z \to Z \setminus X \cup Y \in \ob Z$.
+% \end{definition}
+
+\begin{definition}\label{5(e)}
 	\lean{E5}
 	\leanok
 	Axiom 5(e) for a function $\ob: \Pow(U) \to \Pow(\Pow(U))$ says that
 \fivee
 \end{definition}
 
-
-
-\begin{theorem}\label{bd5}
-	\lean{bd5}
+\begin{definition}\label{BDE}
+	\lean{BDE}
 	\leanok
-	\uses{CJ5bd, CJ5b, CJ5d}
-	If $\ob$ satisfies 5(b) and 5(d) then it satisfies 5(bd).
+	\uses{5(b),5(d),5(e)}
+	The theory BDE consists of the axioms 5(b)(d)(e).
+\end{definition}	
+
+\begin{definition}\label{ADE}
+	\lean{ADE}
+	\leanok
+	\uses{5(a),5(d),5(e)}
+	The theory ADE consists of the axioms 5(a)(d)(e).
+\end{definition}	
+
+
+\begin{theorem}\label{conditional_explosion}
+	\lean{conditional_explosion}
+	\leanok
+	\uses{ADE,BDE}
+    CX ob.
 \end{theorem}
 
-\begin{definition}\label{CJ5f}
-	\lean{CJ5f}
-	\leanok
-	Axiom 5(f) says
-	\[
-		\forall \beta \subseteq \Pow(U), \beta \ne \emptyset \rightarrow
-		\forall X, \text{ if} \forall Z \in \beta, X \in \ob Z \text{ then } X \in \ob \bigcup \beta.
-	\]
-\end{definition}
-While 5(f) allows for infinite sets, the finite version can be stated more simply.
+% \begin{definition}\label{ABCDE}
+% 	\lean{ABCDE}
+% 	\leanok
+% 	\uses{ADE, BDE, 5(c) strong}
+% 	The theory ABCDE consists of all the axioms 5(a)(b)(d)(e) and 5(c) strong.
+% \end{definition}
 
-\begin{theorem}[Lemma II.2.2 of Carmo and Jones]\label{II22}
-	\lean{II_2_2}
+\begin{lemma}\label{single_ob_pair}
+	\lean{single_ob_pair}
 	\leanok
-	\uses{CJ5a, CJ5b, CJ5cstar,CJ5d}
-	If $\ob$ satisfies axioms 5(a,b,c*,d) then $\ob$ satisfies axiom 5(f).
-\end{theorem}
+	\uses{insert_single_ob_pair,5(c) weak,5(e)}
+	If $a_1\ne a_2$, $a_1\notin A$, $a_2\notin A$, $\{a_1,a_2\}\in\ob(\{a_1,a_2\})$,
+	and $A\in\ob(X)$ whenever $A\subseteq X$, then
+	    $\{a_1\} \in \ob \{a_1, a_2\}$ and $\{a_2\} \in \ob \{a_1, a_2\}$.
+\end{lemma}
 
-\begin{definition}
-	\lean{ob₂}
+\begin{lemma}\label{semiglobal_holds}
+	\lean{semiglobal_holds}
+	% \leanok
+	\uses{single_ob_pair, 5(c) strong}
+	If $a_1\ne a_2$, $a_1\notin A$, $a_2\notin A$, $\{a_1,a_2\}\in\ob(\{a_1,a_2\})$,
+	then it cannot be that $A\in\ob(X)$ whenever $A\subseteq X$.
+\end{lemma}
+
+\begin{lemma}
+	\label{global_holds_specific}
+	\lean{global_holds_specific}
 	\leanok
-The 32 models $\ob_2(b)$, where $b$ is a Boolean vector of length 5, are defined by $B\in\ob_2(A)$ iff
-the following are true:
-\begin{itemize}
-	\item $A \cap B \ne \emptyset$,
-	\item $(B = \{0\} \to b 0)$,
-	\item $(B = \{1\} \to b 1)$, and
-	\item if $B = \{0,1\}$ then
-		\begin{itemize}
-			\item $(A = \{0\} \to b 3)$,
-			\item $(A = \{1\} \to b 4)$, and
-			\item $(A = \{0,1\} \to b 2)$.
-		\end{itemize}
-\end{itemize}
-\end{definition}
+	\uses{semiglobal_holds,5(a),5(b),conditional_explosion}
+	If  $a_1 \notin A$ and $a_2 \notin A$ and $a_1 \ne a_2$ then it cannot be that $A\in\ob(X)$ whenever $A\subseteq X$.
+\end{lemma}
 
-Using this ob₂ we prove that
-\begin{theorem}
-	\lean{do_not_imply_5d_or_5f}
-	\uses{ob₂}
+% define 5(bde) as a theory?
+
+\begin{lemma}\label{obSelf_of_bad_not_mem}
+	\lean{obSelf_of_bad_not_mem}
 	\leanok
-There is a model where $5(a)(b)(c)(e)(g)$ all hold but $5(d)$ and $5(f)$
-do not hold.
-\end{theorem}
+	\uses{BDE}
+	If $a$ is $\ob$-bad, $a\notin Y \ne \emptyset$, then $Y\in\ob(Y)$.
+\end{lemma}	
 
-We also prove
-\begin{theorem}
-\lean{do_not_imply_5e}
-\leanok
-∃ ob, A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ ¬ E5 ob ∧ F5 ob ∧ G5 ob.
-\end{theorem}
+
+\begin{lemma}\label{obSelfSdiff_of_bad}
+    \lean{obSelfSdiff_of_bad}
+	\leanok
+	\uses{BDE}
+	If $a$ is $\ob$-bad and $Y \setminus \{a\} \ne \emptyset$ then
+    $Y \setminus \{a\} \in \ob Y$.
+	\end{lemma}
+
+\begin{lemma}\label{obSelf_of_obSelf}
+	\lean{obSelf_of_obSelf}
+	\leanok
+    \uses{BDE}
+	If  $X ∈ \ob X$ and $Y ≠ ∅$ then $Y ∈ ob Y $.
+\end{lemma}
+
+\begin{lemma}\label{obSelf_of_obSelfSdiff}
+	\lean{obSelf_of_obSelfSdiff}
+	\leanok
+	\uses{obSelf_of_obSelf,5(a)}
+	
+	    % (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+	    % {X : Finset (Fin k)} {a : Fin k}
+	If $a ∈ X ≠ \mathrm{univ}$ and $X \setminus \{a\} ∈ ob X$ then $X ∈ \ob X$.
+\end{lemma}
+
+\begin{lemma}\label{ob_singleton_of_obSelf}
+	\lean{ob_singleton_of_obSelf}
+	\leanok
+	\uses{5(a),5(b),5(c) weak}
+	    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) {a : Fin k}
+	    If $\{a\} ∈ \ob \{a\}$ then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
+\end{lemma}
+
+\begin{lemma}\label{obSelfSingleton_of_bad}
+	\lean{obSelfSingleton_of_bad}
+	\leanok
+	\uses{BDE,obSelf_univ}
+	    % (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+		Assume that $∀ a, \mathrm{univ} \setminus \{a\} ∈ \ob \mathrm{univ} \to \mathrm{univ} ∈ \ob \mathrm{univ}$.
+If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
+\end{lemma}
+
+
+\begin{lemma}\label{obSelf_univ}
+	\lean{obSelf_univ}
+	\leanok
+	\uses{ADE}
+	    % (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob) (a : Fin k)
+	If $\mathrm{univ} \setminus \{a\} ∈ \ob \mathrm{univ}$ then $\mathrm{univ} ∈ \ob \mathrm{univ}$.
+\end{lemma}
+
+\begin{lemma}\label{local_of_global}
+	\lean{local_of_global}
+	\leanok
+	\uses{ADE}
+    % (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob)
+    If for all $A$, $\mathrm{inter_ifsub} \ob A → \mathrm{cosubsingleton} A$,
+    then covering ob.
+\end{lemma}
+% \begin{theorem}\label{bd5}
+% 	\lean{bd5}
+% 	\leanok
+% 	\uses{CJ5bd, CJ5b, CJ5d}
+% 	\uses{D5}
+% 	If $\ob$ satisfies 5(b) and 5(d) then it satisfies 5(bd).
+% \end{theorem}
+
+\begin{lemma}\label{global_holds}
+	\lean{global_holds}
+	\leanok
+	\uses{global_holds_specific}
+	If $A$ is small$_2$ and then $A$ is not $\mathrm{inter_ifsub} \ob$.
+\end{lemma}
+
+\begin{lemma}\label{local_holds}
+	\lean{local_holds}
+	\leanok
+	\uses{global_holds, local_of_global}
+   
+    covering ob.
+\end{lemma}
+
+\begin{lemma}\label{getAlive}
+	\lean{getAlive}
+	\leanok
+	\uses{local_holds,obSelf_of_obSelf}
+	If ob ≠ noObligations and ∀ a, ¬ semibad ob a, then
+	    ob = alive k.
+\end{lemma}
+	
+\begin{lemma}\label{unique_bad}
+	\lean{unique_bad}
+	\leanok
+	\uses{local_holds}
+    % (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob)
+    If bad ob a and bad ob b then $a = b$.
+\end{lemma}
+
+\begin{lemma}\label{bad_cosubsingleton_of_ob}
+	\lean{bad_cosubsingleton_of_ob}
+	\leanok
+	\uses{unique_bad}
+	If bad ob a and $X ∩ Y ∈ ob X$ then
+	    $X ∩ Y = X$ or $X ∩ Y = X \setminus \{a\}$.
+\end{lemma}
+
+\begin{lemma}\label{obSelf_of_bad_mem}
+	\lean{obSelf_of_bad_mem}
+	\leanok
+	\uses{obSelfSdiff_of_bad,obSelf_of_obSelfSdiff,5(a)}
+If semibad ob b and $¬X = \{b\}$ and $b ∈ X$ then
+    $X ∈ ob X$.
+\end{lemma}
+
+\begin{lemma}\label{obSelf_of_bad}
+	\lean{obSelf_of_bad}
+	\leanok
+	\uses{obSelf_of_bad_not_mem,obSelf_of_bad_mem}
+    If bad ob a and $X \setminus \{a\}\ne \emptyset$ then $X ∈ \ob X$.
+\end{lemma}
+
+
+\begin{lemma}\label{ob_bad}
+	\lean{ob_bad}
+	\leanok
+	\uses{obSelfSingleton_of_bad,obSelf_univ,ob_singleton_of_obSelf}
+If bad ob a then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
+
+\end{lemma}
+
+\begin{lemma}\label{bad_of_semibad}
+	\lean{bad_of_semibad}
+	\leanok
+	\uses{5(a), 5(e)}
+
+If semibad ob a then bad ob a.
+\end{lemma}
+
+\begin{lemma}\label{sub_stayAlive_of_bad}
+	\lean{sub_stayAlive_of_bad}
+	\leanok
+    \uses{bad_cosubsingleton_of_ob}
+	If bad ob a then ∀ Y, ob Y ⊆ stayAlive a Y.
+\end{lemma}
+
+Note that Lemma \ref{stayAlive_sub_of_bad} does not require the strong form of C5.
+\begin{lemma}\label{stayAlive_sub_of_bad}
+	\lean{stayAlive_sub_of_bad}
+	\leanok
+	\uses{ob_bad,obSelf_of_bad,obSelfSdiff_of_bad}
+    If bad ob a then ∀ Y, stayAlive a Y ⊆ ob Y.
+\end{lemma}
+
+\begin{lemma}\label{stayAlive_of_bad}
+	\lean{stayAlive_of_bad}
+	\leanok
+	\uses{stayAlive_sub_of_bad, sub_stayAlive_of_bad}
+	If semibad ob a then ob = stayAlive a.
+\end{lemma}
+
+
+\begin{lemma}\label{models_ofCJ_1997}
+	\lean{models_ofCJ_1997}
+	\leanok
+	\uses{stayAlive_of_bad,getAlive,bad_of_semibad}
+	Either $∃ a, ob = stayAlive a$ or $ob = alive k$ or $ob = noObligations k$.
+\end{lemma}
+
+% \begin{definition}\label{CJ5f}
+% 	\lean{CJ5f}
+% 	\leanok
+% 	Axiom 5(f) says
+% 	\[
+% 		\forall \beta \subseteq \Pow(U), \beta \ne \emptyset \rightarrow
+% 		\forall X, \text{ if} \forall Z \in \beta, X \in \ob Z \text{ then } X \in \ob \bigcup \beta.
+% 	\]
+% \end{definition}
+% While 5(f) allows for infinite sets, the finite version can be stated more simply.
+
+% \begin{theorem}[Lemma II.2.2 of Carmo and Jones]\label{II22}
+% 	\lean{II_2_2}
+% 	\leanok
+% 	\uses{CJ5a, CJ5b, CJ5cstar,CJ5d}
+% 	If $\ob$ satisfies axioms 5(a,b,c*,d) then $\ob$ satisfies axiom 5(f).
+% \end{theorem}
+
+% \begin{definition}\label{32models}
+% 	\lean{ob₂}
+% 	\leanok
+% The 32 models $\ob_2(b)$, where $b$ is a Boolean vector of length 5, are defined by $B\in\ob_2(A)$ iff
+% the following are true:
+% \begin{itemize}
+% 	\item $A \cap B \ne \emptyset$,
+% 	\item $(B = \{0\} \to b 0)$,
+% 	\item $(B = \{1\} \to b 1)$, and
+% 	\item if $B = \{0,1\}$ then
+% 		\begin{itemize}
+% 			\item $(A = \{0\} \to b 3)$,
+% 			\item $(A = \{1\} \to b 4)$, and
+% 			\item $(A = \{0,1\} \to b 2)$.
+% 		\end{itemize}
+% \end{itemize}
+% \end{definition}
+
+% Using this ob₂ we prove that
+% \begin{theorem}\label{not_imply_5df}
+% 	\lean{do_not_imply_5d_or_5f}
+% 	\uses{32models}
+% 	\leanok
+% There is a model where $5(a)(b)(c)(e)(g)$ all hold but $5(d)$ and $5(f)$
+% do not hold.
+% \end{theorem}
+
+% We also prove
+% \begin{theorem}\label{not_imply_5e}
+% \lean{do_not_imply_5e}
+% \leanok
+% ∃ ob, A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ ¬ E5 ob ∧ F5 ob ∧ G5 ob.
+% \end{theorem}
 
 \section{Canonical models of Carmo and Jones' systems}
 
@@ -236,12 +464,12 @@ Thus, if X ∩ A = ∅ but X ∩ B ≠ ∅, we let F(X) = X ∩ B.
     \label{tab:example}
 \end{table}
 
-\begin{definition}
-	\lean{canon}
-	\leanok
-Given n : ℕ and A : Finset (Fin n)),
-T $\in$ canon(A,S) iff S ∩ A $\ne$ ∅ and S ∩ A ⊆ T.
-\end{definition}
+% \begin{definition}\label{canon}
+% 	\lean{canon}
+% 	\leanok
+% Given n : ℕ and A : Finset (Fin n)),
+% T $\in$ canon(A,S) iff S ∩ A $\ne$ ∅ and S ∩ A ⊆ T.
+% \end{definition}
 
 \bibliographystyle{plain}
 \bibliography{deontic}
