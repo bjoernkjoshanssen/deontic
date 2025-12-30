@@ -282,6 +282,8 @@ def bad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) 
 def semibad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) :=
     ∃ X Y : Finset (Fin n), a ∈ X ∩ Y ∧ (X ∩ Y) \ {a} ∈ ob X
 
+def quasibad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) := ∃ X Y, a ∈ X \ Y ∧ Y ∈ ob X
+
 lemma semibad_of_bad {n : ℕ} {ob : Finset (Fin n) → Finset (Finset (Fin n))} {a : Fin n}
     (hbad : bad ob a) : semibad ob a := by
     obtain ⟨X,h₀⟩ := hbad
@@ -438,10 +440,10 @@ theorem semiglobal_holds (f : @ACDE k ob)
     {A : Finset (Fin k)}
     {a₁ a₂ : Fin k} (ha₂ : a₁ ≠ a₂)
     (ha₀ : a₁ ∉ A) (ha₁ : a₂ ∉ A)
-    (hcorr : {a₁, a₂} ∈ ob {a₁, a₂})
+    (h : inter_ifsub ob A)
     :
-    ¬ inter_ifsub ob A := by
-  intro h
+    ¬ {a₁, a₂} ∈ ob {a₁, a₂} := by
+  intro hcorr
   have ⟨h₃,h₄⟩:= @single_ob_pair k ob (C5_of_C5Strong f.c) f.d f.e A a₁ a₂ ha₂ ha₀ ha₁
     hcorr h
   have : ∅ ∈ ob {a₁, a₂} := by
@@ -458,26 +460,29 @@ structure ABCDE where
 /-- If `A` is small₂ (missing a pair of worlds)
 then `A` is not inter_ifsub. -/
 lemma global_holds_specific (t : @ABCDE k ob)
-    {A : Finset <| Fin k} {a₁ a₂ : Fin k} (ha' : a₁ ∉ A ∧ a₂ ∉ A ∧ a₁ ≠ a₂) :
+    {A : Finset <| Fin k} {a₁ a₂ : Fin k} (h₁ : a₁ ∉ A) (h₂ : a₂ ∉ A)
+    (h₁₂ : a₁ ≠ a₂) :
     ¬ inter_ifsub ob A := by
   intro h
+  apply semiglobal_holds ⟨t.a5, t.c5, t.d5, t.e5⟩ h₁₂ h₁ h₂ h
   have cx : CX ob := by
     convert conditional_explosion t.a5 (by convert t.b5)
         (by convert t.d5) (by convert t.e5)
-  unfold CX at cx
-  have : {a₁, a₂} ∈ ob {a₁, a₂} := by
-    specialize cx A {a₁,a₂} (A ∪ {a₁,a₂}) (by unfold inter_ifsub ifsub at h;simp at h;apply h;simp;intro i hi;simp;tauto)
+
+  specialize cx A {a₁,a₂} (A ∪ {a₁,a₂}) (by
+        unfold inter_ifsub ifsub at h
+        simp only [mem_filter, mem_univ, true_and] at h
+        apply h _ subset_union_left)
       (ne_empty_of_mem (by simp;tauto))
-    convert cx using 2
-    simp
-    ext b;simp
-    constructor
-    intro h
-    cases h with
+  convert cx using 2
+  simp
+  ext b;simp
+  constructor
+  intro h
+  cases h with
     | inl h => subst h;tauto
     | inr h => rw [h];tauto
-    tauto
-  exact semiglobal_holds ⟨t.a5, t.c5, t.d5, t.e5⟩ ha'.2.2 ha'.1 ha'.2.1 this h
+  tauto
 
 /- A context `Y` is obligatory given itself, provided
 that `∃ a ∉ Y, ∃ X, a ∈ X ∧ X \ {a} ∈ ob X`.
@@ -864,7 +869,7 @@ lemma global_holds (t : @ABCDE k ob)
   have ⟨n,hn⟩ : ∃ n, k = n + 2 := Nat.exists_eq_add_of_le' H
   subst hn
   have hA : #A ≤ n := card_compl_aux' hs
-  have ⟨a₁,a₂,ha'⟩: ∃ a₁ a₂, a₁ ∉ A ∧ a₂ ∉ A ∧ a₁ ≠ a₂ := by
+  have ⟨a₁,a₂,h₁,h₂,h₁₂⟩: ∃ a₁ a₂, a₁ ∉ A ∧ a₂ ∉ A ∧ a₁ ≠ a₂ := by
     by_contra H
     push_neg at H
     have : A ≠ univ := by
@@ -890,7 +895,7 @@ lemma global_holds (t : @ABCDE k ob)
         tauto)
     simp at this
     omega
-  exact global_holds_specific t ha'
+  exact global_holds_specific t h₁ h₂ h₁₂
 
 theorem local_holds₀
     {ob : Finset (Fin 0) → Finset (Finset (Fin 0))} :
@@ -956,64 +961,71 @@ lemma obSelf_of_ob_of_subset
   nth_rewrite 2 [← inter_eq_right.mpr hd]
   exact b5 Y X (X ∩ Y) (by simp) h
 
+def semibad' {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) :=
+    ∃ X Y : Finset (Fin n), a ∈ X ∩ Y ∧ X \ {a} ∈ ob Y
+
 
 lemma not_ob_of_almost
     (b5 : B5 ob)
-    (H₁ : ∀ (a : Fin k) (X Y : Finset (Fin k)), a ∈ X ∩ Y → X \ {a} ∉ ob Y)
+    (H₁ : ∀ a, ¬ semibad' ob a)
     {X Y : Finset (Fin k)}
-    (h₀ : #(Y \ X) = 1) : X ∉ ob Y := by
+    (h₀ : #(Y \ X) = 1) : X ∉ ob Y := fun hc => by
+  unfold semibad' at H₁
+  push_neg at H₁
   have ⟨a,ha⟩: ∃ a, Y \ X = {a} := card_eq_one.mp h₀
   specialize H₁ a Y Y (singleton_subset_iff.mp $ by
     rw [← ha]
     simp)
   rw [← ha, ← diff_diff] at H₁
-  have := b5 Y X (X ∩ Y) (by simp)
-  tauto
+  exact H₁ $ (b5 Y X (X ∩ Y) (by simp)) hc
+
 
 /-- A glue lemma for `obSelf_of_ob_of_subset`. -/
-lemma obSelf_of_ob_of_subset.glue
+lemma obSelf_of_ob_of_almost_subset
   (b5 : B5 ob)
-  (H₁ : ∀ (a : Fin k) (X Y : Finset (Fin k)), a ∈ X ∩ Y → X \ {a} ∉ ob Y)
-  {X Y : Finset (Fin k)} (hd : #(Y \ X) ≤ 1)
-  (h : X ∈ ob Y) : Y ∈ ob Y := by
+  (H₁ : ∀ a, ¬ semibad' ob a)
+  {X Y : Finset (Fin k)}
+  (h : X ∈ ob Y)
+  (hd : #(Y \ X) ≤ 1)
+  : Y ∈ ob Y := by
     cases Nat.le_one_iff_eq_zero_or_eq_one.mp hd with
     | inl h₀ =>
       exact obSelf_of_ob_of_subset b5
         (sdiff_eq_empty_iff_subset.mp $ card_eq_zero.mp h₀) h
-    | inr h₀ =>
-      exfalso
-      apply not_ob_of_almost b5 H₁ h₀ h
+    | inr h₀ => exact False.elim $ not_ob_of_almost b5 H₁ h₀ h
 
--- theorem getAlive.sdiff_notinBAD {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
---     (b5 : B5 ob)
---     (H₁ : ∀ (a : Fin k), ¬ bad ob a) :
---     ∀ (a : Fin k) (X Y : Finset (Fin k)), a ∈ X ∩ Y → X \ {a} ∉ ob Y := by
---     intro a X Y haXY
---     unfold bad at H₁
---     push_neg at H₁
---     specialize H₁ a Y
---     contrapose! H₁
---     constructor
---     simp at haXY
---     exact haXY.2
---     apply b5 (Y := X \ {a})
---     compare
---     exact H₁
 
-theorem getAlive.sdiff_notin {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
-    (b5 : B5 ob)
-    (H₁ : ∀ (a : Fin k), ¬semibad ob a) :
-    ∀ (a : Fin k) (X Y : Finset (Fin k)), a ∈ X ∩ Y → X \ {a} ∉ ob Y := by
-    intro a X Y haXY
-    unfold semibad at H₁
-    push_neg at H₁
-    specialize H₁ a Y X (by rw [inter_comm];exact haXY)
-    contrapose! H₁
-    apply b5 (Y := X \ {a})
-    compare
-    exact H₁
+lemma semibad_of_semibad'
+    (b5 : B5 ob) {a : Fin k} (h : semibad' ob a) : semibad ob a := by
+    obtain ⟨Y,X,hXY⟩ := h
+    use X, Y
+    constructor
+    · rw [inter_comm]
+      exact hXY.1
+    · apply b5 (Y := Y \ {a})
+      compare
+      exact hXY.2
 
-theorem getAlive.inter {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+/-- Not used, but for the record... -/
+lemma semibad'_of_semibad
+    (b5 : B5 ob) {a : Fin k} (h : semibad ob a) : semibad' ob a := by
+    obtain ⟨Y,X,hXY⟩ := h
+    use X, Y
+    constructor
+    · rw [inter_comm]
+      exact hXY.1
+    ·exact b5 _ _ _ (by compare) hXY.2
+
+lemma semibad'_iff_semibad
+    (b5 : B5 ob) {a : Fin k} :
+    semibad' ob a ↔ semibad ob a := by
+  constructor
+  apply semibad_of_semibad' b5
+  apply semibad'_of_semibad b5
+
+
+
+theorem quasibad.aux {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
     (t : @ABCDE k ob)
     {X Y : Finset (Fin k)} (h : Y ∈ ob X)
     {a : Fin k} (ha : a ∈ X \ Y) : X ∩ Y = X \ {a} := by
@@ -1033,21 +1045,75 @@ theorem getAlive.inter {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k)
         exact this
 
 
-lemma sub_alive (t : @ABCDE k ob)
-    (H₁ : ∀ a, ¬ semibad ob a) : ∀ Y, ob Y ⊆ alive k Y := by
+
+/-- Does this really require all of ABCDE? -/
+lemma semibad_of_quasibad
+    (t : @ABCDE k ob)
+    {X Y : Finset (Fin k)} (h : Y ∈ ob X) -- quasibad
+    {a : Fin k} (ha : a ∈ X \ Y) :  semibad ob a := by
+        have : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
+        use X, X
+        rw [quasibad.aux t h ha] at this
+        simp at ha ⊢
+        tauto
+
+lemma quasibad_iff_semibad (t : @ABCDE k ob)
+    (a : Fin k) : @quasibad k ob a ↔ semibad ob a := by
+    constructor
+    · intro h
+      unfold quasibad at h
+      obtain ⟨U,V,hUV⟩ := h
+      exact semibad_of_quasibad t hUV.2 hUV.1
+    · clear t
+      intro h
+      unfold semibad at h
+      unfold quasibad
+      obtain ⟨X,Y,hXY⟩ := h
+      use X
+      use (X ∩ Y) \ {a}
+      constructor
+      simp at hXY ⊢
+      tauto
+      tauto
+
+
+
+
+lemma sub_alive.core (a5 : A5 ob) (b5 : B5 ob)
+    (H₁ : ∀ a, ¬ quasibad ob a) : ∀ Y, ob Y ⊆ alive k Y := by
     intro X Y h
     simp [alive]
     constructor
-    · exact fun hc => t.a5 _ $ t.b5 _ _ _ (by simp) $ hc ▸ h
+    · exact fun hc => a5 _ $ b5 _ _ _ (by simp) $ hc ▸ h
     · by_contra H
-      unfold semibad at H₁
+      unfold quasibad at H₁
       push_neg at H₁
       have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
-      specialize H₁ a X X
-      have h₁ : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
-      rw [getAlive.inter t h ha] at h₁
-      simp at ha H₁
-      exact H₁ ha.1 h₁
+      specialize H₁ a X Y
+      tauto
+
+lemma sub_alive (t : @ABCDE k ob)
+    (H₁ : ∀ a, ¬ semibad ob a) : ∀ Y, ob Y ⊆ alive k Y := by
+    have h₀ := quasibad_iff_semibad t
+    apply sub_alive.core t.a5 t.b5 (by
+        intro a hc
+        rw [h₀] at hc
+        exact H₁ a hc)
+    -- OLD PROOF:
+    -- intro X Y h
+    -- simp [alive]
+    -- constructor
+    -- · exact fun hc => t.a5 _ $ t.b5 _ _ _ (by simp) $ hc ▸ h
+    -- · by_contra H
+    --   unfold semibad at H₁
+    --   push_neg at H₁
+    --   have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
+    --   specialize H₁ a X X
+    --   have h₁ : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
+    --   rw [quasibad.aux t h ha] at h₁
+    --   simp at ha H₁
+    --   exact H₁ ha.1 h₁
+
 
 -- not used
 lemma sub_aliveBAD (t : @ABCDE k ob)
@@ -1062,13 +1128,24 @@ lemma sub_aliveBAD (t : @ABCDE k ob)
       have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
       specialize H₁ a X (by simp at ha;tauto)
       have h₁ : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
-      rw [getAlive.inter t h ha] at h₁
+      rw [quasibad.aux t h ha] at h₁
       exact H₁ h₁
 
 
 
-lemma alive_sub (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
-    (H₁ : ∀ a, ¬ semibad ob a) : ∀ Y, alive k Y ⊆ ob Y := by
+-- lemma alive_subMAYBE (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
+--     (H₁ : ∀ a, ¬ quasibad ob a) : ∀ Y, alive k Y ⊆ ob Y := by
+--   unfold quasibad at H₁
+--   push_neg at H₁
+--   simp [alive]
+--   intro X Y
+--   simp
+--   contrapose! H₁
+--   simp
+--   sorry
+
+lemma alive_sub_of_no_semibad' (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
+    (H₁ : ∀ a, ¬ semibad' ob a) : ∀ Y, alive k Y ⊆ ob Y := by
   intro X Y h₂
   simp [alive] at h₂
   have H₀ : ∃ Y X, X ∈ ob Y := by
@@ -1077,14 +1154,27 @@ lemma alive_sub (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
     simp [noObligations]
     apply H₀
   obtain ⟨Y',X',h'⟩ := H₀
-  have h₀ : Y' ∈ ob Y' := by
-    have := local_holds_apply t (t.b5 Y' X' (X' ∩ Y') (by simp) h')
-    unfold cocos at this
-    simp at this
-    exact obSelf_of_ob_of_subset.glue t.b5 (getAlive.sdiff_notin t.b5 H₁) this h'
-  have h₁ : X ∈ ob X := obSelf_of_obSelf ⟨t.b5, t.d5, t.e5⟩ h₀ h₂.1
-  nth_rewrite 2 [← inter_eq_left.mpr h₂.2] at h₁
-  exact t.b5 X (X ∩ Y) Y (by simp) h₁
+  have := local_holds_apply t (t.b5 _ _ (X' ∩ Y') (by simp) h')
+  simp [cocos] at this
+  exact t.b5 X X Y (by compare) $ obSelf_of_obSelf ⟨t.b5, t.d5, t.e5⟩
+    (obSelf_of_ob_of_almost_subset t.b5 H₁ h' this)
+    h₂.1
+
+/--
+
+The implications are
+
+bad →[∅] semibad ↔[B5] semibad' →[∅] quasibad →[ABCDE5] semibad →[AE5] bad
+
+bad, quasibad = bad for the man with the dog and no fence
+unique_bad = bad for Carmo and Jones' theory!
+
+-/
+lemma alive_sub (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
+    (H₁ : ∀ a, ¬ semibad ob a) : ∀ Y, alive k Y ⊆ ob Y := by
+  apply alive_sub_of_no_semibad' t H₀
+  simp_rw [semibad'_iff_semibad t.b5]
+  exact H₁
 
 lemma alive_of_no_bad (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
     (H₁ : ∀ a, ¬ semibad ob a) : ob = alive k := (Set.eqOn_univ _ _).mp fun Y _ => by
