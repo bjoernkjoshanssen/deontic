@@ -203,12 +203,12 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 
 % define 5(bde) as a theory?
 
-\begin{lemma}\label{obSelf_of_bad_not_mem}
-	\lean{obSelf_of_bad_not_mem}
-	\leanok
-	\uses{BDE}
-	If $a$ is $\ob$-bad, $a\notin Y \ne \emptyset$, then $Y\in\ob(Y)$.
-\end{lemma}	
+% \begin{lemma}\label{obSelf_of_bad_not_mem}
+% 	\lean{obSelf_of_bad_not_mem}
+% 	\leanok
+% 	\uses{BDE}
+% 	If $a$ is $\ob$-bad, $a\notin Y \ne \emptyset$, then $Y\in\ob(Y)$.
+% \end{lemma}
 
 
 \begin{lemma}\label{obSelfSdiff_of_bad}
@@ -229,20 +229,20 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 \begin{lemma}\label{obSelf_of_obSelfSdiff}
 	\lean{obSelf_of_obSelfSdiff}
 	\leanok
-	\uses{obSelf_of_obSelf,5(a)}
+	\uses{obSelf_of_obSelf}
 	
 	    % (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
 	    % {X : Finset (Fin k)} {a : Fin k}
 	If $a ∈ X ≠ \mathrm{univ}$ and $X \setminus \{a\} ∈ ob X$ then $X ∈ \ob X$.
 \end{lemma}
 
-\begin{lemma}\label{ob_singleton_of_obSelf}
-	\lean{ob_singleton_of_obSelf}
-	\leanok
-	\uses{5(a),5(b),5(c) weak}
-	    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) {a : Fin k}
-	    If $\{a\} ∈ \ob \{a\}$ then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
-\end{lemma}
+% \begin{lemma}\label{ob_singleton_of_obSelf}
+% 	\lean{ob_singleton_of_obSelf}
+% 	\leanok
+% 	\uses{5(a),5(b),5(c) weak}
+% 	    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) {a : Fin k}
+% 	    If $\{a\} ∈ \ob \{a\}$ then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
+% \end{lemma}
 
 \begin{lemma}\label{obSelfSingleton_of_bad}
 	\lean{obSelfSingleton_of_bad}
@@ -293,8 +293,8 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
     covering ob.
 \end{lemma}
 
-\begin{lemma}\label{getAlive}
-	\lean{getAlive}
+\begin{lemma}\label{alive_of_no_bad}
+	\lean{alive_of_no_bad}
 	\leanok
 	\uses{local_holds,obSelf_of_obSelf}
 	If ob ≠ noObligations and ∀ a, ¬ semibad ob a, then
@@ -317,29 +317,39 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
 	    $X ∩ Y = X$ or $X ∩ Y = X \setminus \{a\}$.
 \end{lemma}
 
-\begin{lemma}\label{obSelf_of_bad_mem}
-	\lean{obSelf_of_bad_mem}
+% \begin{lemma}\label{obSelf_of_bad_mem}
+% 	\lean{obSelf_of_bad_mem}
+% 	\leanok
+% 	\uses{obSelfSdiff_of_bad,obSelf_of_obSelfSdiff,5(a)}
+% If semibad ob b and $¬X = \{b\}$ and $b ∈ X$ then
+%     $X ∈ ob X$.
+% \end{lemma}
+
+\begin{lemma}\label{obSelf_of_bad_nonsingle}
+	\lean{obSelf_of_bad_nonsingle}
 	\leanok
-	\uses{obSelfSdiff_of_bad,obSelf_of_obSelfSdiff,5(a)}
-If semibad ob b and $¬X = \{b\}$ and $b ∈ X$ then
-    $X ∈ ob X$.
+	\uses{obSelf_of_obSelfSdiff,obSelfSdiff_of_bad}
+If bad ob a and X ≠ {a} and X ≠ ∅ then X ∈ ob X.
 \end{lemma}
+
 
 \begin{lemma}\label{obSelf_of_bad}
 	\lean{obSelf_of_bad}
 	\leanok
-	\uses{obSelf_of_bad_not_mem,obSelf_of_bad_mem}
+	\uses{obSelfSingleton_of_bad,obSelf_of_bad_nonsingle}
     If bad ob a and $X \setminus \{a\}\ne \emptyset$ then $X ∈ \ob X$.
 \end{lemma}
 
 
-\begin{lemma}\label{ob_bad}
-	\lean{ob_bad}
-	\leanok
-	\uses{obSelfSingleton_of_bad,obSelf_univ,ob_singleton_of_obSelf}
-If bad ob a then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
-
-\end{lemma}
+%
+%
+% \begin{lemma}\label{ob_bad}
+% 	\lean{ob_bad}
+% 	\leanok
+% 	\uses{obSelfSingleton_of_bad,obSelf_univ,ob_singleton_of_obSelf}
+% If bad ob a then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
+%
+% \end{lemma}
 
 \begin{lemma}\label{bad_of_semibad}
 	\lean{bad_of_semibad}
@@ -356,11 +366,11 @@ If semibad ob a then bad ob a.
 	If bad ob a then ∀ Y, ob Y ⊆ stayAlive a Y.
 \end{lemma}
 
-Note that Lemma \ref{stayAlive_sub_of_bad} does not require the strong form of C5.
+Note that Lemma \ref{stayAlive_sub_of_bad} does not require any form of C5.
 \begin{lemma}\label{stayAlive_sub_of_bad}
 	\lean{stayAlive_sub_of_bad}
 	\leanok
-	\uses{ob_bad,obSelf_of_bad,obSelfSdiff_of_bad}
+	\uses{obSelf_of_bad,obSelfSdiff_of_bad}
     If bad ob a then ∀ Y, stayAlive a Y ⊆ ob Y.
 \end{lemma}
 
@@ -375,7 +385,7 @@ Note that Lemma \ref{stayAlive_sub_of_bad} does not require the strong form of C
 \begin{lemma}\label{models_ofCJ_1997}
 	\lean{models_ofCJ_1997}
 	\leanok
-	\uses{stayAlive_of_bad,getAlive,bad_of_semibad}
+	\uses{stayAlive_of_bad,alive_of_no_bad,bad_of_semibad}
 	Either $∃ a, ob = stayAlive a$ or $ob = alive k$ or $ob = noObligations k$.
 \end{lemma}
 

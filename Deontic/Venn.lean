@@ -343,7 +343,7 @@ theorem pair_venn {n : ℕ}
     tauto
 
 theorem union_sdiff_singleton {n : ℕ}
-  {X Y : Finset (Fin n)} {a : Fin n} (ha : a ∈ X) (haY : Y \ {a} ≠ ∅) :
+  {X Y : Finset (Fin n)} {a : Fin n} (ha : a ∈ X) :
   (X ∪ Y) \ {a} = (X ∪ Y) \ X ∪ X \ {a} := by
     ext i;simp
     constructor
@@ -361,6 +361,19 @@ theorem union_sdiff_singleton {n : ℕ}
 lemma two_in_sdiff {n : ℕ} (X Y : Finset (Fin n))
     (a i : Fin n) (ha : a ∈ X \ Y) (hi₀ : i ∈ X) (hi₁ : ¬i = a) (H₀ : i ∉ Y) :
     ¬ #(X \ (X ∩ Y)) ≤ 1 := by
+  simp
+  have : #{a,i} ≤ #(X \ Y) := by
+    apply card_le_card
+    intro j;simp at ha ⊢;intro hj
+    cases hj with
+    | inl h => subst h; exact ha
+    | inr h => subst h; tauto
+  have : #{a,i} = 2 := card_pair fun hc ↦ hi₁ hc.symm
+  omega
+
+lemma two_in_sdiff' {n : ℕ} (X Y : Finset (Fin n))
+    (a i : Fin n) (ha : a ∈ X \ Y) (hi₀ : i ∈ X) (hi₁ : ¬i = a) (H₀ : i ∉ Y) :
+    ¬ #(X \ Y) ≤ 1 := by
   simp
   have : #{a,i} ≤ #(X \ Y) := by
     apply card_le_card

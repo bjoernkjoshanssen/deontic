@@ -479,58 +479,58 @@ lemma global_holds_specific (t : @ABCDE k ob)
     tauto
   exact semiglobal_holds ⟨t.a5, t.c5, t.d5, t.e5⟩ ha'.2.2 ha'.1 ha'.2.1 this h
 
-/-- A context `Y` is obligatory given itself, provided
+/- A context `Y` is obligatory given itself, provided
 that `∃ a ∉ Y, ∃ X, a ∈ X ∧ X \ {a} ∈ ob X`.
 -/
-theorem obSelf_of_bad_not_mem
-    (t : @BDE k ob)
-    {Y : Finset (Fin k)}
-    {a : Fin k}
-    (hbad : bad ob a)
-    (haY : a ∉ Y)
-    (hY : Y ≠ ∅) : Y ∈ ob Y := by
-  obtain ⟨X,ha,hX⟩ := hbad
+-- theorem obSelf_of_bad_not_mem
+--     (t : @BDE k ob)
+--     {Y : Finset (Fin k)}
+--     {a : Fin k}
+--     (hbad : bad ob a)
+--     (hY : Y ≠ ∅)
+--     (haY : a ∉ Y) : Y ∈ ob Y := by
+--   obtain ⟨X,ha,hX⟩ := hbad
 
-  have : Y ⊆ Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) := by
-    intro y hy
-    simp
-    constructor
-    exact hy
-    by_cases H : y ∈ X
-    · right
-      simp_all
-      intro hc
-      subst hc
-      exact haY hy
-    · tauto
-  have g₀ : Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) ≠ ∅ := by
-    contrapose! hY
-    apply subset_empty.mp
-    apply subset_trans this
-    rw [hY]
-  have g₁ : Y = ((X ∪ Y) \ X ∪ X \ {a}) ∩ Y := by
-    ext i;simp
-    intro hi
-    by_cases H : i ∈ X
-    · exact .inr ⟨H, fun hc => haY $ hc ▸ hi⟩
-    · exact .inl ⟨.inr hi, H⟩
-  have h₀ := t.d5 _ _ (X ∪ Y) sdiff_subset hX subset_union_left
-  have h₁ := t.e5 _ _ _ subset_union_right h₀ g₀
-  have h₂ := t.b5 _ _ (((X ∪ Y) \ X ∪ X \ {a}) ∩ Y)
-    (by simp) h₁
-  convert h₂
+--   have : Y ⊆ Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) := by
+--     intro y hy
+--     simp
+--     constructor
+--     exact hy
+--     by_cases H : y ∈ X
+--     · right
+--       simp_all
+--       intro hc
+--       subst hc
+--       exact haY hy
+--     · tauto
+--   have g₀ : Y ∩ ((X ∪ Y) \ X ∪ X \ {a}) ≠ ∅ := by
+--     contrapose! hY
+--     apply subset_empty.mp
+--     apply subset_trans this
+--     rw [hY]
+--   have g₁ : Y = ((X ∪ Y) \ X ∪ X \ {a}) ∩ Y := by
+--     ext i;simp
+--     intro hi
+--     by_cases H : i ∈ X
+--     · exact .inr ⟨H, fun hc => haY $ hc ▸ hi⟩
+--     · exact .inl ⟨.inr hi, H⟩
+--   have h₀ := t.d5 _ _ (X ∪ Y) sdiff_subset hX subset_union_left
+--   have h₁ := t.e5 _ _ _ subset_union_right h₀ g₀
+--   have h₂ := t.b5 _ _ (((X ∪ Y) \ X ∪ X \ {a}) ∩ Y)
+--     (by simp) h₁
+--   convert h₂
 
 theorem obSelfSdiff_of_bad (t : @BDE k ob)
     {a : Fin k} (hbad : bad ob a)
-    {Y : Finset (Fin k)} (haY : Y \ {a} ≠ ∅) :
+    {Y : Finset (Fin k)} (han : Y \ {a} ≠ ∅) :
     Y \ {a} ∈ ob Y := by
   have ⟨X,ha,h⟩ := hbad
   have : (X ∪ Y) \ {a} ∈ ob (X ∪ Y) := by
     convert t.d5 _ _ (X ∪ Y) (by simp) h (by simp) using 1
-    exact union_sdiff_singleton ha haY
+    exact union_sdiff_singleton ha
   have : (X ∪ Y) \ {a} ∈ ob Y := t.e5 (X ∪ Y) Y ((X ∪ Y) \ {a}) (by simp) this (by
-      contrapose! haY
-      rw [← haY]
+      contrapose! han
+      rw [← han]
       compare)
   exact t.b5 _ _ _ (by compare) this
 
@@ -544,39 +544,39 @@ theorem obSelf_of_obSelf (t : @BDE k ob)
 
 
 
-lemma ob_singleton_of_obSelf
-    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) {a : Fin k}
-    (ha : {a} ∈ ob {a}) : ob {a} = {Y | a ∈ Y}.toFinset := by
-  apply subset_antisymm
-  · intro Y hY -- regular c5 should be enough here
-    simp
-    by_contra H
-    have h₀ : Y ∩ {a} ∈ ob {a} := by
-        apply c5 _ _ _ hY ha
-        have : Y ∩ {a} ∈ ob {a} := by
-            apply b5
-            show Y ∩ {a} = _
-            simp
-            exact hY
-        rw [inter_comm]
-        simp
-        rw [inter_comm]
-        intro hc
-        apply a5
-        rw [hc] at this
-        exact this
-    have h₁ : Y ∩ {a} = ∅ := subset_empty.mp fun i hi => by
-      exfalso
-      simp at hi
-      exact H $ hi.2.symm ▸ hi.1
-    exact a5 _ $ h₁ ▸ h₀
-  · intro Y hY
-    simp at hY
-    exact b5 {a} (Y ∩ {a}) Y (by simp) (by
-      have : Y ∩ {a} = {a} := by
-        apply subset_antisymm <;> (simp;tauto)
-      rw [this]
-      tauto)
+-- lemma ob_singleton_of_obSelf -- not needed!
+--     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) {a : Fin k}
+--     (ha : {a} ∈ ob {a}) : ob {a} = {Y | a ∈ Y}.toFinset := by
+--   apply subset_antisymm
+--   · intro Y hY -- regular c5 should be enough here
+--     simp
+--     by_contra H
+--     have h₀ : Y ∩ {a} ∈ ob {a} := by
+--         apply c5 _ _ _ hY ha
+--         have : Y ∩ {a} ∈ ob {a} := by
+--             apply b5
+--             show Y ∩ {a} = _
+--             simp
+--             exact hY
+--         rw [inter_comm]
+--         simp
+--         rw [inter_comm]
+--         intro hc
+--         apply a5
+--         rw [hc] at this
+--         exact this
+--     have h₁ : Y ∩ {a} = ∅ := subset_empty.mp fun i hi => by
+--       exfalso
+--       simp at hi
+--       exact H $ hi.2.symm ▸ hi.1
+--     exact a5 _ $ h₁ ▸ h₀
+--   · intro Y hY
+--     simp at hY
+--     exact b5 {a} (Y ∩ {a}) Y (by simp) (by
+--       have : Y ∩ {a} = {a} := by
+--         apply subset_antisymm <;> (simp;tauto)
+--       rw [this]
+--       tauto)
 
 
 structure ADE where
@@ -603,42 +603,75 @@ lemma obSelf_univ
   convert this using 2
   simp
 
-lemma obSelfSingleton_of_bad (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    {a : Fin k} (hbad : bad ob a) : {a} ∈ ob {a} := by
-  obtain ⟨X,ha,ha'⟩ := hbad
-  have adHoc := obSelf_univ a5 d5 e5 a (by
-    have := d5 X (X \ {a}) univ (by simp) ha' (by simp)
-    convert this using 1
-    apply subset_antisymm
-    · intro i hi
+lemma obSelf_univNOA
+    (d5 : D5 ob) (e5 : E5 ob) (a : Fin k)
+    (ha : univ \ {a} ∈ ob univ) (h : univ \ {a} ≠ ∅) : univ ∈ ob univ := by
+  by_cases H : k = 0
+  · subst H;have := a.2; simp at this
+  have ⟨n,hn⟩ : ∃ n, k = n + 1 := Nat.exists_eq_succ_of_ne_zero H
+  subst hn
+  have : univ \ {a} ∈ ob (univ \ {a}) :=
+    e5 univ  (univ \ {a}) (univ \ {a}) (by simp) ha (by
+      simp only [inter_self]
+      exact h
+    )
+  have := d5 (univ \ {a}) (univ \ {a}) univ (by simp) this (by simp)
+  convert this using 2
+  simp
+
+
+lemma sdiff_union_sdiff (A B C : Finset (Fin k)) :
+    A \ C ⊆ A \ B ∪ B \ C := by
+      intro i hi
       simp at hi ⊢
       tauto
+
+
+lemma obSelfSingleton_of_bad (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+    {a : Fin k} (hbad : bad ob a) : {a} ∈ ob {a} := by
+  apply b5 _ univ _ (by simp)
+  apply e5 _ _ _ (subset_univ _)
+  apply obSelf_univ a5 d5 e5 a
+  obtain ⟨X,ha,ha'⟩ := hbad
+  have : univ \ {a} = univ \ X ∪ X \ {a} := by
+    apply subset_antisymm
+    · apply sdiff_union_sdiff
     · intro i hi
       simp at hi ⊢
       cases hi with
-      | inl h =>
-        contrapose! h
-        exact h ▸ ha
-      | inr h => tauto)
-  have : univ ∈ ob {a} := e5 univ {a} univ (subset_univ _) adHoc (by simp)
-  exact b5 {a} univ {a} (by simp) this
+        | inl h => exact fun hc => h $ hc ▸ ha
+        | inr h => exact h.2
+  rw [this]
+  apply d5 X (X \ {a}) univ (by simp) ha' (by simp)
+  simp
 
 def obSelf (A : Finset (Fin k)) := A ∈ ob A
 
-theorem obSelf_of_obSelfSdiff
-    (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+-- theorem obSelf_of_obSelfSdiff
+--     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+--     {X : Finset (Fin k)} {a : Fin k}
+--     (haX : X ≠ ∅)
+--     (h : X \ {a} ∈ ob X) : X ∈ ob X := by
+--   apply obSelf_of_obSelf ⟨b5, d5, e5⟩ (hY := haX)
+--   show X \ {a} ∈ ob (X \ {a})
+--   exact e5 X (X \ {a}) (X \ {a}) (by simp) h (by
+--     rw [inter_self]
+--     intro hc
+--     apply a5
+--     rw [hc] at h
+--     exact h
+--   )
+
+theorem obSelf_of_obSelfSdiff (t : @BDE k ob)
     {X : Finset (Fin k)} {a : Fin k}
-    (haX : a ∈ X)
-    (h : X \ {a} ∈ ob X) : X ∈ ob X := by
-  apply obSelf_of_obSelf ⟨b5, d5, e5⟩
-  exact e5 X (X \ {a}) (X \ {a}) (by simp) h (by
+    (h : X \ {a} ∈ ob X) (han : X \ {a} ≠ ∅) : X ∈ ob X := by
+  have haX : X ≠ ∅ := by contrapose! han;subst han;simp
+  apply obSelf_of_obSelf t _ haX
+  show X \ {a} ∈ ob (X \ {a})
+  exact t.e5 X (X \ {a}) (X \ {a}) (by simp) h (by
     rw [inter_self]
-    intro hc
-    apply a5
-    rw [hc] at h
-    exact h
+    exact han
   )
-  exact ne_empty_of_mem haX
 
 --
 /--
@@ -951,47 +984,93 @@ lemma obSelf_of_ob_of_subset.glue
       exfalso
       apply not_ob_of_almost b5 H₁ h₀ h
 
-lemma getAlive (t : @ABCDE k ob)
-    (H₀ : ob ≠ noObligations k)
-    (H₁ : ∀ a, ¬ semibad ob a) :
-    ob = alive k := by
-  ext X Y
-  simp [alive]
-  constructor
-  · intro h
+-- theorem getAlive.sdiff_notinBAD {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+--     (b5 : B5 ob)
+--     (H₁ : ∀ (a : Fin k), ¬ bad ob a) :
+--     ∀ (a : Fin k) (X Y : Finset (Fin k)), a ∈ X ∩ Y → X \ {a} ∉ ob Y := by
+--     intro a X Y haXY
+--     unfold bad at H₁
+--     push_neg at H₁
+--     specialize H₁ a Y
+--     contrapose! H₁
+--     constructor
+--     simp at haXY
+--     exact haXY.2
+--     apply b5 (Y := X \ {a})
+--     compare
+--     exact H₁
+
+theorem getAlive.sdiff_notin {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+    (b5 : B5 ob)
+    (H₁ : ∀ (a : Fin k), ¬semibad ob a) :
+    ∀ (a : Fin k) (X Y : Finset (Fin k)), a ∈ X ∩ Y → X \ {a} ∉ ob Y := by
+    intro a X Y haXY
+    unfold semibad at H₁
+    push_neg at H₁
+    specialize H₁ a Y X (by rw [inter_comm];exact haXY)
+    contrapose! H₁
+    apply b5 (Y := X \ {a})
+    compare
+    exact H₁
+
+theorem getAlive.inter {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+    (t : @ABCDE k ob)
+    {X Y : Finset (Fin k)} (h : Y ∈ ob X)
+    {a : Fin k} (ha : a ∈ X \ Y) : X ∩ Y = X \ {a} := by
+    apply subset_antisymm
+    · intro i hi
+      simp at ha hi ⊢
+      exact ⟨hi.1, fun hc => ha.2 $ hc ▸ hi.2⟩
+    · intro i hi
+      simp at hi ⊢
+      constructor
+      · exact hi.1
+      · by_contra H₀
+        apply two_in_sdiff' _ _ _ _ ha hi.1 hi.2 H₀
+        have := local_holds_apply t (t.b5 _ _ (X ∩ Y) (by compare) h) --inter_subset_left
+        unfold cocos at this
+        simp at this
+        exact this
+
+
+lemma sub_alive (t : @ABCDE k ob)
+    (H₁ : ∀ a, ¬ semibad ob a) : ∀ Y, ob Y ⊆ alive k Y := by
+    intro X Y h
+    simp [alive]
     constructor
-    · intro hc
-      subst hc
-      have := t.b5 ∅ Y ∅ (by simp) h
-      exact t.a5 _ this
+    · exact fun hc => t.a5 _ $ t.b5 _ _ _ (by simp) $ hc ▸ h
     · by_contra H
-      have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
-      have h₀ : X ∩ Y = X \ {a} := by
-        apply subset_antisymm
-        · intro i hi
-          simp at ha hi ⊢
-          exact ⟨hi.1, fun hc => ha.2 $ hc ▸ hi.2⟩
-        · intro i hi
-          simp at hi ⊢
-          constructor
-          · exact hi.1
-          · by_contra H₀
-            exact two_in_sdiff _ _ _ _ ha hi.1 hi.2 H₀ $ by
-                have := local_holds_apply t
-                    (t.b5 X Y (X ∩ Y) (by compare) h) --inter_subset_left
-                unfold cocos at this
-                simp at this
-                convert this using 1
-                apply congrArg
-                compare
-      have h₁ : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
       unfold semibad at H₁
       push_neg at H₁
+      have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
       specialize H₁ a X X
-      rw [h₀] at h₁
+      have h₁ : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
+      rw [getAlive.inter t h ha] at h₁
       simp at ha H₁
-      tauto
-  intro h₂
+      exact H₁ ha.1 h₁
+
+-- not used
+lemma sub_aliveBAD (t : @ABCDE k ob)
+    (H₁ : ∀ a, ¬ bad ob a) : ∀ Y, ob Y ⊆ alive k Y := by
+    intro X Y h
+    simp [alive]
+    constructor
+    · exact fun hc => t.a5 _ $ t.b5 _ _ _ (by simp) $ hc ▸ h
+    · by_contra H
+      unfold bad at H₁
+      push_neg at H₁
+      have ⟨a,ha⟩ : ∃ a, a ∈ X \ Y := Nonempty.exists_mem $ sdiff_nonempty.mpr H
+      specialize H₁ a X (by simp at ha;tauto)
+      have h₁ : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
+      rw [getAlive.inter t h ha] at h₁
+      exact H₁ h₁
+
+
+
+lemma alive_sub (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
+    (H₁ : ∀ a, ¬ semibad ob a) : ∀ Y, alive k Y ⊆ ob Y := by
+  intro X Y h₂
+  simp [alive] at h₂
   have H₀ : ∃ Y X, X ∈ ob Y := by
     contrapose! H₀
     ext Y X
@@ -999,24 +1078,19 @@ lemma getAlive (t : @ABCDE k ob)
     apply H₀
   obtain ⟨Y',X',h'⟩ := H₀
   have h₀ : Y' ∈ ob Y' := by
-    have := local_holds_apply t
-        (t.b5 Y' X' (X' ∩ Y') (by simp) h')
-        --(by simp)
+    have := local_holds_apply t (t.b5 Y' X' (X' ∩ Y') (by simp) h')
     unfold cocos at this
     simp at this
-    apply obSelf_of_ob_of_subset.glue t.b5 (by
-        unfold semibad at H₁
-        push_neg at H₁
-        intro a X Y haXY
-        specialize H₁ a Y X (by rw [inter_comm];tauto)
-        contrapose! H₁
-        apply t.b5
-        show X \ {a} ∩ Y = _
-        compare
-        exact H₁) (by convert this using 1) h'
+    exact obSelf_of_ob_of_subset.glue t.b5 (getAlive.sdiff_notin t.b5 H₁) this h'
   have h₁ : X ∈ ob X := obSelf_of_obSelf ⟨t.b5, t.d5, t.e5⟩ h₀ h₂.1
   nth_rewrite 2 [← inter_eq_left.mpr h₂.2] at h₁
   exact t.b5 X (X ∩ Y) Y (by simp) h₁
+
+lemma alive_of_no_bad (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
+    (H₁ : ∀ a, ¬ semibad ob a) : ob = alive k := (Set.eqOn_univ _ _).mp fun Y _ => by
+  apply subset_antisymm
+  apply sub_alive t H₁
+  apply alive_sub t H₀ H₁
 
 theorem unique_bad (t : @ABCDE k ob) -- maybe five.d instead of t.d5?
     {a b : Fin k} (ha : bad ob a) (hb : bad ob b) : a = b := by
@@ -1079,37 +1153,24 @@ theorem bad_cosubsingleton_of_ob (t : @ABCDE k ob)
 /-- If `X` contains a semibad world `b` and
 at least one other world `a` then `X` is self-obligatory.
  -/
-lemma obSelf_of_bad_mem {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
-    (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    {b : Fin k} (H₁ : bad ob b)
-    {X : Finset (Fin k)} (G : ¬X = {b}) (H₀ : b ∈ X) :
-    X ∈ ob X := by
-  have H₁ := semibad_of_bad H₁
-  obtain ⟨X',Y',H₁⟩ := H₁
-  have h₁ : (X' ∩ Y') \ {b} ≠ ∅ := by
-    have := H₁.2
-    contrapose! this
-    rw [this]
-    apply a5
-  have h₀ : X \ {b} ∈ ob X := by
-    have g₁ := e5 _ _ _ (by show X' ∩ Y' ⊆ X';simp) H₁.2 (by
-        have := h₁
-        contrapose! this;rw [← this];compare)
-    exact @obSelfSdiff_of_bad k ob ⟨b5, d5, e5⟩ b (by
-        use X' ∩ Y'
-        constructor
-        exact H₁.1
-        exact g₁) X (sdiff_ne_empty_of_ne_empty_of_mem G H₀)
-  exact obSelf_of_obSelfSdiff a5 b5 d5 e5 (h := h₀) (haX := H₀)
+-- lemma obSelf_of_bad_mem {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+--     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+--     {b : Fin k} (H₁ : bad ob b)
+--     {X : Finset (Fin k)} (G : ¬X = {b}) (H₀ : b ∈ X) :
+--     X ∈ ob X :=
+--     obSelf_of_obSelfSdiff a5 b5 d5 e5 (ne_empty_of_mem H₀)
+--     $ obSelfSdiff_of_bad ⟨b5, d5, e5⟩ H₁ $ sdiff_ne_empty_of_ne_empty_of_mem G H₀
 
 
 
-theorem ob_bad
-    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    (a : Fin k)
-    (hbad : bad ob a) : ob {a} = {Y | a ∈ Y}.toFinset :=
-  ob_singleton_of_obSelf a5 b5 c5
-         $ obSelfSingleton_of_bad a5 b5 d5 e5 hbad
+
+-- /-- This works, but is not needed for the characterization. -/
+-- theorem ob_bad
+--     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) (d5 : D5 ob) (e5 : E5 ob)
+--     (a : Fin k)
+--     (hbad : bad ob a) : ob {a} = {Y | a ∈ Y}.toFinset :=
+--   ob_singleton_of_obSelf a5 b5 c5
+--          $ obSelfSingleton_of_bad a5 b5 d5 e5 hbad
 
 theorem bad_of_semibad
     (a5 : A5 ob) (e5 : E5 ob)
@@ -1121,14 +1182,53 @@ theorem bad_of_semibad
       exact fun hc => a5 _ $ hc ▸ H₁₁
   exact ⟨(X' ∩ Y'), H₁₀, e5 _ _ _ inter_subset_right H₁₁ h₁⟩
 
+-- lemma obSelf_of_bad_mem {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+--     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+--     {b : Fin k} (H₁ : bad ob b)
+--     {X : Finset (Fin k)} (G : X \ {b} ≠ ∅) :
+--     X ∈ ob X :=
+--     obSelf_of_obSelfSdiff a5 b5 d5 e5 (by contrapose! G;rw [G];simp)
+--     $ obSelfSdiff_of_bad ⟨b5, d5, e5⟩ H₁ G
+
+-- lemma obSelf_of_bad_nonsingle
+--     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+--     {a : Fin k} (hbad : bad ob a) {X : Finset (Fin k)}
+--     (ha : X ≠ {a})
+--     (he : X ≠ ∅) : X ∈ ob X := by
+--   apply obSelf_of_obSelfSdiff a5 b5 d5 e5 he
+--   apply obSelfSdiff_of_bad ⟨b5, d5, e5⟩ hbad
+--   simp
+--   tauto
+
+lemma diff_ne
+{a : Fin k}
+{X : Finset (Fin k)}
+(ha : X ≠ {a})
+(he : X ≠ ∅) : X \ {a} ≠ ∅ := by simp;tauto
+
+
+lemma obSelf_of_bad_nonsingle (t : @BDE k ob)
+    {a : Fin k} (hbad : bad ob a) {X : Finset (Fin k)}
+    (ha : X ≠ {a})
+    (he : X ≠ ∅) : X ∈ ob X := by
+  apply obSelf_of_obSelfSdiff t (han := diff_ne ha he)
+  exact obSelfSdiff_of_bad t hbad (han := diff_ne ha he)
+
+--   apply obSelf_of_bad_mem a5 b5 d5 e5 hbad h
+
+--   by_cases H₀ : a ∈ X
+--   ·
+--     exact obSelf_of_bad_mem   a5 b5  d5  e5  hbad ha H₀
+--   · exact obSelf_of_bad_not_mem ⟨b5, d5, e5⟩ hbad he H₀
+
 theorem obSelf_of_bad
     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    {a : Fin k} (hbad : bad ob a) {X : Finset (Fin k)}
-    (G : X ≠ {a})
-    (hX : X ≠ ∅) : X ∈ ob X := by
-  by_cases H₀ : a ∈ X
-  · exact obSelf_of_bad_mem a5 b5 d5 e5 hbad G H₀
-  · exact obSelf_of_bad_not_mem ⟨b5, d5, e5⟩ hbad H₀ hX
+    (hbad : ∃ a, bad ob a) {X : Finset (Fin k)}
+    (he : X ≠ ∅) : X ∈ ob X := by
+  obtain ⟨a,hbad⟩ := hbad
+  by_cases ha : X = {a}
+  · exact ha ▸ obSelfSingleton_of_bad a5 b5 d5 e5 hbad
+  · exact obSelf_of_bad_nonsingle ⟨b5, d5, e5⟩ hbad ha he
 
 theorem sub_stayAlive_of_bad (t : @ABCDE k ob)
     {a : Fin k} (hbad : bad ob a) : ∀ Y, ob Y ⊆ stayAlive a Y:= by
@@ -1142,34 +1242,43 @@ theorem sub_stayAlive_of_bad (t : @ABCDE k ob)
           | inl h => rw [h]; simp
           | inr h => rw [h]
 
-theorem stayAlive_sub_of_bad
-    (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    {a : Fin k} (hbad : bad ob a) : ∀ Y, stayAlive a Y ⊆ ob Y:= by
-    intro X Y
-    simp [stayAlive]
-    · by_cases G : X = {a}
-      · subst G
-        rw [ob_bad a5 b5 c5 d5 e5 (hbad := hbad)]
-        simp
-        contrapose!
-        intro h
-        exact singleton_inter_of_notMem h
+-- theorem stayAlive_sub_of_badOLD
+--     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5 ob) (d5 : D5 ob) (e5 : E5 ob)
+--     {a : Fin k} (hbad : bad ob a) : ∀ Y, stayAlive a Y ⊆ ob Y:= by
+--     intro X Y
+--     simp [stayAlive]
+--     · by_cases G : X = {a}
+--       · subst G
+--         rw [ob_bad a5 b5 c5 d5 e5 (hbad := hbad)]
+--         simp
+--         contrapose!
+--         intro h
+--         exact singleton_inter_of_notMem h
 
-      · intro h hh
-        apply b5 X (X ∩ Y) Y (by simp)
-        have hX : X ≠ ∅ := fun hc => by simp [hc] at h
-        cases all_or_almost hh with
-        | inl h₀ => rw [h₀];  exact obSelf_of_bad a5 b5 d5 e5 hbad G hX
-        | inr h' => exact h' ▸ obSelfSdiff_of_bad ⟨b5, d5, e5⟩ hbad (Y := X) $ h' ▸ h
+--       · intro h hh
+--         apply b5 X (X ∩ Y) Y (by simp)
+--         have hX : X ≠ ∅ := fun hc => by simp [hc] at h
+--         cases all_or_almost hh with
+--         | inl h₀ => rw [h₀]; exact obSelf_of_bad a5 b5 d5 e5 hbad G hX
+--         | inr h' => exact h' ▸ obSelfSdiff_of_bad ⟨b5, d5, e5⟩ hbad (Y := X) $ h' ▸ h
+
+theorem stayAlive_sub_of_bad
+    (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+    {a : Fin k} (hbad : bad ob a) :
+    ∀ Y, stayAlive a Y ⊆ ob Y := fun X Y h => b5 _ (X ∩ Y) _ (by simp) $ by
+    simp [stayAlive] at h
+    cases all_or_almost h.2 with
+      | inl h₀ =>
+            rw [h₀]
+            exact obSelf_of_bad a5 b5 d5 e5 ⟨a, hbad⟩ fun hc => by simp [hc] at h
+      | inr h₀ => exact h₀ ▸ obSelfSdiff_of_bad ⟨b5, d5, e5⟩ hbad (Y := X) $ h₀ ▸ h.1
+
 
 theorem stayAlive_of_bad (t : @ABCDE k ob)
-    {a : Fin k} (hbad : bad ob a) : ob = stayAlive a := by
-    suffices ∀ Y, ob Y = stayAlive a Y by exact
-        (Set.eqOn_univ ob (stayAlive a)).mp fun ⦃x⦄ a ↦ this x
-    intro Y
-    apply subset_antisymm
-    exact sub_stayAlive_of_bad t hbad Y
-    refine stayAlive_sub_of_bad t.a5 t.b5 (C5_of_C5Strong t.c5) t.d5 t.e5 hbad Y
+    {a : Fin k} (hbad : bad ob a) : ob = stayAlive a :=
+        (Set.eqOn_univ _ _).mp fun Y _ => subset_antisymm
+        (sub_stayAlive_of_bad t hbad Y)
+        (stayAlive_sub_of_bad t.a5 t.b5 t.d5 t.e5 hbad Y)
 
 /--
 There are only three models of CJ 1997 for a given `n ≥ 1`:
@@ -1186,7 +1295,7 @@ theorem models_ofCJ_1997 (t : @ABCDE k ob) --June 11, 2025
       use a
       exact stayAlive_of_bad t (bad_of_semibad t.a5 t.e5 H₁)
     · push_neg at H₁
-      exact .inr $ .inl $ getAlive t H₀ H₁
+      exact .inr $ .inl $ alive_of_no_bad t H₀ H₁
 
 end CJ97
 
