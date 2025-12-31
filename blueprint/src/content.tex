@@ -293,11 +293,11 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
     covering ob.
 \end{lemma}
 
-\begin{lemma}\label{alive_of_no_bad}
-	\lean{alive_of_no_bad}
+\begin{lemma}\label{alive_of_no_quasibad}
+	\lean{alive_of_no_quasibad}
 	\leanok
 	\uses{local_holds,obSelf_of_obSelf}
-	If ob ≠ noObligations and ∀ a, ¬ semibad ob a, then
+	If ob ≠ noObligations and ∀ a, ¬ quasibad ob a, then
 	    ob = alive k.
 \end{lemma}
 	
@@ -351,13 +351,13 @@ If bad ob a and X ≠ {a} and X ≠ ∅ then X ∈ ob X.
 %
 % \end{lemma}
 
-\begin{lemma}\label{bad_of_semibad}
-	\lean{bad_of_semibad}
-	\leanok
-	\uses{5(a), 5(e)}
-
-If semibad ob a then bad ob a.
-\end{lemma}
+% \begin{lemma}\label{bad_of_semibad}
+% 	\lean{bad_of_semibad}
+% 	\leanok
+% 	\uses{5(a), 5(e)}
+%
+% If semibad ob a then bad ob a.
+% \end{lemma}
 
 \begin{lemma}\label{sub_stayAlive_of_bad}
 	\lean{sub_stayAlive_of_bad}
@@ -378,14 +378,14 @@ Note that Lemma \ref{stayAlive_sub_of_bad} does not require any form of C5.
 	\lean{stayAlive_of_bad}
 	\leanok
 	\uses{stayAlive_sub_of_bad, sub_stayAlive_of_bad}
-	If semibad ob a then ob = stayAlive a.
+	If bad ob a then ob = stayAlive a.
 \end{lemma}
 
 
 \begin{lemma}\label{models_ofCJ_1997}
 	\lean{models_ofCJ_1997}
 	\leanok
-	\uses{stayAlive_of_bad,alive_of_no_bad,bad_of_semibad}
+	\uses{stayAlive_of_bad,alive_of_no_quasibad}
 	Either $∃ a, ob = stayAlive a$ or $ob = alive k$ or $ob = noObligations k$.
 \end{lemma}
 
