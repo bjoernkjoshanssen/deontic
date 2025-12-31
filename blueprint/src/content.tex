@@ -244,8 +244,8 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 % 	    If $\{a\} ∈ \ob \{a\}$ then $\ob \{a\} = \{Y \mid a ∈ Y\}$.
 % \end{lemma}
 
-\begin{lemma}\label{obSelfSingleton_of_bad}
-	\lean{obSelfSingleton_of_bad}
+\begin{lemma}\label{obSelf_of_bad.single}
+	\lean{obSelf_of_bad.single}
 	\leanok
 	\uses{BDE,obSelf_univ}
 	    % (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
@@ -325,8 +325,8 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
 %     $X ∈ ob X$.
 % \end{lemma}
 
-\begin{lemma}\label{obSelf_of_bad_nonsingle}
-	\lean{obSelf_of_bad_nonsingle}
+\begin{lemma}\label{obSelf_of_bad.nonsingle}
+	\lean{obSelf_of_bad.nonsingle}
 	\leanok
 	\uses{obSelf_of_obSelfSdiff,obSelfSdiff_of_bad}
 If bad ob a and X ≠ {a} and X ≠ ∅ then X ∈ ob X.
@@ -336,7 +336,7 @@ If bad ob a and X ≠ {a} and X ≠ ∅ then X ∈ ob X.
 \begin{lemma}\label{obSelf_of_bad}
 	\lean{obSelf_of_bad}
 	\leanok
-	\uses{obSelfSingleton_of_bad,obSelf_of_bad_nonsingle}
+	\uses{obSelf_of_bad.single,obSelf_of_bad.nonsingle}
     If bad ob a and $X \setminus \{a\}\ne \emptyset$ then $X ∈ \ob X$.
 \end{lemma}
 
