@@ -348,6 +348,9 @@ theorem semiglobal_holds (f : @ACDE k ob)
     exact fun h => h ▸ ha₂
   exact f.a _ this
 
+structure ADE where
+    (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob)
+
 structure ABCDE where
     (a5 : A5 ob) (b5 : B5 ob) (c5 : C5Strong ob) (d5 : D5 ob) (e5 : E5 ob)
 
