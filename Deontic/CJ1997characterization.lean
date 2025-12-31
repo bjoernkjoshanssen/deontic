@@ -157,6 +157,25 @@ theorem stayAlive_properties {n : ℕ} (e : Fin n) :
 def small₂ {n : ℕ} (A : Finset (Fin n)) :=
     2 ≤ #Aᶜ
 
+/-- A convenient companion lemma for `card_le_one`. -/
+lemma card_ge_two {k : ℕ} (A : Finset (Fin k)) :
+    2 ≤ #A ↔ ∃ a ∈ A, ∃ b ∈ A, a ≠ b := by
+  suffices (¬ (2 ≤ #A)) ↔ ¬ (∃ a ∈ A, ∃ b ∈ A, a ≠ b) by
+    constructor
+    intro h
+    by_contra H
+    tauto
+    intro h
+    by_contra H
+    revert h
+    simp only [imp_false]
+    rw [← this]
+    tauto
+  push_neg
+  rw [← card_le_one]
+  omega
+
+
 /-- `A` is a conditional cosubsingleton within `B`. -/
 def ccss {n : ℕ} (B A : Finset (Fin n)) :=
     A ⊆ B → #(B \ A) ≤ 1
@@ -219,25 +238,6 @@ lemma cosubsingleton_eq_ccss_univ {n : ℕ} (A : Finset (Fin n)) :
   simp [cosubsingleton, ccss]
   tauto
 
-lemma sdiff_two {n : ℕ}
-    {B C : Finset (Fin n)} (hBC₀ : #(C \ B) ≥ 2) (hBC₁ : B ⊆ C) :
-    #(univ \ C ∪ B) ≤ n - 2 := by
-    have : Disjoint (univ \ C) B := fun D hD₀ hD₁ i hi => False.elim $ by
-      have h₁ := hD₀ hi
-      rw [mem_sdiff] at h₁
-      exact h₁.2 $ hBC₁ $ hD₁ hi
-    rw [card_sdiff] at hBC₀
-    rw [card_union_of_disjoint this, card_sdiff,
-      card_univ, Fintype.card_fin, ← Nat.sub_add_comm]
-    · simp
-      suffices #B ≤ #C - 2 by omega
-      suffices 2 ≤ #C - #B by omega
-      have : B ∩ C = B := by compare
-      rw [this] at hBC₀
-      exact hBC₀
-    have : n = #(Finset.univ : Finset (Fin n)) := by simp
-    simp_rw [this]
-    apply Finset.card_le_card;simp
 
 /-- Not only is `a` "bad" but there is an obligation that singles it out. -/
 def bad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) :=
@@ -250,42 +250,6 @@ def quasibad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fi
 def noObligations (n : ℕ) : Finset (Fin n) → Finset (Finset (Fin n)) :=
   fun _ => ∅
 
-lemma large_iff_cosubsingleton {n : ℕ} (A : Finset (Fin (n+1))) :
-    cosubsingleton A ↔  #A ≥ n := by
-    unfold cosubsingleton
-    have : #Aᶜ = #(univ \ A) := by congr
-    rw [this]
-    have : #(univ \ A) = #((univ : Finset (Fin (n+1)))) - #A := by
-        refine card_sdiff_of_subset ?_
-        simp
-    rw [this]
-    have : #((univ : Finset (Fin (n+1)))) = n+1 := card_fin (n + 1)
-    rw [this]
-    omega
-
-lemma card_compl_aux {n : ℕ} {A : Finset (Fin (n + 2))}
-      (hA : #A < n + 1) : 2 < #Aᶜ + 1 := by
-    have : #Aᶜ = #(univ \ A) := by congr
-    rw [this]
-    have : #(univ \ A) = #((univ : Finset (Fin (n + 2)))) - #A := by
-        refine card_sdiff_of_subset ?_
-        simp
-    rw [this]
-    have : #((univ : Finset (Fin (n + 2)))) = n + 2 := card_fin (n + 2)
-    rw [this]
-    omega
-
-lemma card_compl_aux' {n : ℕ} {A : Finset (Fin (n + 2))} (hs : 2 ≤ #Aᶜ) :
-  #A ≤ n := by
-    have : #Aᶜ = #(univ \ A) := by congr
-    rw [this] at hs
-    have : #(univ \ A) = #((univ : Finset (Fin (n + 2)))) - #A := by
-        refine card_sdiff_of_subset ?_
-        simp
-    rw [this] at hs
-    have : #((univ : Finset (Fin (n + 2)))) = n + 2 := card_fin (n + 2)
-    rw [this] at hs
-    omega
 
 lemma diff_diff {n : ℕ}
     {X Y : Finset (Fin n)} : X ∩ Y = Y \ (Y \ X) := by
@@ -508,14 +472,15 @@ lemma sdiff_union_sdiff (A B C : Finset (Fin k)) :
       simp at hi ⊢
       tauto
 
+lemma diff_ne
+{a : Fin k}
+{X : Finset (Fin k)}
+(ha : X ≠ {a})
+(he : X ≠ ∅) : X \ {a} ≠ ∅ := by simp;tauto
 
-lemma obSelfSingleton_of_bad (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    {a : Fin k} (hbad : bad ob a) : {a} ∈ ob {a} := by
-  apply b5 _ univ _ (by simp)
-  apply e5 _ _ _ (subset_univ _)
-  apply obSelf_univ a5 d5 e5 a
-  obtain ⟨X,ha,ha'⟩ := hbad
-  have : univ \ {a} = univ \ X ∪ X \ {a} := by
+lemma sdiff_union_sdiff_eq
+{a : Fin k} {X : Finset (Fin k)}
+(ha : a ∈ X) : univ \ {a} = univ \ X ∪ X \ {a} := by
     apply subset_antisymm
     · apply sdiff_union_sdiff
     · intro i hi
@@ -523,11 +488,7 @@ lemma obSelfSingleton_of_bad (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
       cases hi with
         | inl h => exact fun hc => h $ hc ▸ ha
         | inr h => exact h.2
-  rw [this]
-  apply d5 X (X \ {a}) univ (by simp) ha' (by simp)
-  simp
 
-def obSelf (A : Finset (Fin k)) := A ∈ ob A
 
 
 theorem obSelf_of_obSelfSdiff (t : @BDE k ob)
@@ -556,7 +517,7 @@ theorem local_of_global_theoretical
     {A B : Finset (Fin k)} (hBC₁ : A ∈ ifsub ob B) : ccss B A := by
   unfold ccss
   by_contra hBC
-  simp at hBC
+  simp only [Classical.not_imp] at hBC
   have : 2 ≤ #((univ : Finset (Fin k))) := by
     apply le_trans
     show 2 ≤ #(B \ A)
@@ -570,10 +531,7 @@ theorem local_of_global_theoretical
   have hBC₀ := hBC.1
   have hBC₂ := hBC.2
   let U := univ \ B ∪ A -- the key step
-  have hU : #U ≤ k - 2 ∧ inter_ifsub ob U := by
-    constructor
-    · apply sdiff_two _ hBC₀
-      omega
+  have hU₁ : inter_ifsub ob U := by
     · have h₁ : (univ \ B ∪ A) ∈ ob univ := @d5 B A univ hBC₀
             (ifsub_apply hBC₁ hBC₀) (by simp)
       intro X
@@ -582,18 +540,20 @@ theorem local_of_global_theoretical
       intro hX
       exact e5 _ _ _ (subset_univ _) h₁ $
         (inter_eq_right.mpr hX).symm ▸ fun hc => a5 univ $ hc ▸ h₁
-  specialize h U hU.2 univ (by simp)
-  rw [@card_sdiff_of_subset (Fin k) U univ _ (by simp), card_fin] at h
+  specialize h U hU₁ univ (by simp)
+  unfold U at h
+  have : univ \ (univ \ B ∪ A) = B \ A := by compare
+  rw [this] at h
   omega
 
 
-/-- A trivial consequence of `local_of_global`.  -/
+/-- A trivial consequence of `local_of_global_theoretical`.  -/
 theorem local_of_global'
     (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob) {B C : Finset (Fin k)}
-    (hBC₀:  Finset.card (C \ B) ≥ 2)
+    (hBC₀:  #(C \ B) ≥ 2)
     (hBC₁ : B ⊆ C)
     (hBC₂ : B ∈ ob C) :
-     ∃ A, #A ≤ k - 2 ∧ inter_ifsub ob A := by
+     ∃ A, #Aᶜ ≥ 2 ∧ inter_ifsub ob A := by
   have := fun a ↦ Not.imp a $ @local_of_global_theoretical k ob a5 d5 e5
   specialize this (by
     push_neg
@@ -612,8 +572,8 @@ theorem local_of_global'
   use A
   have ⟨U,hU⟩ := hA.2
   unfold ccss at hU
-
-  push_neg at hU
+  simp only [Classical.not_imp] at hU
+--   push_neg at hU
   refine ⟨?_, hA.1⟩
   have : 2 ≤ #((univ : Finset (Fin k))) := by
     apply le_trans
@@ -621,16 +581,8 @@ theorem local_of_global'
     omega
     apply card_le_card
     simp
-  have : #(U \ A) = #U - #A := by
-    refine card_sdiff_of_subset hU.1
-  rw [this] at hU
-  have : #U ≤ #((univ : Finset (Fin k))) := by
-    apply card_le_card
-    simp
-  have : #((univ : Finset (Fin k))) = k := card_fin k
-  omega
-
-
+  calc 2 ≤ #(U \ A) := by omega
+       _ ≤ _ := by apply card_le_card;intro;simp
 
 theorem local_of_global₀
     {ob : Finset (Fin 0) → Finset (Finset (Fin 0))}
@@ -670,47 +622,21 @@ theorem local_of_global
     intro B C ho
     simp [cocos]
     intro hBC
-    have hn (A) (hA : #A ≤ m) : ¬ inter_ifsub ob A := by
-        intro hc
-        specialize large_of_ob A hc
-        rw [large_iff_cosubsingleton] at large_of_ob
-        omega
     have h_a : ¬ (∃ B C, #(C \ B) ≥ 2 ∧ B ⊆ C ∧ B ∈ ob C) := by
         intro ⟨B,C,hBC⟩
         have := local_of_global' a5 d5 e5 hBC.1 hBC.2.1 hBC.2.2
         revert this
         simp
-        exact hn
+        intro X
+        contrapose
+        intro h
+        specialize large_of_ob X h
+        unfold cosubsingleton at large_of_ob
+        omega
     push_neg at h_a
     by_contra H
     simp at H
     exact h_a C B H hBC ho
-
-lemma global_holds₀
-    {ob : Finset (Fin 0) → Finset (Finset (Fin 0))}
-    (A : Finset (Fin 0)) (hs : small₂ A) :
-    ¬ inter_ifsub ob A := by
-    unfold inter_ifsub small₂ at *
-    exfalso
-    revert hs
-    simp
-    suffices #Aᶜ ≤ 0 by omega
-    suffices #Aᶜ ≤ #(univ : Finset (Fin 0)) by convert this
-    apply card_le_card
-    apply subset_univ
-
-lemma global_holds₁
-    {ob : Finset (Fin 1) → Finset (Finset (Fin 1))}
-    (A : Finset (Fin 1)) (hs : small₂ A) :
-    ¬ inter_ifsub ob A := by
-    unfold inter_ifsub small₂ at *
-    exfalso
-    revert hs
-    simp
-    suffices #Aᶜ ≤ 1 by omega
-    suffices #Aᶜ ≤ #(univ : Finset (Fin 1)) by convert this
-    apply card_le_card
-    apply subset_univ
 
 /-- If `A` is small₂ then `A` is not inter_ifsub.
 This is just some set-wrangling on top of `global_holds_specific`.
@@ -720,43 +646,21 @@ lemma global_holds (t : @ABCDE k ob)
     ¬ inter_ifsub ob A := by
   by_cases H : k ≤ 1
   · have : k = 0 ∨ k = 1 := Nat.le_one_iff_eq_zero_or_eq_one.mp H
-    cases this with
-    | inl h =>
+    rcases this with (h | h)
+    all_goals
         subst h
-        apply global_holds₀ _ hs
-    | inr h =>
-        subst h
-        apply global_holds₁ _ hs
-  simp at H
-  have ⟨n,hn⟩ : ∃ n, k = n + 2 := Nat.exists_eq_add_of_le' H
+        unfold small₂ at hs
+        rw [card_ge_two] at hs
+        simp at hs
+  have ⟨n,hn⟩ : ∃ n, k = n + 2 := by
+    simp at H
+    exact Nat.exists_eq_add_of_le' H
   subst hn
-  have hA : #A ≤ n := card_compl_aux' hs
-  have ⟨a₁,a₂,h₁,h₂,h₁₂⟩: ∃ a₁ a₂, a₁ ∉ A ∧ a₂ ∉ A ∧ a₁ ≠ a₂ := by
-    by_contra H
-    push_neg at H
-    have : A ≠ univ := by
-      intro hc
-      subst hc
-      simp at hA
-    have ⟨a₁, ha₁⟩ : ∃ a₁, a₁ ∉ A := by
-      contrapose! this
-      exact Eq.symm (Mathlib.Meta.Finset.univ_eq_elems A this)
-    specialize H a₁
-    have H' : ∀ a₂ ∉ A, a₁ = a₂ := by aesop
-    have : A ∪ {a₁} = univ := by
-      ext i;simp
-      by_cases H : i ∈ A
-      tauto
-      specialize H' _ H
-      tauto
-    have : # (univ : Finset (Fin (n+2))) = #A + 1 := by
-      rw [← this]
-      exact (@card_eq_succ (Fin (n+2)) (A ∪ {a₁}) #A _).mpr (by
-        use a₁, A
-        simp
-        tauto)
-    simp at this
-    omega
+  have ⟨a₁,h₁,a₂,h₂,h₁₂⟩:  ∃ a ∈ Aᶜ, ∃ b ∈ Aᶜ, a ≠ b := by
+    unfold small₂ at hs
+    rw [card_ge_two] at hs
+    exact hs
+  simp at h₁ h₂
   exact global_holds_specific t h₁ h₂ h₁₂
 
 theorem local_holds₀
@@ -768,11 +672,8 @@ theorem local_holds₀
   constructor
   exact Unique.uniq instUniqueOfIsEmpty B
   intro h₁
-  suffices #(C \ B) ≤ 0 by omega
+  rw [card_le_one]
   simp
-  intro i
-  have := i.2
-  simp at this
 
 theorem local_holds₁
     {ob : Finset (Fin 1) → Finset (Finset (Fin 1))} :
@@ -781,9 +682,8 @@ theorem local_holds₁
   intro C B h₀
   simp
   intro h₁
-  suffices #(C \ B) ≤ #(univ : Finset (Fin 1)) by convert this
-  apply card_le_card
-  apply subset_univ
+  rw [card_le_one]
+  simp
 
 /-- A direct consequence of `global_holds` and `local_of_global`. -/
 theorem local_holds (t : @ABCDE k ob) :
@@ -793,18 +693,26 @@ theorem local_holds (t : @ABCDE k ob) :
     cases this with
     | inl h => subst h;apply local_holds₀
     | inr h => subst h;apply local_holds₁
-  · simp at H
-    have ⟨n, hn⟩ : ∃ n, k = n + 2 := Nat.exists_eq_add_of_le' H
+  · have ⟨n, hn⟩ : ∃ n, k = n + 2 := by
+        simp at H
+        exact Nat.exists_eq_add_of_le' H
     subst hn
-    have (A) (hA : inter_ifsub ob A) : cosubsingleton A := by
-        rw [large_iff_cosubsingleton]
-        contrapose! hA
-        exact global_holds t _ $ Nat.lt_add_one_iff.mp $ card_compl_aux hA
     unfold covering cocos
     by_contra H
     push_neg at H
-    simp at H
+    simp only [mem_filter, mem_univ, true_and, Classical.not_imp] at H
     obtain ⟨B,C,h₀,h₁,h₂⟩ := H
+    have (A) (hA : inter_ifsub ob A) : cosubsingleton A := by
+        contrapose! hA
+        apply global_holds t A
+        unfold small₂
+        rw [card_ge_two]
+        unfold cosubsingleton at hA
+        rw [card_le_one] at hA
+        push_neg at hA
+        exact hA
+        -- rw [large_iff_cosubsingleton]
+        -- exact global_holds t _ $ Nat.lt_add_one_iff.mp $ card_compl_aux hA
     have := local_of_global t.a5 t.d5 t.e5 this _ _ h₀
     unfold cocos at this
     simp at this
@@ -846,7 +754,7 @@ lemma obSelf_of_ob_of_almost_subset
         (sdiff_eq_empty_iff_subset.mp $ card_eq_zero.mp h₀) h
     | inr h₀ => exact False.elim $ not_ob_of_almost H₁ h₀ h
 
-theorem quasibad.aux {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+theorem at_most_one_quasibad {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
     (t : @ABCDE k ob)
     {X Y : Finset (Fin k)} (h : Y ∈ ob X)
     {a : Fin k} (ha : a ∈ X \ Y) : X ∩ Y = X \ {a} := by
@@ -867,15 +775,13 @@ theorem quasibad.aux {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
 
 lemma bad_of_quasibad (t : @ABCDE k ob)
     (a : Fin k) (h : quasibad ob a) : bad ob a := by
-    unfold quasibad at h
     obtain ⟨U,V,hUV⟩ := h
-    unfold bad
-    have := @quasibad.aux k ob t U V hUV.2 a hUV.1
     use U
     constructor
-    · simp at hUV;exact hUV.1.1
-    · rw [← this]
-      apply @t.b5 U V (U ∩ V)
+    · rw [mem_sdiff] at hUV
+      exact hUV.1.1
+    · rw [← at_most_one_quasibad t hUV.2 hUV.1]
+      apply t.b5 U V (U ∩ V)
       compare
 
 lemma sub_alive.core (a5 : A5 ob) (b5 : B5 ob)
@@ -935,40 +841,34 @@ lemma alive_of_no_quasibad (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
 
 theorem unique_bad (t : @ABCDE k ob) -- maybe five.d instead of t.d5?
     {a b : Fin k} (ha : bad ob a) (hb : bad ob b) : a = b := by
-  obtain ⟨X,ha, hoa⟩ := ha
-  obtain ⟨Y,hb, hob⟩ := hb
+  obtain ⟨X,_, hoa⟩ := ha
+  obtain ⟨Y,_, hob⟩ := hb
   have h₁ : (X ∪ Y) \ {a} ∈ ob (X ∪ Y) := by
     convert t.d5 _ _ (X ∪ Y) (by simp) hoa (by simp) using 1
     apply union_diff_singleton ; tauto
-  have h₃ : (X ∪ Y) \ {b} ∈ ob (X ∪ Y) := by
+  have h₂ : (X ∪ Y) \ {b} ∈ ob (X ∪ Y) := by
     convert t.d5 _ _ (X ∪ Y) (by simp) hob (by simp) using 1
-    convert union_diff_singleton Y X hb using 2
-    · exact union_comm X Y
-    · nth_rewrite 1 [union_comm]
-      rfl
+    rw [union_comm]
+    apply union_diff_singleton ; tauto
   have : #({a,b}) ≤ 1 := by
-    have := local_holds_apply t (t.c5 _ _ _ h₁ h₃)
+    have := local_holds_apply t (t.c5 _ _ _ h₁ h₂)
     unfold cocos at this
     simp at this
     specialize this (subset_trans inter_subset_union $ union_subset sdiff_subset sdiff_subset)
     convert this using 2
     apply pair_venn <;> tauto
-  cases Nat.eq_or_lt_of_le this with
-  | inl h =>
-    by_contra H
-    have := card_pair H
-    omega
-  | inr h => simp at h
+  rw [card_le_one] at this
+  simp at this
+  tauto
 
 theorem bad_cosubsingleton_of_ob (t : @ABCDE k ob)
     {a : Fin k}
     (hbad : bad ob a)
     {X Y : Finset (Fin k)}
-    (h' : X ∩ Y ∈ ob X) :
+    (h' : X ∩ Y ∈ ob X) : -- or just Y ∈ ob X
     X ∩ Y = X ∨ X ∩ Y = X \ {a} := by
   obtain ⟨X',haX',imp⟩ := hbad
-  have := local_holds_apply t
-    h'
+  have := local_holds_apply t h'
   unfold cocos at this
   simp only [mem_filter, mem_univ, inter_subset_left, forall_const,
     true_and] at this
@@ -991,20 +891,25 @@ theorem bad_cosubsingleton_of_ob (t : @ABCDE k ob)
     simp at h
     exact .inl $ subset_antisymm inter_subset_left $ subset_inter (subset_refl _) h
 
-
-lemma diff_ne
-{a : Fin k}
-{X : Finset (Fin k)}
-(ha : X ≠ {a})
-(he : X ≠ ∅) : X \ {a} ≠ ∅ := by simp;tauto
-
-
-lemma obSelf_of_bad_nonsingle (t : @BDE k ob)
+/-- If `X` contains an element `b≠a` where `a` is a given bad world,
+then `X` is self-obligatory. -/
+lemma obSelf_of_bad.nonsingle (t : @BDE k ob)
     {a : Fin k} (hbad : bad ob a) {X : Finset (Fin k)}
     (ha : X ≠ {a})
-    (he : X ≠ ∅) : X ∈ ob X := by
-  apply obSelf_of_obSelfSdiff t (han := diff_ne ha he)
-  exact obSelfSdiff_of_bad t hbad (han := diff_ne ha he)
+    (he : X ≠ ∅) : X ∈ ob X :=
+    obSelf_of_obSelfSdiff t (han := diff_ne ha he) $
+    obSelfSdiff_of_bad t hbad (han := diff_ne ha he)
+
+/-- Bad singletons are self-obligatory. Proved from first
+principles. -/
+lemma obSelf_of_bad.single (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
+    {a : Fin k} (hbad : bad ob a) : {a} ∈ ob {a} := b5 _ univ _ (by simp) <| by
+  apply e5 _ _ _ (subset_univ _)
+  apply obSelf_univ a5 d5 e5 a
+  obtain ⟨X,ha,ha'⟩ := hbad
+  rw [sdiff_union_sdiff_eq ha]
+  apply d5 _ _ _ sdiff_subset ha' (subset_univ _)
+  simp
 
 theorem obSelf_of_bad
     (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
@@ -1012,8 +917,8 @@ theorem obSelf_of_bad
     (he : X ≠ ∅) : X ∈ ob X := by
   obtain ⟨a,hbad⟩ := hbad
   by_cases ha : X = {a}
-  · exact ha ▸ obSelfSingleton_of_bad a5 b5 d5 e5 hbad
-  · exact obSelf_of_bad_nonsingle ⟨b5, d5, e5⟩ hbad ha he
+  · exact ha ▸ obSelf_of_bad.single a5 b5 d5 e5 hbad
+  · exact      obSelf_of_bad.nonsingle ⟨b5, d5, e5⟩ hbad ha he
 
 theorem sub_stayAlive_of_bad (t : @ABCDE k ob)
     {a : Fin k} (hbad : bad ob a) : ∀ Y, ob Y ⊆ stayAlive a Y:= by
@@ -1021,6 +926,7 @@ theorem sub_stayAlive_of_bad (t : @ABCDE k ob)
     simp [stayAlive]
     · intro h
       have h' : X ∩ Y ∈ ob X := t.b5 X Y (X ∩ Y) (by compare) h
+      -- this line is unnecessary if we generalize lemma below
       constructor
       · exact fun hc => t.a5 _ <| hc ▸ h'
       · cases bad_cosubsingleton_of_ob t hbad h' with
