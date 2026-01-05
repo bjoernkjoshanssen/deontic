@@ -42,7 +42,7 @@ Our paradox will be a weak form of conditional deontic explosion: given that som
 
 We then show that despite this paradox, the the systems of Carmo and Jones have interesting mathematical content. For the strongest system we provide a full classification of its models; for weaker versions we characterize the least models (under inclusion) satisfying the axioms and basic contrary-to-duty assumptions.
 
-\section{The paradox}
+\chapter{The paradox}
 	Let $W$ be a finite set of possible worlds of a given model, and let $\mathscr P$ denote the power set operation.
 
  %    \textsc{Carmo and Jones}\footnote{
@@ -147,6 +147,140 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 \fivee
 \end{definition}
 
+
+
+\paragraph{The argument.} Axioms 5(b)(e)(f) will now be used to derive a paradox.
+
+Suppose that James is taking an exam on which the possible grades, in decreasing order of quality, are A, B, C, D and F.
+
+If seems reasonable to assume that given that James' grade is A or B, it ought to be A.
+
+Moreover, given that the grade is C or D, it ought to be C.
+
+Then by axiom 5(b), given that the grade is C or D, it ought to be A or C.
+Moreover, also by 5(b), given that the grade is A or B, it ought to be A or C.
+In other words, James ought to make sure the proposition ``the grade is A or C'' is true (of course, ideally by getting an A).
+
+It also follows that the grade ought to be A or C given that it is A, B, C, or D, this time using axiom 5(f) applied to the two previous statements. (If this is getting hard to follow, the reader may rest assured that a formalization is available, see \ref{sa}.)
+
+So far this is not entirely unintuitive. But now we use 5(e), and conclude that since A or C was obligatory in the context A, B, C, or D it must remain obligatory in a more restrictive context in which it is still possible, namely B, C, or D.
+
+Finally, using 5(b) again, we conclude that given that the grade is B, C, or D, it ought to be C. While there is such a concept as ``gentleman's C'', surely this is a paradox.\footnote{Traditionally a \emph{Gentleman's C} is given to someone who deserves D or F but for extraneous reasons is deemed worthy of a C. Here this is reversed, as a C is deemed obligatory even when a B is available.
+}
+
+
+
+\paragraph{A literary perspective.} 
+Let us consider this paradox above in another context, beside students and their grades.
+
+Suppose James has the following options.
+\begin{enumerate}[A]
+\item Marriage to Alice, his favorite.
+\item Marriage to Alice's sister Beatrice, or one of several other women he also quite likes.
+\item Remaining a lonely bachelor.
+\item Marriage to Deirdre, whom he despises.
+\end{enumerate}
+
+Then our conclusion is like that of the Bee Gees in 1977:
+\begin{quote}
+If I can't have you, I don't want nobody.    
+\end{quote}
+
+% This sentiment is, it seems to us, inherently surprising, perhaps even hyperbolic. Still, it retains some plausibility, and is relatively entertaining, compared to alternative statements such as
+% \begin{itemize}
+%     \item \emph{If I can't have you, I'll marry someone I despise} (too unjustified)
+%     \item \emph{If I can't have you, I'll settle for Beatrice} (not dramatic enough)
+% \end{itemize}
+It is a limited deontic explosion, in contrast with the full deontic explosion of Romeo's statement in \emph{Romeo and Juliet}:
+\begin{quote}
+There is no world without Verona walls but purgatory, torture, hell itself.
+\end{quote}
+
+
+\paragraph{From despondency to mathematics.}
+Hage \cite{Hage2000-HAGDNE} thinks the task Carmo and Jones and others have set themselves is impossible.
+
+From Hage's book review, in the context of discussing a man who (i) should visit his neighbor, (ii) if he does visit, should call to say that he is coming, and (iii) is not in fact coming:
+
+\emph{[...] Actually, A does not assist his neighbours and
+therefore should not call them. The two intuitions presuppose a different role for
+deontic logic, namely, reasoning about what is ideally the case, and reasoning about
+what ought to be done in the real world. These two roles are hard to reconcile in
+one logic, unless the logic combines the two kinds of reasoning in different parts.
+The paper by Carmo and Jones in the present volume provides such a combination
+logic.
+Nevertheless, many have attempted to do what is, in my opinion, \textbf{undoable}\footnote{(emphasis ours)} and
+this has lead to many modifications of the Standard System of Deontic Logic
+(Hilpinen, 1971, p. 13f.; Chellas, 1980, p. 190f.). These new systems have lead
+to new paradoxes that deal with CTD obligations.}
+
+
+Given Hage's sentiment
+and the paradox we have presented, one might temporarily become despondent. If deontic systems always have flaws, why pursue them? However, in the course of uncovering this paradox I also discovered interesting \emph{mathematical structure} in the axioms 5(a)--5(g).
+
+\begin{definition}
+    Given a set $W$ and a family $\mathcal F$ of functions $f :\mathscr P(W)\to\mathscr P(\mathscr P(W))$, we say that $f_0\in\mathcal F$ is the \emph{least} element of $\mathcal F$ if for all $f\in\mathcal F$ and all $X\subseteq W$, $f_0(X)\subseteq f(X)$.
+
+    The \emph{least model} of a set of axioms $\mathscr A$ concerning a variable function $\mathrm{ob} :\mathscr P(W)\to\mathscr P(\mathscr P(W))$ is the least element of the collection $\mathcal F$ of all functions $\mathrm{ob} :\mathscr P(W)\to\mathscr P(\mathscr P(W))$ satisfying all axioms in $\mathscr A$.
+
+    ``Axiom'' here is used to mean simply a condition on $\mathrm{ob}$, although we may note that all the axioms 5(a)--(g) may be formulated in first-order set theory.
+\end{definition}
+
+The least model of 5(b) given certain ``oughts'' has a very natural characterization, as does the least model of 5(b), 5(d), and 5(f).
+
+To be specific let us write $\mathrm{Ought}(A\mid B)$ to mean that for each $X\subseteq B$, if $A\cap X\ne \emptyset$ then $A\in\ob X$. This is the semantic condition used by Carmo and Jones for the conditional obligation operator $O(A\mid B)$. A pair of oughts $(\mathrm{Ought}(A\mid W)$, $\mathrm{Ought}(B\mid W \setminus A))$ forms a basic contrary-to-duty obligation of $B$ given that our duty $A$ has failed to be observed.
+
+\begin{theorem}\label{t1}
+The least model $\ob$ (under inclusion) of $\mathrm{Ought}(A\mid W)$, $\mathrm{Ought}(B\mid W \setminus A)$, and axiom 5(b) is characterized by:
+
+$Y \in \ob X$ if and only if $X \cap B \ne \emptyset$, and either $X \cap A = \emptyset$, in which case
+      $X \cap B = X \cap Y$, or else $X \cap A = X \cap Y$.    
+\end{theorem}
+In other words, $X\cap Y$ consists exactly of the most desirable worlds in $X$.
+
+Even though the model arises from assuming 5(b) only, it also satisfies axioms 5(a), 5(c), 5(e) and 5(g). This indicates a certain robustness of our definitions.
+
+\begin{theorem}\label{t2}
+The least model of axioms 5(b), 5(d), 5(f) and the two ``oughts'' in \ref{t1} has the following least model:
+$Y \in \ob X$ if and only if $X \cap B \ne \emptyset$, and either $X \cap A = \emptyset$, in which case
+      $X \cap B \subseteq Y$, or else $X \cap A\subseteq Y$.    
+\end{theorem}
+In other words, $X\cap Y$ contains at least all the most desirable worlds in $X$.
+Since axiom 5(f) follows from 5(a)(b)(c)(d), as shown by Carmo and Jones, the model can alternatively be characterized as the least one satisfying the latter four axioms and the two specified Oughts.
+
+The two families of models in \ref{t1,t2}  represent two alternative approaches to contrary-to-duty obligations as discussed in \cite{MR3607634} (called I and II there). They do not exhaust the interesting models by any means: for instance, we may have conflicting obligations. This may lead us to prefer 5(c) to 5(c)*, in particular. For a concrete example, suppose that James has received acceptances on separate marriage proposals to both Alice and Beatrice, but cannot marry them both.
+
+\paragraph{Classification.}
+In mathematics, classification theorems are fairly common. For example, the finite abelian groups have a straightforward characterization and the finite simple groups a complicated one. Vector spaces over a fixed field $\mathbb F$ of finite dimension are characterized by their dimension $d$, hence the single parameter $d$ determines the space up to isomorphism.
+
+In deontic logic, where axioms and rules are added based on moral intuitions, we should perhaps not expect structures that are mathematically natural enough to be classifiable.
+
+However, for the full theory of Carmo and Jones's axioms 5(a)--5(e) with the strong version 5(c)* in which we do not impose nondisjointness, we can characterize its models completely. The only nontrivial ones basically say that there is just one bad world and the only obligation is to avoid it:
+\begin{theorem}
+    Let $W$ be a finite set of possible worlds and let $\ob : \mathscr P (W)\to \mathscr P(\mathscr P(W))$. The the following are equivalent:
+    \begin{enumerate}
+        \item $\ob$ satisfies the full system suggested in \cite{CJ96}: 5(a), (b), (c)*, (d) and (e).
+        \item One of the following three holds:
+        \begin{enumerate}
+            \item $\ob(X)=\emptyset$ for all $X$.
+            \item $\ob(X)=\{Y \mid \emptyset \ne X \subseteq Y\}$ for all $X$.
+            \item There is a distinguished possible world $a$ (the ``forbidden'' world) such that for all $X$,
+            $\ob(X)=\{Y \mid X \cap Y \ne \emptyset \text{ and } X\setminus \{a\}\subseteq Y\}$.
+        \end{enumerate}
+    \end{enumerate}
+\end{theorem}
+
+
+\section{Acknowledgments}\label{sa}
+
+All mathematical claims above are verified in the proof assistant \textsc{Lean}, see \cite{deontic}.
+
+The main argument for our paradox was discovered by carefully analyzing some output from a script in the computer mathematics system \textsc{Maple} by Maplesoft \cite[Appendix]{K96}.
+
+This work was partially supported by a grant from the Simons Foundation (\#704836 to Bj{\o}rn Kjos-Hanssen).
+
+\chapter{Technical details of the characterization of CJ97}
+
 \begin{definition}\label{BDE}
 	\lean{BDE}
 	\leanok
@@ -162,11 +296,16 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 \end{definition}	
 
 
+
+\begin{definition}
+	Conditional explosion for ob is the statement that
+	∀ (A B C : Finset U), A ∈ ob C → B ∩ Aᶜ ∩ C ≠ ∅ → B ∈ ob (Aᶜ ∩ C).
+\end{definition}
 \begin{theorem}\label{conditional_explosion}
 	\lean{conditional_explosion}
 	\leanok
 	\uses{ADE,BDE}
-    CX ob.
+    If ob satisfies axioms 5(a)(b)(d)(e) then ob satisfies conditional explosion.
 \end{theorem}
 
 % \begin{definition}\label{ABCDE}
@@ -210,14 +349,30 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 % 	If $a$ is $\ob$-bad, $a\notin Y \ne \emptyset$, then $Y\in\ob(Y)$.
 % \end{lemma}
 
+\begin{definition}
+\lean{bad}
+\leanok
+A world $a$ is bad if  ∃ (X : Finset (Fin n)), a ∈ X ∧ $X \setminus \{a\} \in \ob X$.
+\end{definition}
+\begin{definition}
+\lean{quasibad}
+\leanok
+The world $a$ is quasibad if ∃ (X : Finset (Fin n)) (Y : Finset (Fin n)), a ∈ X $\setminus$ Y ∧ Y ∈ ob X.
+\end{definition}
+
+Thus, a world $a$ is bad if in some context there is an obligation to simply avoid $a$.
+For example, if there is an obligation ``do not go to war'' then the world representing ``going to war with Syria''
+is \emph{quasibad}, but it is not \emph{bad} unless there is also the specific obligation ``do not go to war with Syria''. (In ``reasonable'' this distinction would perhaps not need to be made, but here we are in the process of proving that a certain system 5(abcde) is not reasonable.)
 
 \begin{lemma}\label{obSelfSdiff_of_bad}
     \lean{obSelfSdiff_of_bad}
 	\leanok
 	\uses{BDE}
-	If $a$ is $\ob$-bad and $Y \setminus \{a\} \ne \emptyset$ then
+	If $a$ is bad and $Y \setminus \{a\} \ne \emptyset$ then
     $Y \setminus \{a\} \in \ob Y$.
 	\end{lemma}
+
+Lemma \ref{obSelfSdiff_of_bad} says that badness of the world does not depend on context.
 
 \begin{lemma}\label{obSelf_of_obSelf}
 	\lean{obSelf_of_obSelf}
@@ -226,6 +381,8 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	If  $X ∈ \ob X$ and $Y ≠ ∅$ then $Y ∈ ob Y $.
 \end{lemma}
 
+Lemma \ref{obSelf_of_obSelf} says that if any context is obligatory relative to itself, then they all are.
+
 \begin{lemma}\label{obSelf_of_obSelfSdiff}
 	\lean{obSelf_of_obSelfSdiff}
 	\leanok
@@ -233,8 +390,10 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	
 	    % (a5 : A5 ob) (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
 	    % {X : Finset (Fin k)} {a : Fin k}
-	If $a ∈ X ≠ \mathrm{univ}$ and $X \setminus \{a\} ∈ ob X$ then $X ∈ \ob X$.
+	If $\emptyset \ne X \setminus \{a\} ∈ ob X$ then $X ∈ \ob X$.
 \end{lemma}
+
+Lemma \ref{obSelf_of_obSelfSdiff} says that if there is a bad world then the corresponding context is self-obligatory.
 
 % \begin{lemma}\label{ob_singleton_of_obSelf}
 % 	\lean{ob_singleton_of_obSelf}
@@ -249,10 +408,12 @@ Carmo and Jones gave several axioms on their function $\mathrm{ob}$.
 	\leanok
 	\uses{BDE,obSelf_univ}
 	    % (b5 : B5 ob) (d5 : D5 ob) (e5 : E5 ob)
-		Assume that $∀ a, \mathrm{univ} \setminus \{a\} ∈ \ob \mathrm{univ} \to \mathrm{univ} ∈ \ob \mathrm{univ}$.
+		% Assume that $∀ a, \mathrm{univ} \setminus \{a\} ∈ \ob \mathrm{univ} \to \mathrm{univ} ∈ \ob \mathrm{univ}$.
+Assume axioms 5(abde).
 If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
 \end{lemma}
 
+Lemma \ref{obSelf_of_bad.single} is a technicality: even if $a$ is bad, it is still self-obligatory.
 
 \begin{lemma}\label{obSelf_univ}
 	\lean{obSelf_univ}
@@ -262,14 +423,22 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
 	If $\mathrm{univ} \setminus \{a\} ∈ \ob \mathrm{univ}$ then $\mathrm{univ} ∈ \ob \mathrm{univ}$.
 \end{lemma}
 
+Lemma \ref{obSelf_univ} is another technicality: if $a$ is bad in the global context then the global context is self-obligatory.
+
 \begin{lemma}\label{local_of_global}
 	\lean{local_of_global}
 	\leanok
 	\uses{ADE}
     % (a5 : A5 ob) (d5 : D5 ob) (e5 : E5 ob)
-    If for all $A$, $\mathrm{inter_ifsub} \ob A → \mathrm{cosubsingleton} A$,
-    then covering ob.
+	Suppose that for all contexts $A$, if $A$ is obligatory in all larger contexts $X\supseteq A$, then $A$ is a cosubsingleton, i.e., missing at most one element (from the global context).
+	Then for all $B$ and $C$, if $B\subseteq C$ is obligatory relative to $C$ then $C\setminus B$ is a cosubsingleton.
+
+    % If for all $A$, $\mathrm{inter_ifsub} \ob A → \mathrm{cosubsingleton} A$,
+    % then covering ob.
 \end{lemma}
+
+Lemma \ref{local_of_global} is a ``global-to-local'' principle allowing us to conclude a fact about an arbitrary context $C$ from
+a fact about the global context.
 % \begin{theorem}\label{bd5}
 % 	\lean{bd5}
 % 	\leanok
@@ -278,11 +447,13 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
 % 	If $\ob$ satisfies 5(b) and 5(d) then it satisfies 5(bd).
 % \end{theorem}
 
+The antecedent of Lemma \ref{local_of_global} is provided by Lemma \ref{global_holds}
+and hence the consequent is provided by Lemma \ref{local_holds}.
 \begin{lemma}\label{global_holds}
 	\lean{global_holds}
 	\leanok
 	\uses{global_holds_specific}
-	If $A$ is small$_2$ and then $A$ is not $\mathrm{inter_ifsub} \ob$.
+	For all contexts $A$, if $A$ is obligatory in all larger contexts $X\supseteq A$, then $A$ is a cosubsingleton, i.e., missing at most one element (from the global context).
 \end{lemma}
 
 \begin{lemma}\label{local_holds}
@@ -290,9 +461,43 @@ If $a$ is $\ob$-bad then $\{a\} ∈ \ob \{a\}$.
 	\leanok
 	\uses{global_holds, local_of_global}
    
-    covering ob.
+	For all $B$ and $C$, if $B\subseteq C$ is obligatory relative to $C$ then $C\setminus B$ is a cosubsingleton.
 \end{lemma}
 
+\begin{definition}
+	\lean{stayAlive}
+	\leanok
+The model \emph{stayAlive} is defined by
+stayAlive e X = $\{Y  | X \cap Y \ne \emptyset \wedge X \setminus \{e\} \subseteq  X \cap Y\}$.
+\end{definition}
+	
+	
+\begin{definition}
+	\lean{alive}
+	\leanok
+	
+The model \emph{alive} is defined by
+
+	alive n X = $\{Y \mid X \ne \emptyset \wedge Y \supseteq X\}$.
+\end{definition}
+
+\begin{definition}
+	\lean{noObligations}
+	\leanok
+
+The model \emph{noObligations} is defined by
+
+	noObligations X = ∅.
+
+\end{definition}
+
+We think of \emph{alive} as a computer game like ``Snake'' where the objective is to stay alive,
+with the surprising twist that it is not possible to die. In contrast, in the model \emph{noObligations} there are no obligations at all, and in the model \emph{stayAlive} the objective is standard: stay alive.
+
+Thus, someone playing Snake under the noObligations model can relax completely, whereas someone playing under the \emph{alive} model may worry
+that perhaps there is a way to die that they just have not seen yet. In fact, \emph{alive} is a reduct of \emph{stayAlive} where we remove the one bad world.
+
+We prove several technical lemmas, culminating in Theorem \ref{models_ofCJ_1997}:
 \begin{lemma}\label{alive_of_no_quasibad}
 	\lean{alive_of_no_quasibad}
 	\leanok
@@ -382,12 +587,12 @@ Note that Lemma \ref{stayAlive_sub_of_bad} does not require any form of C5.
 \end{lemma}
 
 
-\begin{lemma}\label{models_ofCJ_1997}
+\begin{theorem}\label{models_ofCJ_1997}
 	\lean{models_ofCJ_1997}
 	\leanok
 	\uses{stayAlive_of_bad,alive_of_no_quasibad}
-	Either $∃ a, ob = stayAlive a$ or $ob = alive k$ or $ob = noObligations k$.
-\end{lemma}
+	Every model of axioms 5(abcde) is either stayAlive $a$ for some bad world $a$, alive, or noObligations.
+\end{theorem}
 
 % \begin{definition}\label{CJ5f}
 % 	\lean{CJ5f}
