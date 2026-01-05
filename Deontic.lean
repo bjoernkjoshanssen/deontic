@@ -5,3 +5,4 @@ import Deontic.Venn
 import Deontic.Canonical
 import Deontic.Finset
 import Deontic.CJ1997characterization
+import Deontic.canon3
