@@ -65,8 +65,7 @@ def canon₃''' {α : Type*} [Fintype α] [DecidableEq α] (A B C : Finset α) :
 /-- Ought (Y | Z) as in 1996 Maple code. -/
 def Ought {α : Type*} [Fintype α] [DecidableEq α]
     (ob : Finset α → Finset (Finset α))
-    (Y Z : Finset α)
-     := ∀ X ⊆ Z, X ∩ Y ≠ ∅ → Y ∈ ob X
+    (Y Z : Finset α) := ∀ X ⊆ Z, X ∩ Y ≠ ∅ → Y ∈ ob X
 
 /- The next two results show that canon₂_II is the least model
  satisfying B5 and two Ought conditions.
@@ -443,6 +442,61 @@ theorem characterize_canon₂₀ {α : Type*} [Fintype α] [DecidableEq α] (A B
     rw [this]
     simp
 
+-- Taste Tea definitions
+-- def Ought {α : Type*} [Fintype α] [DecidableEq α]
+--     (ob : Finset α → Finset (Finset α))
+--     (Y Z : Finset α) := ∀ X ⊆ Z, X ∩ Y ≠ ∅ → Y ∈ ob X
+--      A univ
+--      B Aᶜ
+
+-- inductive oblig (A B : Set ℕ) : Set (Set ℕ × Set ℕ)
+-- | basic₁ {X} : X ⊆ Set.univ → X ∩ A ≠ ∅ → oblig A B (A, X) -- Ought (A | univ)
+-- | basic₂ {X} : X ⊆ Aᶜ       → X ∩ B ≠ ∅ → oblig A B (B, X) -- Ought (B | Aᶜ)
+-- | B5 {X Y} : oblig A B (X, Y) → oblig A B (X ∩ Y, Y)
+
+
+-- | C5 {X Y Z} : CJ_closure ob₀ (Y,X) → CJ_closure ob₀ (Z,X) → CJ_closure ob₀ (Y ∩ Z,X)
+-- | D5 {X Y Z} : Y ⊆ X → CJ_closure ob₀ (Y, X) → X ⊆ Z → CJ_closure ob₀ (((Z \ X) ∪ Y), Z )
+-- | E5 {X Y Z} : Y ⊆ X → CJ_closure ob₀ (Z, X) → Y ∩ Z ≠ ∅ → CJ_closure ob₀ (Z, Y)
+
+
+-- inductive CJ_closure (ob₀ : Set (Set ℕ × Set ℕ)) : Set (Set ℕ × Set ℕ)
+-- | basic {s} : s ∈ ob₀ → CJ_closure ob₀ s
+-- | B5 {X Y} : CJ_closure ob₀ (X, Y) → CJ_closure ob₀ (X ∩ Y, Y)
+-- | C5 {X Y Z} : CJ_closure ob₀ (Y,X) → CJ_closure ob₀ (Z,X) → CJ_closure ob₀ (Y ∩ Z,X)
+-- | D5 {X Y Z} : Y ⊆ X → CJ_closure ob₀ (Y, X) → X ⊆ Z → CJ_closure ob₀ (((Z \ X) ∪ Y), Z )
+-- | E5 {X Y Z} : Y ⊆ X → CJ_closure ob₀ (Z, X) → Y ∩ Z ≠ ∅ → CJ_closure ob₀ (Z, Y)
+
+-- inductive CJ_closure' {n : ℕ} (ob₀ : Set (Fin n) → Set (Set (Fin n))) : Set (Fin n) → Set (Set (Fin n))
+-- | basic {X Y} : X ∈ ob₀ Y → CJ_closure' ob₀ Y X
+
+-- inductive UnionClos {α : Type*} (𝒜 : Set (Set α)) : Set (Set α)
+-- | basic {s} : s ∈ 𝒜 → UnionClos 𝒜 s
+-- | union {s t} : UnionClos 𝒜 s → UnionClos 𝒜 s → UnionClos 𝒜 (s ∪ t)
+-- example : UnionClos { (∅ : Set ℕ)} = (({ (∅ : Set ℕ)}) : Set (Set (ℕ))) := by
+--   sorry
+
+inductive Ob_chisholm_b {n : ℕ} (A B : Finset (Fin n)) : Set ((Finset (Fin n)) × Finset (Fin n))
+| basic₁ {X} : X ⊆ univ → X ∩ A ≠ ∅ → Ob_chisholm_b A B (A, X) -- Ought (A | univ)
+| basic₂ {X} : X ⊆ Aᶜ   → X ∩ B ≠ ∅ → Ob_chisholm_b A B (B, X) -- Ought (B | Aᶜ)
+| B5 {X Y Z} : Ob_chisholm_b A B (X, Y) → X ∩ Y = Z ∩ Y → Ob_chisholm_b A B (Z, Y)
+
+inductive Ob_chisholm_bdf {n : ℕ} (A B : Finset (Fin n)) : Set ((Finset (Fin n)) × Finset (Fin n))
+| basic₁ {X} : X ⊆ univ → X ∩ A ≠ ∅ → Ob_chisholm_bdf A B (A, X) -- Ought (A | univ)
+| basic₂ {X} : X ⊆ Aᶜ   → X ∩ B ≠ ∅ → Ob_chisholm_bdf A B (B, X) -- Ought (B | Aᶜ)
+| B5 {X Y Z} : Ob_chisholm_bdf A B (X, Y) → X ∩ Y = Z ∩ Y → Ob_chisholm_bdf A B (Z, Y)
+| D5 {X Y Z} : Y ⊆ X → Ob_chisholm_bdf A B (Y, X) → X ⊆ Z → Ob_chisholm_bdf A B (((Z \ X) ∪ Y), Z )
+| F5 {X Y Z} : Ob_chisholm_bdf A B (X, Y) → Ob_chisholm_bdf A B (X, Z) → Ob_chisholm_bdf A B (X, Y ∪ Z)
+
+-- legg til D of F
+
+open Classical
+noncomputable def ob_chisholm_b {n : ℕ} (A B : Finset (Fin n)) :
+  Finset (Fin n) → Finset (Finset (Fin n)) := fun Y => {X | (X,Y) ∈ Ob_chisholm_b A B}
+
+noncomputable def ob_chisholm_bdf {n : ℕ} (A B : Finset (Fin n)) :
+  Finset (Fin n) → Finset (Finset (Fin n)) := fun Y => {X | (X,Y) ∈ Ob_chisholm_bdf A B}
+
 /-- Theorem 2 in the first version of the paper. -/
 theorem characterize_canon₂_II {α : Type*} [Fintype α] [DecidableEq α] (A B : Finset α)
   (ob : Finset α → Finset (Finset α)) (b5 : B5 ob)
@@ -525,6 +579,70 @@ theorem least_model_canon₂_II {α : Type*} [Fintype α] [DecidableEq α]
     · exact characterize_canon₂_II₀ A B h
   · intro ob h₀
     exact characterize_canon₂_II A B ob h₀.1 h₀.2
+
+/-- We need to assume `A ⊆ B`, perhaps relevant to referee's question,
+although it was already in `least_model_canon₂_II`.
+The contribution of this theorem is to obtain canon₂_II as *equal* to a certain closure,
+not just satisfying a "least model" *predicate*.
+January 5, 2026.
+-/
+theorem canon₂_II_eq_ob_chisholm_b {n : ℕ} (A B : Finset (Fin n)) (h : A ⊆ B):
+canon₂_II A B = ob_chisholm_b A B := by
+  ext Y X
+  simp [ob_chisholm_b]
+  constructor
+  · intro h
+    have := @characterize_canon₂_II (Fin n) _ _ A B (ob_chisholm_b A B)
+      (by
+      clear h X Y
+      intro X Y Z h₀ h₁
+      simp [ob_chisholm_b] at h₁ ⊢
+      exact @Ob_chisholm_b.B5 (X := Y) (Y := X) n A B Z h₁ h₀) (by
+      constructor
+      · intro X hu h₀
+        simp [ob_chisholm_b]
+        apply Ob_chisholm_b.basic₁ _ h₀
+        exact hu
+      · intro X hu h₀
+        simp [ob_chisholm_b]
+        apply Ob_chisholm_b.basic₂ _ h₀
+        exact hu
+      ) Y _ h
+    unfold ob_chisholm_b at this
+    simp at this
+    exact this
+  · intro h
+    set a := (X,Y)
+    show a.1 ∈ canon₂_II A B a.2
+    apply Ob_chisholm_b.rec (motive := fun a ha => a.1 ∈ canon₂_II A B a.2)
+      (A := A) (B := B) -- whoa!
+    · clear h a X
+      have := @least_model_canon₂_II (Fin n) _ _ A B h
+      simp [least_model] at this
+      have := this.1.2.1
+      unfold Ought at this
+      simp
+      intro X h₀
+      exact this X (by simp) h₀
+    · clear h a X
+      have := @least_model_canon₂_II (Fin n) _ _ A B h
+      simp [least_model] at this
+      have := this.1.2.2
+      unfold Ought at this
+      simp
+      intro X h₀
+      exact this X h₀
+
+    · clear h a X
+      have := @least_model_canon₂_II (Fin n) _ _ A B h
+      simp [least_model] at this
+      intro X Y Z h h₀ h₁
+      exact this.1.1 Y X Z h₀ h₁
+    · exact h
+
+
+
+
 
 /- `canon_II A` is the least model of ABCEFG + ¬ CX + Ought(A | univ).
 Not really worth proving.
@@ -657,6 +775,276 @@ theorem least_model_canon₂ {α : Type*} [Fintype α] [DecidableEq α]
   ⟨
     ⟨canon₂_B5 A B, canon₂_D5 h, canon₂_F5 A B, characterize_canon₂₀ A B h⟩,
     fun _ h₀ => characterize_canon₂ h₀.1 h₀.2.1 h₀.2.2.1 h₀.2.2.2⟩
+
+structure Rule (α : Type*) where
+(params : Type*)
+(ι : Type*)                      -- indices of premises
+(premise_set : params → ι → Set α)
+(conclusion : params → Set α)
+
+inductive Closure {α : Type*} (𝒜 : Set (Set α))
+  {R : Type*} (rule : R → Rule α) :
+  Set α → Prop
+| basic {s} : s ∈ 𝒜 → Closure 𝒜 rule s
+| apply (r : R) (p : (rule r).params) :
+    (∀ i : (rule r).ι, Closure 𝒜 rule ((rule r).premise_set p i)) →
+    Closure 𝒜 rule ((rule r).conclusion p)
+
+/-!
+# General setup for CJ rules
+ -/
+
+structure sets_instance (α : Type*) (n : ℕ) (P : (Fin n → Finset α) → Prop) where
+(s : Fin n → Finset α)
+(h : P s)
+
+structure closure_rule (α : Type*) where
+(numSets num_in : ℕ)
+(P : (Fin numSets → Finset α) → Prop)
+(premises : sets_instance α numSets P → Fin num_in → (Finset α × Finset α))
+(conclusion : sets_instance α numSets P → (Finset α × Finset α))
+
+inductive closure_under {α : Type*} (𝒜 : Finset (Finset α × Finset α))
+  (rule : Finset (closure_rule α)) :
+  Set (Finset α × Finset α)
+| basic {s} : s ∈ 𝒜 → closure_under 𝒜 rule s
+| apply (r : closure_rule α) (hr : r ∈ rule)
+  (sets : sets_instance α (r.numSets) r.P )
+    (h : ∀ i, closure_under 𝒜 rule (r.premises sets i)) :
+              closure_under 𝒜 rule (r.conclusion sets)
+
+/-- If we add more rules then the closure becomes larger. -/
+-- January 6, 2026
+lemma closure_under_sub {α : Type*} (𝒜 : Finset (Finset α × Finset α))
+  (rules₁ rules₂ : Finset (closure_rule α)) (h : rules₁ ⊆ rules₂) :
+  closure_under 𝒜 rules₁ ⊆ closure_under 𝒜 rules₂ :=
+  @closure_under.rec α 𝒜 rules₁
+    (motive := fun a _ => closure_under 𝒜 rules₂ a)
+    (@closure_under.basic α 𝒜 rules₂)
+    (fun r hr sets _ => @closure_under.apply α 𝒜 rules₂ r (h hr) sets)
+
+
+--  ∀ (X Y Z : Finset U), (Y ∩ X = Z ∩ X) → (Y ∈ ob X → Z ∈ ob X)
+def B5rule (n : ℕ) : closure_rule (Fin n) := {
+      numSets := 3,
+      num_in := 1,
+      P := fun X => X 1 ∩ X 0 = X 2 ∩ X 0,
+      premises := fun X _ ↦ (X.s 1, X.s 0),
+      conclusion := fun X => (X.s 2, X.s 0)}
+
+def ObArule {n : ℕ} (A : Finset (Fin n)) : closure_rule (Fin n) := {
+      numSets := 1,
+      num_in := 0,
+      P := fun X => X 0 ∩ A ≠ ∅,
+      premises := fun _ i ↦ (not_lt_zero i.2).elim
+      conclusion := fun X => (A, X.s 0)}
+
+def ObBArule {n : ℕ} (A B : Finset (Fin n)) : closure_rule (Fin n) := {
+      numSets := 1,
+      num_in := 0,
+      P := fun X => X 0 ⊆ Aᶜ ∧ X 0 ∩ B ≠ ∅, --(Y Z : Finset α) := ∀ X ⊆ Aᶜ, X ∩ B ≠ ∅ → B ∈ ob X
+      premises := fun _ i ↦ (not_lt_zero i.2).elim
+      conclusion := fun X => (B, X.s 0)}
+
+example (P : Fin 0 → Prop) : ∀ i, P i := by exact fun i ↦ Fin.elim0 i
+
+/-- This shows, together with earlier results,
+how to express canon₂_II as a closure under a set of operators. -/
+lemma close_under_eq_ob_chisholm_b {n : ℕ} (A B : Finset (Fin n)) :
+    closure_under ∅ {B5rule n, ObArule A, ObBArule A B} =
+    {p | p.1 ∈ ob_chisholm_b A B p.2} := by
+  ext p
+  simp
+  constructor
+  · exact @closure_under.rec _ _ _
+      (motive := fun p _ =>  p.1 ∈ ob_chisholm_b _ _ p.2)
+      (by simp)
+      (fun r hr ins hins ho => by
+        simp [ob_chisholm_b] at hr ⊢
+        cases hr with
+        | inl h =>
+          subst h
+          simp [ob_chisholm_b] at ho
+          change ∀ (_ : Fin 1), _ at ho
+          exact Ob_chisholm_b.B5 (ho 0) ins.h -- ins.2 also works
+        | inr h =>
+          rcases h with (h | h)
+          all_goals subst h
+          exact Ob_chisholm_b.basic₁ (subset_univ _) ins.2
+          exact Ob_chisholm_b.basic₂ ins.2.1 ins.2.2) _
+  · intro h
+    unfold ob_chisholm_b at h
+    simp at h
+    exact @Ob_chisholm_b.rec _ _ _
+      (fun p _ => closure_under _ _ p)
+      (fun {X} hu hA => closure_under.apply (ObArule A)
+        (by simp) ({s := fun z => X, h := hA})
+        (fun z => Fin.elim0 z))
+      (fun {X} h₀ h₁ => closure_under.apply (ObBArule A B)
+          (by simp) {s := fun _ => X, h := ⟨h₀,h₁⟩} fun z => Fin.elim0 z)
+      (fun {X} {Y} {Z} h₀ h₁ h₂ => closure_under.apply (B5rule n)
+        (by simp) {s := ![Y,X,Z], h := h₁} fun _ => h₂) p h
+
+/-- The closure of a set under some operations can be defined
+in a very noneffective way as the intersection of all closed sets.
+Second, it can be defined in a recursively enumerable way in terms of
+being generated by some operations. Sometimes, it can be characterized
+even more concretely in a quantifier-free way, like here.
+For example, in a vector space over F_2 the subspace generated by `v`
+is just `{v,0}`.
+ -/
+lemma close_under_eq_canon₂_II {n : ℕ} (A B Y : Finset (Fin n)) (h : A ⊆ B) :
+    canon₂_II A B Y =
+    {X | (X,Y) ∈ closure_under ∅ {B5rule n, ObArule A, ObBArule A B}} := by
+  have : {(X,Y) | (X,Y) ∈  closure_under ∅ {B5rule n, ObArule A, ObBArule A B}} =
+    {p | p.1 ∈ canon₂_II A B p.2} := by
+    rw [canon₂_II_eq_ob_chisholm_b ]
+    exact close_under_eq_ob_chisholm_b A B
+    exact h
+  ext X
+  simp at this
+  rw [this]
+  simp
+
+lemma closure_under_empty {n : ℕ} :
+  closure_under ∅ ∅ = (∅ : Set (Finset (Fin n) × Finset (Fin n))) := by
+  ext X
+  constructor
+  · intro h
+    exfalso
+    exact @closure_under.rec (Fin n) ∅ ∅ (motive := fun _ _ => False)
+      (by simp) (by simp) X h
+  · intro h
+    simp at h
+
+
+
+example {n : ℕ} (A B : Finset (Fin n)) :
+  closure_under ∅ {B5rule n, ObArule A, ObBArule A B} =
+  closure_under ∅ {B5rule n, ObBArule A B, ObArule A} := by
+  apply congrArg
+  compare
+
+
+-- the num_in are how many things (like Z \ X ∪ Y, X ∩ Y)
+-- are assumed to be in ob
+-- the numSets is how many sets (X,Y,Z) are considered.
+
+
+structure DisjointUnionParams (α : Type*) where
+(s : Fin 2 → Set α)
+(h : Disjoint (s 0) (s 1))
+
+def disjointUnionRule (α : Type*) : Rule α :=
+{ params := DisjointUnionParams α,
+  ι := Fin 2,
+  premise_set := DisjointUnionParams.s,
+  conclusion := fun p => p.s 0 ∪ p.s 1}
+example : Closure {(∅ : Set ℕ)}
+  (fun _ : Fin 1 => disjointUnionRule ℕ)
+  = ({(∅ : Set ℕ)} : Set (Set (ℕ))) := by
+  ext A
+  constructor
+  · intro h
+    show A = ∅
+    have := @Closure.rec ℕ {∅} (Fin 1) (fun i : Fin 1 ↦ disjointUnionRule ℕ)
+      (motive := fun a t => a = ∅)
+    apply this
+    · simp
+    · intro i p h₀ h₁
+      simp [disjointUnionRule] at h₁ ⊢
+      exact h₁
+    · exact h
+  · exact Closure.basic
+
+
+theorem canon₂_eq_ob_chisholm_bdf {n : ℕ} (A B : Finset (Fin n)) (h : A ⊆ B):
+canon₂ A B = ob_chisholm_bdf A B := by
+  ext Y X
+  simp [ob_chisholm_bdf]
+  constructor
+  · intro h
+    have := @characterize_canon₂ (Fin n) _ _ A B (ob_chisholm_bdf A B)
+      (by
+      clear h X Y
+      intro X Y Z h₀ h₁
+      simp [ob_chisholm_bdf] at h₁ ⊢
+      apply @Ob_chisholm_bdf.B5 (X := Y) (Y := X) n A B Z h₁ h₀)
+
+      (by
+        unfold ob_chisholm_bdf
+        intro X Y Z h₀ h₁ h₂
+        simp at h₁ ⊢
+        apply @Ob_chisholm_bdf.D5
+        exact h₀
+        exact h₁
+        exact h₂
+      )
+      (by
+        unfold ob_chisholm_bdf
+        intro X Y Z h₀ h₁
+        simp at h₀ h₁ ⊢
+        apply @Ob_chisholm_bdf.F5
+        exact h₀
+        exact h₁
+      ) (by
+        constructor
+        · unfold Ought ob_chisholm_bdf
+          intro X hu h₀
+          simp
+          apply @Ob_chisholm_bdf.basic₁
+          exact hu
+          exact h₀
+        · unfold Ought ob_chisholm_bdf
+          intro X hu h₀
+          simp
+          apply @Ob_chisholm_bdf.basic₂
+          exact hu
+          exact h₀) Y _ h
+
+    unfold ob_chisholm_bdf at this
+    simp at this
+    exact this
+  · intro h
+    set a := (X,Y)
+    show a.1 ∈ canon₂ A B a.2
+    apply @Ob_chisholm_bdf.rec (motive := fun a ha => a.1 ∈ canon₂ A B a.2) (A := A) (B := B)
+    · clear h a X
+      have := @least_model_canon₂ (Fin n) _ _ A B h
+      simp [least_model] at this
+      have := this.1.2.2.2.1
+      unfold Ought at this
+      simp
+      intro X h₀
+      exact this X (by simp) h₀
+
+    · clear h a X
+      have := @least_model_canon₂ (Fin n) _ _ A B h
+      simp [least_model] at this
+      have := this.1.2.2.2.2
+      unfold Ought at this
+      simp
+      intro X h₀
+      exact this X h₀
+    · clear h a X
+      have := @least_model_canon₂ (Fin n) _ _ A B h
+      simp [least_model] at this
+      intro X Y Z h h₀ h₁
+      exact this.1.1 Y X Z h₀ h₁
+    · clear h a X
+      have := @least_model_canon₂ (Fin n) _ _ A B h
+      simp [least_model] at this
+      intro X Y Z h h₀ h₁ h₂
+      have := this.1.2.1
+      exact this X Y Z h h₂ h₁
+    · clear h a X
+      have := @least_model_canon₂ (Fin n) _ _ A B h
+      simp [least_model] at this
+      intro X Y Z h h₀ h₁ h₂
+      have := this.1.2.2.1
+      exact this X Y Z h₁ h₂
+    exact h
+
 
 /-- A version of `least_model_canon₂` that mentions only
 older axioms than F5. -/

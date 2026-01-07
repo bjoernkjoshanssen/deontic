@@ -35,12 +35,12 @@
 \newcommand{\fivea}{
 	$\emptyset\not\in\ob(X)$.
 }
-Carmo and Jones in 2022 \cite{MR4500520} proposed certains axioms 5(a)--(g) for a relation $\ob$ that holds between sets of possible worlds $X$ and $Y$ if $X$ is obligatory in the context $Y$. It was the latest iteration in a sequence of systems \cite{CJ96,CJ02,MR3063042}.
+Carmo and Jones in 2022 \cite{MR4500520} proposed certain axioms 5(a)--(g) for a relation $\ob$ that holds between sets of possible worlds $X$ and $Y$ if $X$ is obligatory in the context $Y$. It was the latest iteration in a sequence of systems \cite{CJ96,CJ02,MR3063042}.
 
 We will exhibit a paradox therein.
 Our paradox will be a weak form of conditional deontic explosion: given that something is somewhat desirable (passing a course with a grade of C, say) and given that the most desirable outcome (the grade of A) is unavailable, the somewhat desirable outcome becomes obligatory.
 
-We then show that despite this paradox, the the systems of Carmo and Jones have interesting mathematical content. For the strongest system we provide a full classification of its models; for weaker versions we characterize the least models (under inclusion) satisfying the axioms and basic contrary-to-duty assumptions.
+We then show that despite this paradox, the systems of Carmo and Jones have interesting mathematical content. For the strongest system we provide a full classification of its models; for weaker versions we characterize the least models (under inclusion) satisfying the axioms and basic contrary-to-duty assumptions.
 
 \chapter{The paradox}
 	Let $W$ be a finite set of possible worlds of a given model, and let $\mathscr P$ denote the power set operation.
@@ -191,10 +191,10 @@ If I can't have you, I don't want nobody.
 %     \item \emph{If I can't have you, I'll marry someone I despise} (too unjustified)
 %     \item \emph{If I can't have you, I'll settle for Beatrice} (not dramatic enough)
 % \end{itemize}
-It is a limited deontic explosion, in contrast with the full deontic explosion of Romeo's statement in \emph{Romeo and Juliet}:
-\begin{quote}
-There is no world without Verona walls but purgatory, torture, hell itself.
-\end{quote}
+% It is a limited deontic explosion, in contrast with the full deontic explosion of Romeo's statement in \emph{Romeo and Juliet}:
+% \begin{quote}
+% There is no world without Verona walls but purgatory, torture, hell itself.
+% \end{quote}
 
 
 \paragraph{From despondency to mathematics.}
@@ -202,23 +202,25 @@ Hage \cite{Hage2000-HAGDNE} thinks the task Carmo and Jones and others have set 
 
 From Hage's book review, in the context of discussing a man who (i) should visit his neighbor, (ii) if he does visit, should call to say that he is coming, and (iii) is not in fact coming:
 
-\emph{[...] Actually, A does not assist his neighbours and
-therefore should not call them. The two intuitions presuppose a different role for
-deontic logic, namely, reasoning about what is ideally the case, and reasoning about
-what ought to be done in the real world. These two roles are hard to reconcile in
-one logic, unless the logic combines the two kinds of reasoning in different parts.
-The paper by Carmo and Jones in the present volume provides such a combination
-logic.
-Nevertheless, many have attempted to do what is, in my opinion, \textbf{undoable}\footnote{(emphasis ours)} and
-this has lead to many modifications of the Standard System of Deontic Logic
-(Hilpinen, 1971, p. 13f.; Chellas, 1980, p. 190f.). These new systems have lead
-to new paradoxes that deal with CTD obligations.}
+\begin{quote}
+	[...] Actually, A does not assist his neighbours and
+	therefore should not call them. The two intuitions presuppose a different role for
+	deontic logic, namely, reasoning about what is ideally the case, and reasoning about
+	what ought to be done in the real world. These two roles are hard to reconcile in
+	one logic, unless the logic combines the two kinds of reasoning in different parts.
+	The paper by Carmo and Jones in the present volume provides such a combination
+	logic.
+	Nevertheless, many have attempted to do what is, in my opinion, \textbf{undoable}\footnote{[emphasis ours]} and
+	this has lead to many modifications of the Standard System of Deontic Logic
+	(Hilpinen, 1971, p. 13f.; Chellas, 1980, p. 190f.). These new systems have lead
+	to new paradoxes that deal with CTD obligations.
+\end{quote}
 
 
 Given Hage's sentiment
 and the paradox we have presented, one might temporarily become despondent. If deontic systems always have flaws, why pursue them? However, in the course of uncovering this paradox I also discovered interesting \emph{mathematical structure} in the axioms 5(a)--5(g).
 
-\begin{definition}
+\begin{definition}\label{least}
     Given a set $W$ and a family $\mathcal F$ of functions $f :\mathscr P(W)\to\mathscr P(\mathscr P(W))$, we say that $f_0\in\mathcal F$ is the \emph{least} element of $\mathcal F$ if for all $f\in\mathcal F$ and all $X\subseteq W$, $f_0(X)\subseteq f(X)$.
 
     The \emph{least model} of a set of axioms $\mathscr A$ concerning a variable function $\mathrm{ob} :\mathscr P(W)\to\mathscr P(\mathscr P(W))$ is the least element of the collection $\mathcal F$ of all functions $\mathrm{ob} :\mathscr P(W)\to\mathscr P(\mathscr P(W))$ satisfying all axioms in $\mathscr A$.
@@ -230,27 +232,38 @@ The least model of 5(b) given certain ``oughts'' has a very natural characteriza
 
 To be specific let us write $\mathrm{Ought}(A\mid B)$ to mean that for each $X\subseteq B$, if $A\cap X\ne \emptyset$ then $A\in\ob X$. This is the semantic condition used by Carmo and Jones for the conditional obligation operator $O(A\mid B)$. A pair of oughts $(\mathrm{Ought}(A\mid W)$, $\mathrm{Ought}(B\mid W \setminus A))$ forms a basic contrary-to-duty obligation of $B$ given that our duty $A$ has failed to be observed.
 
-\begin{theorem}\label{t1}
+\begin{definition}\label{canon₂}
+\lean{canon₂}
+\leanok
+canon₂ A B X = if X ∩ B = ∅ then ∅, else: if X ∩ A = ∅ then $\{T \mid X \cap B \subseteq T\}$ else $\{T \mid X \cap A \subseteq T\}$.
+\end{definition}
+
+\begin{definition}\label{canon₂_II}
+\lean{canon₂_II}
+\leanok
+
+canon₂_II A B X = if X ∩ B = ∅ then ∅, else: if X ∩ A = ∅ then $\{Y \mid X \cap B = X \cap Y\}$ else $\{Y \mid X \cap A = X \cap Y\}$.
+\end{definition}
+In other words, if $Y \in\ob (X)$ under a canon₂_II model then generically $X\cap Y$ consists exactly of the most desirable worlds in $X$.
+
+\begin{theorem}\label{characterize_canon₂_II}
 	\lean{characterize_canon₂_II}
 	\leanok
-The least model $\ob$ (under inclusion) of $\mathrm{Ought}(A\mid W)$, $\mathrm{Ought}(B\mid W \setminus A)$, and axiom 5(b) is characterized by:
-
-$Y \in \ob X$ if and only if $X \cap B \ne \emptyset$, and either $X \cap A = \emptyset$, in which case
-      $X \cap B = X \cap Y$, or else $X \cap A = X \cap Y$.    
+The least model $\ob$ (under inclusion) of $\mathrm{Ought}(A\mid W)$, $\mathrm{Ought}(B\mid W \setminus A)$, and axiom 5(b) is canon₂_II A B.
 \end{theorem}
-In other words, $X\cap Y$ consists exactly of the most desirable worlds in $X$.
 
 Even though the model arises from assuming 5(b) only, it also satisfies axioms 5(a), 5(c), 5(e) and 5(g). This indicates a certain robustness of our definitions.
 
-\begin{theorem}\label{t2}
-The least model of axioms 5(b), 5(d), 5(f) and the two ``oughts'' in \ref{t1} has the following least model:
-$Y \in \ob X$ if and only if $X \cap B \ne \emptyset$, and either $X \cap A = \emptyset$, in which case
-      $X \cap B \subseteq Y$, or else $X \cap A\subseteq Y$.    
+
+\begin{theorem}\label{characterize_canon₂}
+	\lean{characterize_canon₂}
+	\leanok
+The least model of axioms 5(b), 5(d), 5(f) and the two ``oughts'' in \ref{t1} is canon₂ A B.
 \end{theorem}
 In other words, $X\cap Y$ contains at least all the most desirable worlds in $X$.
 Since axiom 5(f) follows from 5(a)(b)(c)(d), as shown by Carmo and Jones, the model can alternatively be characterized as the least one satisfying the latter four axioms and the two specified Oughts.
 
-The two families of models in \ref{t1,t2}  represent two alternative approaches to contrary-to-duty obligations as discussed in \cite{MR3607634} (called I and II there). They do not exhaust the interesting models by any means: for instance, we may have conflicting obligations. This may lead us to prefer 5(c) to 5(c)*, in particular. For a concrete example, suppose that James has received acceptances on separate marriage proposals to both Alice and Beatrice, but cannot marry them both.
+The two families of models in \ref{characterize_canon₂_II} and \ref{characterize_canon₂} represent two alternative approaches to contrary-to-duty obligations as discussed in \cite{MR3607634} (called I and II there). They do not exhaust the interesting models by any means: for instance, we may have conflicting obligations. This may lead us to prefer 5(c) to 5(c)*, in particular. For a concrete example, suppose that James has received acceptances on separate marriage proposals to both Alice and Beatrice, but cannot marry them both.
 
 \paragraph{Classification.}
 In mathematics, classification theorems are fairly common. For example, the finite abelian groups have a straightforward characterization and the finite simple groups a complicated one. Vector spaces over a fixed field $\mathbb F$ of finite dimension are characterized by their dimension $d$, hence the single parameter $d$ determines the space up to isomorphism.
@@ -258,7 +271,9 @@ In mathematics, classification theorems are fairly common. For example, the fini
 In deontic logic, where axioms and rules are added based on moral intuitions, we should perhaps not expect structures that are mathematically natural enough to be classifiable.
 
 However, for the full theory of Carmo and Jones's axioms 5(a)--5(e) with the strong version 5(c)* in which we do not impose nondisjointness, we can characterize its models completely. The only nontrivial ones basically say that there is just one bad world and the only obligation is to avoid it:
-\begin{theorem}
+\begin{theorem}\label{models_ofCJ_1997_equiv}
+	\lean{models_ofCJ_1997_equiv}
+	\leanok
     Let $W$ be a finite set of possible worlds and let $\ob : \mathscr P (W)\to \mathscr P(\mathscr P(W))$. The the following are equivalent:
     \begin{enumerate}
         \item $\ob$ satisfies the full system suggested in \cite{CJ96}: 5(a), (b), (c)*, (d) and (e).
@@ -271,15 +286,8 @@ However, for the full theory of Carmo and Jones's axioms 5(a)--5(e) with the str
         \end{enumerate}
     \end{enumerate}
 \end{theorem}
+Details on the proof of Theorem \ref{models_ofCJ_1997_equiv} can be found in the next section.
 
-
-\section{Acknowledgments}\label{sa}
-
-All mathematical claims above are verified in the proof assistant \textsc{Lean}, see \cite{deontic}.
-
-The main argument for our paradox was discovered by carefully analyzing some output from a script in the computer mathematics system \textsc{Maple} by Maplesoft \cite[Appendix]{K96}.
-
-This work was partially supported by a grant from the Simons Foundation (\#704836 to Bj{\o}rn Kjos-Hanssen).
 
 \chapter{Technical details of the characterization of CJ97}
 
@@ -299,7 +307,9 @@ This work was partially supported by a grant from the Simons Foundation (\#70483
 
 
 
-\begin{definition}
+\begin{definition}\label{CX}
+	\lean{CX}
+	\leanok
 	Conditional explosion for ob is the statement that
 	∀ (A B C : Finset U), A ∈ ob C → B ∩ Aᶜ ∩ C ≠ ∅ → B ∈ ob (Aᶜ ∩ C).
 \end{definition}
@@ -351,12 +361,12 @@ This work was partially supported by a grant from the Simons Foundation (\#70483
 % 	If $a$ is $\ob$-bad, $a\notin Y \ne \emptyset$, then $Y\in\ob(Y)$.
 % \end{lemma}
 
-\begin{definition}
+\begin{definition}\label{bad}
 \lean{bad}
 \leanok
 A world $a$ is bad if  ∃ (X : Finset (Fin n)), a ∈ X ∧ $X \setminus \{a\} \in \ob X$.
 \end{definition}
-\begin{definition}
+\begin{definition}\label{quasibad}
 \lean{quasibad}
 \leanok
 The world $a$ is quasibad if ∃ (X : Finset (Fin n)) (Y : Finset (Fin n)), a ∈ X $\setminus$ Y ∧ Y ∈ ob X.
@@ -466,7 +476,7 @@ and hence the consequent is provided by Lemma \ref{local_holds}.
 	For all $B$ and $C$, if $B\subseteq C$ is obligatory relative to $C$ then $C\setminus B$ is a cosubsingleton.
 \end{lemma}
 
-\begin{definition}
+\begin{definition}\label{stayAlive}
 	\lean{stayAlive}
 	\leanok
 The model \emph{stayAlive} is defined by
@@ -474,7 +484,7 @@ stayAlive e X = $\{Y  | X \cap Y \ne \emptyset \wedge X \setminus \{e\} \subsete
 \end{definition}
 	
 	
-\begin{definition}
+\begin{definition}\label{alive}
 	\lean{alive}
 	\leanok
 	
@@ -483,7 +493,7 @@ The model \emph{alive} is defined by
 	alive n X = $\{Y \mid X \ne \emptyset \wedge Y \supseteq X\}$.
 \end{definition}
 
-\begin{definition}
+\begin{definition}\label{noObligations}
 	\lean{noObligations}
 	\leanok
 
@@ -648,38 +658,38 @@ Note that Lemma \ref{stayAlive_sub_of_bad} does not require any form of C5.
 % ∃ ob, A5 ob ∧ B5 ob ∧ C5 ob ∧ D5 ob ∧ ¬ E5 ob ∧ F5 ob ∧ G5 ob.
 % \end{theorem}
 
-\section{Canonical models of Carmo and Jones' systems}
-
-We show that the two approaches sketched in [Kjos-Hanssen 2017] are both consistent with [Carmo Jones 2022]
-\cite{MR4500520}.
-
-Preferably, we let F(X) = X ∩ A for a fixed set A.
-
-However, to incorporate contrary-to-duty obligations we introduce a predicate B,
-where A worlds, A ⊆ B, are the best and B \setminus A worlds the second best.
-
-Thus, if X ∩ A = ∅ but X ∩ B ≠ ∅, we let F(X) = X ∩ B.
-
-
-
-\begin{table}[h]
-    \centering
-    \begin{tabular}{lcccc}
-        \toprule
-        Axiom \textbackslash\ Model & \texttt{canon} & \texttt{canon\_II} & \texttt{canon₂} & \texttt{canon₂\_II} \\
-        \midrule
-        A & ✓ & ✓ & ✓ & ✓ \\
-        B & ✓ & ✓ & ✓ & ✓ \\
-        C & ✓ & ✓ & ✓ & ✓ \\
-        D & \textit{thus} ✓ & × & ✓ & \textit{thus} × \\
-        E & × & ✓ & \textit{thus} × & ✓ \\
-        F & ✓ & ✓ & ✓ & ×! \\
-        G & ✓ & ✓ & ×! & ✓ \\
-        \bottomrule
-    \end{tabular}
-    \caption{Results about which axioms hold in which model.}
-    \label{tab:example}
-\end{table}
+% \section{Canonical models of Carmo and Jones' systems}
+%
+% We show that the two approaches sketched in [Kjos-Hanssen 2017] are both consistent with [Carmo Jones 2022]
+% \cite{MR4500520}.
+%
+% Preferably, we let F(X) = X ∩ A for a fixed set A.
+%
+% However, to incorporate contrary-to-duty obligations we introduce a predicate B,
+% where A worlds, A ⊆ B, are the best and B \setminus A worlds the second best.
+%
+% Thus, if X ∩ A = ∅ but X ∩ B ≠ ∅, we let F(X) = X ∩ B.
+%
+%
+%
+% \begin{table}[h]
+%     \centering
+%     \begin{tabular}{lcccc}
+%         \toprule
+%         Axiom \textbackslash\ Model & \texttt{canon} & \texttt{canon\_II} & \texttt{canon₂} & \texttt{canon₂\_II} \\
+%         \midrule
+%         A & ✓ & ✓ & ✓ & ✓ \\
+%         B & ✓ & ✓ & ✓ & ✓ \\
+%         C & ✓ & ✓ & ✓ & ✓ \\
+%         D & \textit{thus} ✓ & × & ✓ & \textit{thus} × \\
+%         E & × & ✓ & \textit{thus} × & ✓ \\
+%         F & ✓ & ✓ & ✓ & ×! \\
+%         G & ✓ & ✓ & ×! & ✓ \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{Results about which axioms hold in which model.}
+%     \label{tab:example}
+% \end{table}
 
 % \begin{definition}\label{canon}
 % 	\lean{canon}
@@ -687,6 +697,13 @@ Thus, if X ∩ A = ∅ but X ∩ B ≠ ∅, we let F(X) = X ∩ B.
 % Given n : ℕ and A : Finset (Fin n)),
 % T $\in$ canon(A,S) iff S ∩ A $\ne$ ∅ and S ∩ A ⊆ T.
 % \end{definition}
+\section{Acknowledgments}\label{sa}
+
+All mathematical claims above are verified in the proof assistant \textsc{Lean}, see \cite{deontic}.
+
+The main argument for our paradox was discovered by carefully analyzing some output from a script in the computer mathematics system \textsc{Maple} by Maplesoft \cite[Appendix]{K96}.
+
+This work was partially supported by a grant from the Simons Foundation (\#704836 to Bj{\o}rn Kjos-Hanssen).
 
 \bibliographystyle{plain}
 \bibliography{deontic}
