@@ -264,7 +264,9 @@ A pair of oughts $(\mathrm{Ought}(A\mid W)$,
                   $\mathrm{Ought}(B\mid W \setminus A))$ forms a basic
 contrary-to-duty obligation of $B$ given that our duty $A$ has failed to be observed.
 
-Definition \ref{{canon₂}} introduces canon$_2$, a ``canonical'' model of some of Carmo and Jones' axioms with two parameters:
+Definitions \ref{canon₂} and \ref{canon₂_II}
+introduce canon$_2$ and canon$_2$II,
+``canonical'' models of some of Carmo and Jones' axioms with two parameters:
 a set of most desirable worlds, A, and a set of worlds that are desirable when A is not available, B.
 \begin{definition}\label{canon₂}
     \lean{canon₂}
@@ -278,7 +280,9 @@ if $X \cap A = \emptyset$ then $\{T \mid X \cap B \subseteq T\}$, else $\{T \mid
 \begin{definition}\label{canon₂_II}
     \lean{canon₂_II}
     \leanok
-    canon₂\_II A B X = if X ∩ B = ∅ then ∅, else: if X ∩ A = ∅ then
+    The set canon$_2$II A B X is defined by:
+    if $X \cap B = \emptyset$ then $\emptyset$, else:
+    if $X \cap A = \emptyset$ then
     $\{Y \mid X \cap B = X \cap Y\}$ else $\{Y \mid X \cap A = X \cap Y\}$.
 \end{definition}
 In other words, if $Y \in\ob (X)$ under a canon₂\_II model then generically
