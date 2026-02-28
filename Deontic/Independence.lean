@@ -1,6 +1,7 @@
 import Mathlib.RingTheory.Int.Basic
 import Mathlib.Data.Finset.Basic
 import Deontic.Basic
+import Deontic.Canonical
 
 /-!
 
@@ -23,27 +24,7 @@ We show that the system has arbitrarily large models.
 
 open Set
 
-def A5 {U : Type*} [Fintype U] (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X : Finset U), ¬ ∅ ∈ ob X
 
-def B5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), (Y ∩ X = Z ∩ X) → (Y ∈ ob X → Z ∈ ob X)
-
-def B5original {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), (Y ∩ X = Z ∩ X) → (Y ∈ ob X ↔ Z ∈ ob X)
-
--- 5c_2013:
-def C5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob X →
-  X ∩ Y ∩ Z ≠ ∅ → Y ∩ Z ∈ ob X
-
-/-- An axiom going back to the 1990s. -/
-def C5Strong {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob X → Y ∩ Z ∈ ob X
 
 
 /-
@@ -63,27 +44,6 @@ def CJ5c_star (ob : Set U → Set (Set U)) :=
 ∀ (X : Set U) (β : Set (Set U)),
   (h1 : β ⊆ ob X) → (h2 : β ≠ ∅) → ⋂₀β ∩ X ≠ ∅ → ⋂₀β ∈ ob X
 -/
-def D5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), Y ⊆ X → Y ∈ ob X → X ⊆ Z → (Z \ X) ∪ Y ∈ ob Z
-
-def BD5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), Y ∈ ob X → X ⊆ Z → (Z \ X) ∪ Y ∈ ob Z
-
-def E5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), Y ⊆ X → Z ∈ ob X → Y ∩ Z ≠ ∅ → Z ∈ ob Y
-def E5weak {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (Y Z : Finset U), Z ∈ ob univ → Y ∩ Z ≠ ∅ → Z ∈ ob Y
-def F5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), X ∈ ob Y → X ∈ ob Z → X ∈ ob (Y ∪ Z)
-def G5 {U : Type*} [Fintype U] [DecidableEq U]
-    (ob : Finset U → Finset (Finset U)) :=
-  ∀ (X Y Z : Finset U), Y ∈ ob X → Z ∈ ob Y →
-    X ∩ Y ∩ Z ≠ ∅ → Y ∩ Z ∈ ob X
 
 -- Can we satisfy everything except B5? Not at Fin 0:
 example : ∀ ob : Finset (Fin 0) → Finset (Finset (Fin 0)), C5 ob ∧ D5 ob ∧ E5 ob ∧ A5 ob → B5 ob := by
@@ -162,9 +122,9 @@ lemma B5_not_implied' {n : ℕ} : ∃ ob : Finset (Fin (n)) → Finset (Finset (
 
 
 lemma A5_not_implied {n : ℕ} : ∃ ob : Finset (Fin n) → Finset (Finset (Fin n)),
-  B5 ob ∧ C5 ob ∧ D5 ob ∧ E5 ob ∧ F5 ob ∧ G5 ob ∧ ¬ A5 ob := by
+  B5 ob ∧ C5Strong ob ∧ D5 ob ∧ E5 ob ∧ F5 ob ∧ G5 ob ∧ ¬ A5 ob := by
   use fun X => Finset.univ
-  unfold B5 C5 D5 E5 F5 G5 A5
+  unfold B5 C5Strong D5 E5 F5 G5 A5
   simp
 
 
@@ -376,3 +336,72 @@ lemma C5Strong_not_implied {n : ℕ} : ∃ ob : Finset (Fin (n+2)) → Finset (F
           simp
           use {1}
           simp
+
+
+
+theorem CJ97_not_implied {n : ℕ} :
+  ∀ i : Fin 5,
+  ∃ ob : Finset (Fin (n+4)) → Finset (Finset (Fin (n+4))),
+  let li := ![A5 ob, B5 ob, C5Strong ob, D5 ob, E5 ob]
+  (∀ j : Fin 5, j ≠ i → li j) ∧ ¬ li i := by
+  intro i
+  fin_cases i
+  · have ⟨ob,hob⟩ := @A5_not_implied (n+4)
+    use ob
+    simp
+    constructor
+    · intro j
+      fin_cases j
+      all_goals try simp
+      all_goals try tauto
+    · apply hob.2.2.2.2.2.2
+  · have ⟨ob,hob⟩ := @B5_not_implied' (n+4)
+    use ob
+    simp
+    constructor
+    · intro j
+      fin_cases j
+      all_goals try simp
+      all_goals try tauto
+      apply hob.2.2.2.1
+      omega
+    · apply hob.2.2.2.2.2.2
+      omega
+  · have ⟨ob,hob⟩ := @C5Strong_not_implied (n+2)
+    use ob
+    constructor
+    · intro j
+      fin_cases j
+      all_goals try simp
+      all_goals try tauto
+    · tauto
+  · use @canon_II (Fin (n+4)) _ _ {0}
+    simp
+    constructor
+    · intro j
+      fin_cases j
+      all_goals try simp
+      · rw [canon_II_is_canon₂_II]
+        apply canon₂_II_A5
+      · rw [canon_II_is_canon₂_II]
+        apply canon₂_II_B5
+      · rw [canon_II_is_canon₂_II]
+        apply canon₂_II_C5Strong
+      · apply canon_II_E5
+    · apply many_not_canon_II_D5 <;> simp
+  · use @canon (Fin (n+4)) _ _ {0}
+    simp
+    constructor
+    · intro j
+      fin_cases j
+      all_goals try simp
+      · rw [canon_eq_canon₂]
+        apply canon₂_A5
+      · rw [canon_eq_canon₂]
+        apply canon₂_B5
+      · rw [canon_eq_canon₂]
+        apply canon₂_C5Strong
+      · rw [canon_eq_canon₂]
+        apply canon₂_D5
+        simp
+    · exact @many_not_canon_E5 (n+4) {0} (by simp) (by simp)
