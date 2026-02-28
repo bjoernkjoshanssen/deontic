@@ -14,7 +14,7 @@ open Finset
 
 /- A family of deontic models in which the only obligation is to avoid
 the dreaded world `e`. -/
-def stayAlive {n : ℕ} (e : Fin n) : Finset (Fin n) → Finset (Finset (Fin n)) :=
+def stayAlive {α : Type*} [Fintype α] [DecidableEq α] (e : α) : Finset α → Finset (Finset α) :=
   fun X => {Y | X ∩ Y ≠ ∅ ∧ X \ {e} ⊆ X ∩ Y}
 
 
@@ -35,6 +35,10 @@ lemma stayAlive_eq_stayAlive' {n : ℕ} (e : Fin n) : stayAlive e = stayAlive' e
     simp at hx
     tauto
     apply h hx
+
+def alive₀ (α : Type*) [Fintype α] [DecidableEq α] : Finset α → Finset (Finset α) :=
+  fun X => {Y | X ≠ ∅ ∧ X ⊆ Y }
+
 
 /-- A version of stayAlive where `e` is missing,
 or if you will, e = n ∉ Fin n.
@@ -245,6 +249,8 @@ def bad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) 
 
 def quasibad {n : ℕ} (ob : Finset (Fin n) → Finset (Finset (Fin n))) (a : Fin n) := ∃ X Y, a ∈ X \ Y ∧ Y ∈ ob X
 
+def noObligations' (α : Type*) [Fintype α] [DecidableEq α] : Finset α → Finset (Finset α) :=
+  fun _ => ∅
 
 /-- The model according to which there are no obligations at all. -/
 def noObligations (n : ℕ) : Finset (Fin n) → Finset (Finset (Fin n)) :=
@@ -640,39 +646,115 @@ lemma obSelf_of_ob_of_almost_subset
         (sdiff_eq_empty_iff_subset.mp $ card_eq_zero.mp h₀) h
     | inr h₀ => exact False.elim $ not_ob_of_almost H₁ h₀ h
 
-theorem at_most_one_quasibad {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
-    (t : @ABCDE k ob)
-    {X Y : Finset (Fin k)} (h : Y ∈ ob X)
-    {a : Fin k} (ha : a ∈ X \ Y) : X ∩ Y = X \ {a} := by
-    apply subset_antisymm
-    · intro i hi
-      simp at ha hi ⊢
-      exact ⟨hi.1, fun hc => ha.2 $ hc ▸ hi.2⟩
-    · intro i hi
-      simp at hi ⊢
-      constructor
-      · exact hi.1
-      · by_contra H₀
-        apply two_in_sdiff' _ _ _ _ ha hi.1 hi.2 H₀
-        have := local_holds_apply t (t.b5 _ _ (X ∩ Y) (by compare) h) --inter_subset_left
-        unfold cocos at this
-        simp at this
-        exact this
+-- theorem at_most_one_quasibad {k : ℕ} {ob : Finset (Fin k) → Finset (Finset (Fin k))}
+--     (t : @ABCDE k ob)
+--     {X Y : Finset (Fin k)} (h : Y ∈ ob X)
+--     {a : Fin k} (ha : a ∈ X \ Y) : X ∩ Y = X \ {a} := by
+--     apply subset_antisymm
+--     · intro i hi
+--       simp at ha hi ⊢
+--       exact ⟨hi.1, fun hc => ha.2 $ hc ▸ hi.2⟩
+--     · intro i hi
+--       simp at hi ⊢
+--       constructor
+--       · exact hi.1
+--       · by_contra H₀
+--         apply two_in_sdiff' _ _ _ _ ha hi.1 hi.2 H₀
+--         have := local_holds_apply t (t.b5 _ _ (X ∩ Y) (by compare) h) --inter_subset_left
+--         unfold cocos at this
+--         simp at this
+--         exact this
 
 /-
 The implications are
-bad →[∅] quasibad →[ABCDE5] bad
+bad →[∅] quasibad →[ABE] bad
 -/
-lemma bad_of_quasibad (t : @ABCDE k ob)
+-- My old proof:
+-- lemma bad_of_quasibad (t : @ABCDE k ob)
+--     (a : Fin k) (h : quasibad ob a) : bad ob a := by
+--     obtain ⟨U,V,hUV⟩ := h
+--     use U
+--     constructor
+--     · rw [mem_sdiff] at hUV
+--       exact hUV.1.1
+--     · rw [← at_most_one_quasibad t hUV.2 hUV.1]
+--       apply t.b5 U V (U ∩ V)
+--       compare
+
+/-- The anonymous referee's proof. -/
+lemma bad_of_quasibad (a5 : A5 ob) (b5 : B5 ob) (e5 : E5 ob)
     (a : Fin k) (h : quasibad ob a) : bad ob a := by
-    obtain ⟨U,V,hUV⟩ := h
-    use U
+    obtain ⟨X,Y,hXY⟩ := h
+    unfold bad
+    use (X ∩ Y) ∪ {a}
     constructor
-    · rw [mem_sdiff] at hUV
-      exact hUV.1.1
-    · rw [← at_most_one_quasibad t hUV.2 hUV.1]
-      apply t.b5 U V (U ∩ V)
-      compare
+    · simp
+    · set Z := (X ∩ Y) ∪ {a}
+      have h₀ : Z ⊆ X := by
+        unfold Z
+        intro i hi
+        simp at hi
+        cases hi with
+        | inl h => subst h;simp at hXY;exact hXY.1.1
+        | inr h => exact h.1
+      have h₁ : Z ∩ Y = X ∩ Y := by
+        unfold Z
+        apply subset_antisymm
+        · intro j hj
+          simp at hj ⊢
+          constructor
+          · have := hj.1
+            cases this with
+            | inl h => subst h;simp at hXY;exact hXY.1.1
+            | inr h => exact h.1
+          · exact hj.2
+        · intro j hj
+          simp at hj ⊢
+          constructor
+          · right;exact hj
+          · exact hj.2
+      have h₂ : X ∩ Y ≠ ∅ := by
+        have := hXY.2
+        have : X ∩ Y ∈ ob X := by
+          apply b5 (Y := Y)
+          compare
+        intro hc
+        apply a5
+        rw [← hc]
+        exact this
+      have h₃ : Z ∩ Y ≠ ∅ := by
+        rw [h₁]; exact h₂
+      have h₄ : Y ∈ ob Z := by
+        apply e5
+        exact h₀
+        exact hXY.2
+        exact h₃
+      have h₅ : X ∩ Y ∈ ob Z := by
+        unfold Z at h₄ ⊢
+        apply b5 (Y := Y)
+        ext i
+        simp
+        intro g₀ g₁
+        cases g₁ with
+        | inl h => subst h;simp at hXY;exact hXY.1.1
+        | inr h => exact h.1
+        exact h₄
+      have : Z \ {a} = X ∩ Y := by
+        unfold Z
+        ext i
+        simp
+        constructor
+        · intro h
+          tauto
+        · intro h
+          constructor
+          · tauto
+          · simp at hXY
+            intro hc
+            subst hc
+            tauto
+      rw [this]
+      tauto
 
 lemma sub_alive  (a5 : A5 ob) (b5 : B5 ob)
     (H₁ : ∀ a, ¬ quasibad ob a) : ∀ Y, ob Y ⊆ alive k Y := by
@@ -687,7 +769,9 @@ lemma sub_alive  (a5 : A5 ob) (b5 : B5 ob)
       specialize H₁ a X Y
       tauto
 
-lemma alive_sub (t : @ABCDE k ob) (H₀ : ob ≠ noObligations k)
+lemma alive_sub
+    (t : @ABCDE k ob)
+    (H₀ : ob ≠ noObligations k)
     (H₁ : ∀ a, ¬ quasibad ob a) : ∀ Y, alive k Y ⊆ ob Y := by
   intro X Y h₂
   simp [alive] at h₂
@@ -847,7 +931,7 @@ theorem models_ofCJ_1997 (t : @ABCDE k ob) : --June 11, 2025
     · left
       obtain ⟨a,H₁⟩ := H₁
       use a
-      exact stayAlive_of_bad t (bad_of_quasibad t a H₁)
+      exact stayAlive_of_bad t (bad_of_quasibad t.a5 t.b5 t.e5 a H₁)
     · push_neg at H₁
       exact .inr $ .inl $ alive_of_no_quasibad t H₀ H₁
       -- see how much we can eliminate semi-bad completely
